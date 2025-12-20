@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+:root {
+  /* =========================================
+     PREMIUM COLOR PALETTE (Light Mode)
+     Goal: Warm, editorial, organic.
+     ========================================= */
+  /* Backgrounds */
+  --color-base-cream: #F9F9F5;
+  /* Main background */
+  --color-base-cream-dark: #F0F0EB;
+  /* Secondary background */
+  --color-base-white: #FFFFFF;
+  /* Card background */
+
+  /* Text */
+  --color-base-charcoal: #1A1A1A;
+  /* Primary text (softer than black) */
+  --color-base-slate: #4A4A4A;
+  /* Secondary text */
+  --color-base-stone: #595959;
+  /* Muted text (Darkened from #888888 for contrast) */
+
+  /* Accents */
+  --color-base-gold: #C6A87C;
+  /* Premium accent */
+  --color-base-blue: #0A2540;
+  /* Deep luxurious blue */
+
+  /* Dark palette basics (available in :root for fixed-dark sections) */
+  --color-base-obsidian: #050505;
+  --color-base-charcoal-dark: #121212;
+  --color-base-slate-dark: #1E1E1E;
+  --color-base-white-soft: #EDEDED;
+  --color-base-gray-soft: #C0C0C0;
+
+  /* Borders */
+  --color-base-border-light: rgba(0, 0, 0, 0.15);
+  /* Darkened from 0.08 */
+
+  /* Mapping to Semantic Variables (Default = Light) */
+  --bg-primary: var(--color-base-cream);
+  --bg-secondary: var(--color-base-cream-dark);
+  --bg-card: var(--color-base-white);
+  --bg-inverse: var(--color-base-charcoal);
+
+  --text-primary: var(--color-base-charcoal);
+  --text-secondary: var(--color-base-slate);
+  --text-muted: var(--color-base-stone);
+  --text-inverse: var(--color-base-white);
+
+  --border-subtle: var(--color-base-border-light);
+  --accent-main: var(--color-base-blue);
+  --accent-gold: var(--color-base-gold);
+}
+
+.dark {
+  /* =========================================
+     PREMIUM COLOR PALETTE (Dark Mode)
+     Goal: Deep, elegant, reduces eye strain.
+     ========================================= */
+  /* Backgrounds */
+  --color-dark-obsidian: #050505;
+  /* Deepest black/grey */
+  --color-dark-charcoal: #121212;
+  /* Card background */
+  --color-dark-slate: #1E1E1E;
+  /* Secondary background */
+
+  /* Text */
+  --color-dark-white: #EDEDED;
+  /* Primary text (soft white) */
+  --color-dark-gray: #C0C0C0;
+  /* Secondary text (Lightened from A1A1A1) */
+  --color-dark-muted: #888888;
+  /* Muted text (Lightened from 666666) */
+
+  /* Borders */
+  --color-dark-border: rgba(255, 255, 255, 0.15);
+
+  /* Mapping Overrides for Dark Mode */
+  --bg-primary: var(--color-base-obsidian);
+  --bg-secondary: var(--color-base-charcoal-dark);
+  --bg-card: var(--color-base-slate-dark);
+  --bg-inverse: var(--color-base-white-soft);
+
+  --text-primary: var(--color-base-white-soft);
+  --text-secondary: var(--color-base-gray-soft);
+  --text-muted: #888888;
+  --text-inverse: var(--color-base-obsidian);
+
+  --border-subtle: var(--color-dark-border);
+  --accent-main: #60A5FA;
+  /* Lighter blue for dark mode visibility */
+}
+
+@theme {
+  --font-sans: var(--font-merriweather-sans), "system-ui", "sans-serif";
+  --font-serif: var(--font-fraunces), "Georgia", "serif";
+
+  /* Colors (generates text-X and bg-X) */
+  /* Base Colors (Explicit for stability) */
+  --color-bg-light: #F9F9F5;
+  --color-bg-dark: #050505;
+  --color-text-dark: #1A1A1A;
+  --color-text-light: #EDEDED;
+
+  /* Mappings */
+  --color-base: var(--bg-primary);
+  --color-surface: var(--bg-secondary);
+  --color-card: var(--bg-card);
+  --color-inverse: var(--bg-inverse);
+
+  --color-main: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-bright: var(--text-inverse);
+
+  --color-border: var(--border-subtle);
+  --color-accent: var(--accent-main);
+  --color-gold: var(--accent-gold);
+
+  /* LEGACY COMPATIBILITY (Do not remove until full migration) */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-card: var(--bg-card);
+  --color-bg-inverse: var(--bg-inverse);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-inverse: var(--text-inverse);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-gold: var(--accent-gold);
+}
+
+/* Global Reset & Base Styles */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent; /* Remove blue tap highlight on mobile */
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.5s ease, color 0.5s ease;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
+  
+  /* Safe area insets for notch devices */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Smooth selection */
+::selection {
+  background-color: var(--accent-main);
+  color: var(--bg-primary);
+}
+
+/* =========================================
+   MOBILE-FIRST ENHANCEMENTS
+   App-like experience for touch devices
+   ========================================= */
+
+/* Minimum touch target size for accessibility */
+button,
+a,
+[role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* But allow inline links to be smaller */
+p a,
+span a,
+li a {
+  min-height: auto;
+  min-width: auto;
+}
+
+/* Touch feedback - active states */
+button:active,
+a:active,
+[role="button"]:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+
+/* Prevent text selection on interactive elements for app-like feel */
+button,
+[role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Better mobile typography */
+@media (max-width: 640px) {
+  html {
+    font-size: 15px; /* Slightly smaller base for mobile */
+  }
+  
+  /* Prevent zooming on input focus (iOS) */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe area bottom padding for bottom navigation/gesture bar */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* Smooth image loading */
+img {
+  transition: opacity 0.3s ease;
+}
+
+/* Hide scrollbar but keep functionality for app-like feel */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pull-to-refresh prevention (optional) */
+body {
+  overscroll-behavior-y: contain;
+}
