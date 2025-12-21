@@ -7,6 +7,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MobileSlider } from "@/components/ui/MobileSlider";
+import { MediaOptions } from "@/components/ui/MediaOptions";
 
 
 const stories = [
@@ -77,9 +78,10 @@ export function StoriesGrid() {
                                     </div>
 
                                     <div>
-                                        <h3 className="text-lg font-serif text-white leading-snug">
+                                        <h3 className="text-lg font-serif text-white leading-snug mb-3">
                                             {story.title}
                                         </h3>
+                                        <MediaOptions slug={story.slug} variant="compact" />
                                     </div>
                                 </div>
                             </div>
@@ -134,11 +136,12 @@ export function StoriesGrid() {
                                     </div>
 
                                     <div>
-                                        <h3 className={`font-serif text-white leading-tight
+                                        <h3 className={`font-serif text-white leading-tight mb-3
                                             ${story.size === 'large' ? 'text-3xl md:text-4xl' : 'text-xl'}
                                         `}>
                                             {story.title}
                                         </h3>
+                                        <MediaOptions slug={story.slug} variant="compact" />
                                     </div>
                                 </div>
                             </div>

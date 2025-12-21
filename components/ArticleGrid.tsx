@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MobileSlider } from "@/components/ui/MobileSlider";
+import { MediaOptions } from "@/components/ui/MediaOptions";
 
 const articles = [
     { id: 1, title: "The quiet revolution of slow interfaces", author: "Sarah Jenkins", date: "Dec 24", img: Assets.imgArticleBreakout, category: "Design", slug: "slow-interfaces", topicSlug: "design-culture" },
@@ -73,6 +74,7 @@ export function ArticleGrid() {
                                     <h3 className="text-sm font-serif font-semibold leading-snug">
                                         {article.title}
                                     </h3>
+                                    <MediaOptions slug={article.slug} variant="compact" className="mt-2" />
                                 </div>
                             </div>
                         ))}
@@ -114,11 +116,14 @@ export function ArticleGrid() {
                                 <h3 className="text-lg md:text-xl font-serif font-semibold leading-tight group-hover:text-accent transition-colors">
                                     {article.title}
                                 </h3>
-                                <div className="flex items-center gap-3 pt-2 border-t border-border-subtle">
-                                    <div className="w-8 h-8 rounded-full bg-bg-secondary relative overflow-hidden">
-                                        <Image src={Assets.imgAvatarImage} alt="Avatar" fill className="object-cover" />
+                                <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-bg-secondary relative overflow-hidden">
+                                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill className="object-cover" />
+                                        </div>
+                                        <span className="text-xs font-sans font-medium text-text-secondary">{article.author}</span>
                                     </div>
-                                    <span className="text-xs font-sans font-medium text-text-secondary">{article.author}</span>
+                                    <MediaOptions slug={article.slug} variant="compact" />
                                 </div>
                             </div>
                         </div>

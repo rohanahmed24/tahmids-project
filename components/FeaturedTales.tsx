@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { DecorativeBackgrounds } from "@/components/ui/DecorativeBackgrounds";
 import { MobileSlider } from "@/components/ui/MobileSlider";
+import { MediaOptions } from "@/components/ui/MediaOptions";
 
 const breakingNews = [
     { id: "01", category: "Technology", title: "The quiet revolution of slow interfaces", img: Assets.imgPlaceholderImage1, slug: "slow-interfaces" },
@@ -52,9 +53,10 @@ export function FeaturedTales() {
                                     />
                                     <div className="absolute inset-0 bg-black/20" />
                                 </div>
-                                <div className="space-y-1">
+                                <div className="space-y-2">
                                     <span className="text-[11px] uppercase font-bold tracking-widest text-accent">{item.category}</span>
                                     <h3 className="text-base font-serif leading-snug text-text-primary">{item.title}</h3>
+                                    <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
                                 </div>
                             </Link>
                         ))}
@@ -87,6 +89,7 @@ export function FeaturedTales() {
                                 <div className="space-y-2">
                                     <span className="text-[10px] uppercase font-bold tracking-widest text-text-muted">{item.category}</span>
                                     <h3 className="text-2xl font-serif leading-none group-hover:underline decoration-1 underline-offset-4 text-text-primary">{item.title}</h3>
+                                    <MediaOptions slug={item.slug} variant="compact" className="mt-3" />
                                 </div>
                             </Link>
                         </motion.div>

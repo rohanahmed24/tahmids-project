@@ -6,6 +6,7 @@ import { Assets } from "@/lib/assets";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
+import { MediaOptions } from "@/components/ui/MediaOptions";
 
 const hotTopics = [
     {
@@ -189,14 +190,8 @@ export function HeroSlider() {
                                 {currentTopic.subtitle}
                             </p>
 
-                            {/* CTA Button */}
-                            <Link
-                                href={`/article/${currentTopic.slug}`}
-                                className="group inline-flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-white/90 transition-all hover:scale-105"
-                            >
-                                Read Article
-                                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                            </Link>
+                            {/* CTA Buttons */}
+                            <MediaOptions slug={currentTopic.slug} variant="overlay" />
                         </motion.div>
                     </AnimatePresence>
                 </div>
@@ -237,8 +232,8 @@ export function HeroSlider() {
                     >
                         <motion.div
                             className={`h-1.5 rounded-full transition-all duration-300 ${index === currentIndex
-                                    ? "w-12 bg-white"
-                                    : "w-6 bg-white/30 group-hover:bg-white/50"
+                                ? "w-12 bg-white"
+                                : "w-6 bg-white/30 group-hover:bg-white/50"
                                 }`}
                         />
                     </button>
@@ -277,8 +272,8 @@ export function HeroSlider() {
                         onClick={() => goToSlide(index)}
                         whileHover={{ scale: 1.05, y: -5 }}
                         className={`relative w-20 h-14 rounded-lg overflow-hidden transition-all ${index === currentIndex
-                                ? "ring-2 ring-white ring-offset-2 ring-offset-black/50"
-                                : "opacity-50 hover:opacity-80"
+                            ? "ring-2 ring-white ring-offset-2 ring-offset-black/50"
+                            : "opacity-50 hover:opacity-80"
                             }`}
                     >
                         <Image
