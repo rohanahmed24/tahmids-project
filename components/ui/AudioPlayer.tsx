@@ -244,10 +244,11 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={handleRestart}
-                                    className="p-2 text-text-muted hover:text-text-primary transition-colors"
+                                    className="p-3 text-text-muted hover:text-text-primary transition-colors"
                                     title="Restart"
+                                    aria-label="Restart"
                                 >
-                                    <RotateCcw className="w-5 h-5" />
+                                    <RotateCcw className="w-5 h-5 md:w-5 md:h-5" />
                                 </motion.button>
 
                                 {/* Play/Pause */}
@@ -255,7 +256,8 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={handlePlayPause}
-                                    className="w-14 h-14 bg-accent text-white rounded-full flex items-center justify-center shadow-lg shadow-accent/30"
+                                    className="w-16 h-16 bg-accent text-white rounded-full flex items-center justify-center shadow-lg shadow-accent/30"
+                                    aria-label={isPlaying && !isPaused ? "Pause" : "Play"}
                                 >
                                     {isPlaying && !isPaused ? (
                                         <Pause className="w-6 h-6" />
@@ -269,8 +271,9 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={toggleMute}
-                                    className="p-2 text-text-muted hover:text-text-primary transition-colors"
+                                    className="p-3 text-text-muted hover:text-text-primary transition-colors"
                                     title={isMuted ? "Unmute" : "Mute"}
+                                    aria-label={isMuted ? "Unmute" : "Mute"}
                                 >
                                     {isMuted ? (
                                         <VolumeX className="w-5 h-5" />
@@ -281,16 +284,16 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
                             </div>
 
                             {/* Speed Controls */}
-                            <div className="flex items-center justify-center gap-2">
-                                {[0.5, 0.75, 1, 1.25, 1.5, 2].map((s) => (
+                            <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                                {[0.75, 1, 1.5, 2].map((s) => (
                                     <motion.button
                                         key={s}
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => handleSpeedChange(s)}
-                                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${speed === s
-                                                ? "bg-accent text-white"
-                                                : "bg-bg-primary text-text-muted hover:text-text-primary"
+                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all min-w-[52px] ${speed === s
+                                            ? "bg-accent text-white"
+                                            : "bg-bg-primary text-text-muted hover:text-text-primary"
                                             }`}
                                     >
                                         {s}x
