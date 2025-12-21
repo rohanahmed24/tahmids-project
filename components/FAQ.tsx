@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 
 const faqs = [
-    { question: "What is Wisdomenia?", answer: "Wisdomenia is a curated digital publication dedicated to exploring culture, design, and future technology through long-form storytelling." },
+    { question: "What is Wisdomia?", answer: "Wisdomia is a curated digital publication dedicated to exploring culture, design, and future technology through long-form storytelling." },
     { question: "How does the subscription work?", answer: "Our membership is simple: $9/month or $90/year. You get unlimited access to all stories, the full archive, and our weekly curated newsletter." },
     { question: "Can I cancel anytime?", answer: "Yes. We believe in freedom. You can turn off auto-renew at any time from your account settings, no questions asked." },
-    { question: "Do you offer student discounts?", answer: "We support lifelong learning. Students with a valid .edu email get 50% off. Contact support@wisdomenia.com to apply." },
+    { question: "Do you offer student discounts?", answer: "We support lifelong learning. Students with a valid .edu email get 50% off. Contact support@wisdomia.com to apply." },
 ];
 
 export function FAQ() {

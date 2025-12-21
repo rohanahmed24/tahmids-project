@@ -20,7 +20,7 @@ export function Hero() {
                 className="hidden md:flex absolute inset-0 items-center justify-center z-0 pointer-events-none select-none"
             >
                 <h1 className="text-[18vw] leading-none font-serif font-black text-main/5 tracking-tighter text-center whitespace-nowrap">
-                    WISDOMENIA
+                    WISDOMIA
                 </h1>
             </motion.div>
 

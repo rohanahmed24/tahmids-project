@@ -18,7 +18,7 @@ const merriweatherSans = Merriweather_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Wisdomenia",
+  title: "Wisdomia",
   description: "Where every tale comes alive",
 };
 

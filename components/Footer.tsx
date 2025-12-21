@@ -51,7 +51,7 @@ export function Footer() {
 
             {/* Bottom Bar */}
             <div className="max-w-[1800px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-border-subtle text-text-muted">
-                <p className="text-[10px] font-bold uppercase tracking-widest">© 2024 Wisdomenia Inc.</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest">© 2024 Wisdomia Inc.</p>
                 <div className="flex gap-6 text-[10px] font-bold uppercase tracking-widest">
                     <a href="#" className="hover:text-text-primary transition-colors">Twitter</a>
                     <a href="#" className="hover:text-text-primary transition-colors">Instagram</a>
