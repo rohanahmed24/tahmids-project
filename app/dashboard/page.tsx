@@ -22,8 +22,7 @@ import {
     CreditCard,
     Shield,
     Trash2,
-    Check,
-    X
+    Check
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -139,8 +138,8 @@ export default function DashboardPage() {
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.id
-                                    ? "bg-accent text-white"
-                                    : "bg-bg-secondary border border-border-subtle hover:border-accent"
+                                ? "bg-accent text-white"
+                                : "bg-bg-secondary border border-border-subtle hover:border-accent"
                                 }`}
                         >
                             <tab.icon className="w-4 h-4" />

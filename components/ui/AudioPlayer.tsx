@@ -60,14 +60,18 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
         return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
+
     useEffect(() => {
-        if (typeof window !== "undefined" && !window.speechSynthesis) {
+        // Check for speech synthesis support once
+        const supported = typeof window !== "undefined" && !!window.speechSynthesis;
+        if (!supported) {
             setIsSupported(false);
-        } else {
-            textRef.current = cleanContent(`${title}. ${content}`);
-            const duration = estimateDuration(textRef.current);
-            setTotalTime(formatTime(duration));
+            return;
         }
+
+        textRef.current = cleanContent(`${title}. ${content}`);
+        const duration = estimateDuration(textRef.current);
+        setTotalTime(formatTime(duration));
     }, [content, title, cleanContent, estimateDuration]);
 
     const speak = useCallback(() => {
