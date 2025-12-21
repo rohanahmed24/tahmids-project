@@ -35,7 +35,7 @@ export function FeaturedTales() {
 
                 {/* Mobile: Draggable Slider with Autoplay */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={3500} cardWidth={260} gap={12}>
+                    <MobileSlider autoplayInterval={3500} cardWidth={260} gap={12} marquee marqueeSpeed={25}>
                         {breakingNews.map((item) => (
                             <Link
                                 key={item.id}

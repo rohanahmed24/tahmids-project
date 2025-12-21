@@ -44,7 +44,7 @@ export function StoriesGrid() {
 
                 {/* Mobile: Draggable Slider with Autoplay */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={4000} cardWidth={280} gap={12}>
+                    <MobileSlider autoplayInterval={4000} cardWidth={280} gap={12} marquee marqueeSpeed={25}>
                         {stories.slice(0, 8).map((story) => (
                             <div
                                 key={story.id}

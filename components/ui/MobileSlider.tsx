@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, PanInfo } from "framer-motion";
+import { motion, useMotionValue, useSpring, PanInfo, animate } from "framer-motion";
 import { useRef, useEffect, useState, ReactNode, useCallback } from "react";
 
 interface MobileSliderProps {
@@ -9,6 +9,8 @@ interface MobileSliderProps {
     cardWidth?: number; // default 300
     gap?: number; // default 16
     className?: string;
+    marquee?: boolean; // Enable continuous marquee mode
+    marqueeSpeed?: number; // Pixels per second, default 30
 }
 
 export function MobileSlider({
@@ -16,7 +18,9 @@ export function MobileSlider({
     autoplayInterval = 4000,
     cardWidth = 300,
     gap = 16,
-    className = ""
+    className = "",
+    marquee = false,
+    marqueeSpeed = 30
 }: MobileSliderProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState(0);
@@ -49,9 +53,25 @@ export function MobileSlider({
         setCurrentIndex(index);
     }, [cardWidth, gap, maxDrag, x]);
 
-    // Autoplay
+    // Marquee continuous scroll effect
     useEffect(() => {
-        if (isPaused || children.length <= 1) return;
+        if (!marquee || isPaused || children.length <= 1) return;
+
+        const duration = (totalWidth / marqueeSpeed);
+
+        const controls = animate(x, [0, -totalWidth], {
+            duration,
+            ease: "linear",
+            repeat: Infinity,
+            repeatType: "loop",
+        });
+
+        return () => controls.stop();
+    }, [marquee, isPaused, marqueeSpeed, totalWidth, x, children.length]);
+
+    // Regular autoplay (when not in marquee mode)
+    useEffect(() => {
+        if (marquee || isPaused || children.length <= 1) return;
 
         const interval = setInterval(() => {
             const nextIndex = (currentIndex + 1) % children.length;
@@ -59,7 +79,7 @@ export function MobileSlider({
         }, autoplayInterval);
 
         return () => clearInterval(interval);
-    }, [currentIndex, isPaused, autoplayInterval, children.length, scrollToIndex]);
+    }, [marquee, currentIndex, isPaused, autoplayInterval, children.length, scrollToIndex]);
 
     // Handle drag end
     const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -82,6 +102,9 @@ export function MobileSlider({
         scrollToIndex(newIndex);
     };
 
+    // For marquee mode, duplicate children for seamless loop
+    const displayChildren = marquee ? [...children, ...children] : children;
+
     return (
         <div
             ref={containerRef}
@@ -93,13 +116,13 @@ export function MobileSlider({
         >
             <motion.div
                 className="flex cursor-grab active:cursor-grabbing"
-                style={{ x: springX, gap }}
-                drag="x"
+                style={{ x: marquee ? x : springX, gap }}
+                drag={!marquee ? "x" : false}
                 dragConstraints={{ left: maxDrag, right: 0 }}
                 dragElastic={0.1}
-                onDragEnd={handleDragEnd}
+                onDragEnd={!marquee ? handleDragEnd : undefined}
             >
-                {children.map((child, index) => (
+                {displayChildren.map((child, index) => (
                     <div
                         key={index}
                         className="flex-shrink-0"
@@ -112,3 +135,4 @@ export function MobileSlider({
         </div>
     );
 }
+

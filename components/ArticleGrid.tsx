@@ -39,7 +39,7 @@ export function ArticleGrid() {
 
                 {/* Mobile: Draggable Slider with Autoplay */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={5000} cardWidth={280} gap={16}>
+                    <MobileSlider autoplayInterval={5000} cardWidth={280} gap={16} marquee marqueeSpeed={25}>
                         {articles.map((article) => (
                             <div
                                 key={article.id}
