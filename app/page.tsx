@@ -1,4 +1,4 @@
-import { Hero } from "@/components/Hero";
+import { HeroSlider } from "@/components/HeroSlider";
 import { FeaturedTales } from "@/components/FeaturedTales";
 import { Subscription } from "@/components/Subscription";
 import { ArticleGrid } from "@/components/ArticleGrid";
@@ -12,7 +12,7 @@ import { AuthorsGrid } from "@/components/AuthorsGrid";
 export default function Home() {
   return (
     <main className="min-h-screen bg-background-light text-text-primary font-sans selection:bg-background-darkest selection:text-white">
-      <Hero />
+      <HeroSlider />
       <FeaturedTales />
       <DailyQuote />
       <Subscription />
