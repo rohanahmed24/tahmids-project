@@ -262,7 +262,7 @@ export default function PricingPage() {
                     animate="visible"
                     className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8"
                 >
-                    {plans.map((plan, _index) => (
+                    {plans.map((plan) => (
                         <motion.div
                             key={plan.id}
                             variants={cardVariants}

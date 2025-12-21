@@ -266,7 +266,7 @@ export default function CareersPage() {
                         viewport={{ once: true }}
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
                     >
-                        {values.map((value, index) => (
+                        {values.map((value) => (
                             <motion.div
                                 key={value.title}
                                 variants={itemVariants}

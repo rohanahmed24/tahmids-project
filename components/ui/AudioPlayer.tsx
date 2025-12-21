@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Play,
@@ -22,7 +22,11 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
     const [progress, setProgress] = useState(0);
     const [speed, setSpeed] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
-    const [isSupported, setIsSupported] = useState(true);
+    // Lazy initialization to check support without needing useEffect
+    const [isSupported] = useState(() => {
+        if (typeof window === "undefined") return true;
+        return !!window.speechSynthesis;
+    });
     const [currentTime, setCurrentTime] = useState("0:00");
     const [totalTime, setTotalTime] = useState("0:00");
     const [isExpanded, setIsExpanded] = useState(false);
@@ -54,25 +58,21 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
     }, [speed]);
 
     // Format time in mm:ss
-    const formatTime = (seconds: number) => {
+    const formatTime = useCallback((seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs.toString().padStart(2, "0")}`;
-    };
+    }, []);
 
+    // Memoize cleaned content and duration to avoid recalculating
+    const cleanedText = useMemo(() => cleanContent(`${title}. ${content}`), [cleanContent, title, content]);
+    const estimatedDuration = useMemo(() => estimateDuration(cleanedText), [estimateDuration, cleanedText]);
 
+    // Update text ref and total time when content changes
     useEffect(() => {
-        // Check for speech synthesis support once
-        const supported = typeof window !== "undefined" && !!window.speechSynthesis;
-        if (!supported) {
-            setIsSupported(false);
-            return;
-        }
-
-        textRef.current = cleanContent(`${title}. ${content}`);
-        const duration = estimateDuration(textRef.current);
-        setTotalTime(formatTime(duration));
-    }, [content, title, cleanContent, estimateDuration]);
+        textRef.current = cleanedText;
+        setTotalTime(formatTime(estimatedDuration));
+    }, [cleanedText, estimatedDuration, formatTime]);
 
     const speak = useCallback(() => {
         if (!window.speechSynthesis) return;
