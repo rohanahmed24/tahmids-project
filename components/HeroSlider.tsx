@@ -128,7 +128,7 @@ export function HeroSlider() {
 
     return (
         <section
-            className="relative w-full h-[50vh] md:h-screen overflow-hidden bg-black touch-none md:touch-auto mt-14 md:mt-0"
+            className="relative w-full h-[50svh] md:h-screen overflow-hidden bg-black touch-none md:touch-auto mt-14 md:mt-0"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
         >

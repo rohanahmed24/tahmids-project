@@ -44,13 +44,12 @@ export function StoriesGrid() {
 
                 {/* Mobile: Draggable Slider (No autoplay/marquee - fully manual) */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={0} cardWidth={300} gap={12}>
+                    <MobileSlider autoplayInterval={0} cardWidthPercent={85} gap={12}>
                         {stories.slice(0, 8).map((story) => (
                             <div
                                 key={story.id}
                                 onClick={() => router.push(`/article/${story.slug}`)}
-                                className="h-[380px] relative group overflow-hidden rounded-2xl bg-bg-card cursor-pointer"
-                                style={{ width: '300px', minWidth: '300px' }}
+                                className="h-[380px] relative group overflow-hidden rounded-2xl bg-bg-card cursor-pointer w-full"
                             >
                                 <Image
                                     src={story.img}

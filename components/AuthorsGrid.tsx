@@ -28,12 +28,11 @@ export function AuthorsGrid() {
 
                 {/* Mobile: Horizontal Slider */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={0} cardWidth={200} gap={16}>
+                    <MobileSlider autoplayInterval={0} cardWidthPercent={60} gap={16}>
                         {authors.map((author) => (
                             <div
                                 key={author.id}
-                                className="flex flex-col items-center text-center space-y-3 group"
-                                style={{ width: '200px', minWidth: '200px' }}
+                                className="flex flex-col items-center text-center space-y-3 group w-full"
                             >
                                 <div className="w-24 h-24 rounded-full overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-500">
                                     <Image src={author.img} alt={author.name} fill className="object-cover" />

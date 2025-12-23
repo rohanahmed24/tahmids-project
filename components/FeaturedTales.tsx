@@ -35,13 +35,12 @@ export function FeaturedTales() {
 
                 {/* Mobile: Draggable Slider with Autoplay */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={0} cardWidth={300} gap={12}>
+                    <MobileSlider autoplayInterval={0} cardWidthPercent={85} gap={12}>
                         {breakingNews.map((item) => (
                             <Link
                                 key={item.id}
                                 href={`/article/${item.slug}`}
-                                className="block"
-                                style={{ width: '300px', minWidth: '300px' }}
+                                className="block w-full"
                             >
                                 <div className="relative aspect-[3/4] overflow-hidden mb-4 rounded-xl">
                                     <span className="absolute top-3 left-3 text-3xl font-serif text-white z-20 opacity-80 drop-shadow-lg">{item.id}</span>

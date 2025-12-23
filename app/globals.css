@@ -166,22 +166,17 @@ body {
    App-like experience for touch devices
    ========================================= */
 
-/* Minimum touch target size for accessibility */
+/* Touch-friendly sizing via padding (no fixed min-width/min-height) */
 button,
-a,
 [role="button"] {
-  min-height: 44px;
-  min-width: 44px;
+  padding: 0.75rem 1rem;
+  /* ~12px vertical for comfortable touch */
 }
 
-/* But allow inline links and navbar elements to be smaller */
-p a,
-span a,
-li a,
-nav a,
-nav button {
-  min-height: auto;
-  min-width: auto;
+/* Links use inline padding for touch comfort */
+a {
+  padding: 0.25rem;
+  /* Small padding for inline links */
 }
 
 /* Touch feedback - active states */
