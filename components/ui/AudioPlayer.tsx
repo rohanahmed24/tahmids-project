@@ -68,11 +68,18 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
     const cleanedText = useMemo(() => cleanContent(`${title}. ${content}`), [cleanContent, title, content]);
     const estimatedDuration = useMemo(() => estimateDuration(cleanedText), [estimateDuration, cleanedText]);
 
-    // Update text ref and total time when content changes
+    // Update text ref when content changes (no setState in effect)
     useEffect(() => {
         textRef.current = cleanedText;
-        setTotalTime(formatTime(estimatedDuration));
-    }, [cleanedText, estimatedDuration, formatTime]);
+    }, [cleanedText]);
+
+    // Initialize total time from memoized duration
+    const formattedTotalTime = useMemo(() => formatTime(estimatedDuration), [formatTime, estimatedDuration]);
+
+    // Sync totalTime state with formatted value
+    useEffect(() => {
+        setTotalTime(formattedTotalTime);
+    }, [formattedTotalTime]);
 
     const speak = useCallback(() => {
         if (!window.speechSynthesis) return;
@@ -131,7 +138,7 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
         }
 
         return () => clearInterval(interval);
-    }, [isPlaying, isPaused, estimateDuration]);
+    }, [isPlaying, isPaused, estimateDuration, formatTime]);
 
     const handlePlayPause = () => {
         if (!window.speechSynthesis) return;

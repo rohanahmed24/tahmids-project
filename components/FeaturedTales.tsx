@@ -18,12 +18,12 @@ const breakingNews = [
 
 export function FeaturedTales() {
     return (
-        <section className="relative w-full py-24 bg-bg-primary overflow-hidden">
+        <section className="relative w-full py-10 md:py-24 bg-bg-primary overflow-hidden">
             <DecorativeBackgrounds />
 
             <div className="max-w-[1800px] mx-auto px-6 md:px-12 relative z-10">
                 {/* Section Header */}
-                <div className="flex justify-between items-end mb-16 border-b border-border-subtle pb-6">
+                <div className="flex justify-between items-end mb-8 md:mb-16 border-b border-border-subtle pb-4 md:pb-6">
                     <h2 className="text-4xl md:text-6xl font-serif font-medium tracking-tight text-text-primary">
                         Trending <span className="italic font-light opacity-60">Now</span>
                     </h2>
@@ -35,13 +35,13 @@ export function FeaturedTales() {
 
                 {/* Mobile: Draggable Slider with Autoplay */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={3500} cardWidth={260} gap={12} marquee marqueeSpeed={25}>
+                    <MobileSlider autoplayInterval={0} cardWidth={300} gap={12}>
                         {breakingNews.map((item) => (
                             <Link
                                 key={item.id}
                                 href={`/article/${item.slug}`}
                                 className="block"
-                                style={{ width: '260px', minWidth: '260px' }}
+                                style={{ width: '300px', minWidth: '300px' }}
                             >
                                 <div className="relative aspect-[3/4] overflow-hidden mb-4 rounded-xl">
                                     <span className="absolute top-3 left-3 text-3xl font-serif text-white z-20 opacity-80 drop-shadow-lg">{item.id}</span>

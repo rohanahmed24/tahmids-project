@@ -26,14 +26,14 @@ export default function Navbar() {
     return (
         <>
             <motion.nav
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${isScrolled
-                    ? 'bg-base/80 backdrop-blur-xl border-border py-4'
-                    : 'bg-transparent border-transparent py-6'
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b bg-base md:bg-transparent ${isScrolled
+                    ? 'md:bg-base/80 backdrop-blur-xl border-border py-4'
+                    : 'border-transparent md:border-transparent py-4 md:py-6'
                     }`}
             >
-                <div className="max-w-[1800px] mx-auto px-6 md:px-12 flex items-center justify-between">
+                <div className="max-w-[1800px] mx-auto px-6 md:px-12 flex items-center">
                     {/* Left: Menu & Search */}
-                    <div className={`flex items-center gap-4 md:gap-6 ${textColorClass}`}>
+                    <div className={`flex items-center gap-4 md:gap-6 w-24 md:w-40 ${textColorClass}`}>
                         <button
                             onClick={() => setIsMenuOpen(true)}
                             className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
@@ -47,7 +47,7 @@ export default function Navbar() {
                     </div>
 
                     {/* Center: Logo */}
-                    <div className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center ${textColorClass}`}>
+                    <div className={`flex-1 flex items-center justify-center ${textColorClass}`}>
                         <Link href="/" className="block">
                             <h1 className="font-serif text-2xl md:text-4xl font-black tracking-tighter transition-colors">
                                 WISDOMIA
@@ -56,7 +56,7 @@ export default function Navbar() {
                     </div>
 
                     {/* Right: Actions */}
-                    <div className={`flex items-center gap-5 md:gap-8 ${textColorClass}`}>
+                    <div className={`flex items-center justify-end gap-5 md:gap-8 w-24 md:w-40 ${textColorClass}`}>
                         <Link href="/signin" className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity">
                             Sign In
                         </Link>

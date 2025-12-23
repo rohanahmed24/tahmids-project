@@ -138,7 +138,8 @@
 /* Global Reset & Base Styles */
 html {
   scroll-behavior: smooth;
-  -webkit-tap-highlight-color: transparent; /* Remove blue tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
+  /* Remove blue tap highlight on mobile */
 }
 
 body {
@@ -148,7 +149,7 @@ body {
   transition: background-color 0.5s ease, color 0.5s ease;
   overflow-x: hidden;
   /* Prevent horizontal scroll */
-  
+
   /* Safe area insets for notch devices */
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
@@ -173,10 +174,12 @@ a,
   min-width: 44px;
 }
 
-/* But allow inline links to be smaller */
+/* But allow inline links and navbar elements to be smaller */
 p a,
 span a,
-li a {
+li a,
+nav a,
+nav button {
   min-height: auto;
   min-width: auto;
 }
@@ -199,9 +202,10 @@ button,
 /* Better mobile typography */
 @media (max-width: 640px) {
   html {
-    font-size: 15px; /* Slightly smaller base for mobile */
+    font-size: 15px;
+    /* Slightly smaller base for mobile */
   }
-  
+
   /* Prevent zooming on input focus (iOS) */
   input,
   textarea,
@@ -225,6 +229,7 @@ img {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }

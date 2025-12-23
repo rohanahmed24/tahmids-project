@@ -1,11 +1,11 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, PanInfo, animate } from "framer-motion";
-import { useRef, useEffect, useState, ReactNode, useCallback } from "react";
+import { motion, useMotionValue, useSpring, animate } from "framer-motion";
+import { useRef, useEffect, useState, ReactNode } from "react";
 
 interface MobileSliderProps {
     children: ReactNode[];
-    autoplayInterval?: number; // ms, default 4000
+    autoplayInterval?: number; // ms, 0 to disable
     cardWidth?: number; // default 300
     gap?: number; // default 16
     className?: string;
@@ -15,7 +15,8 @@ interface MobileSliderProps {
 
 export function MobileSlider({
     children,
-    autoplayInterval = 4000,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    autoplayInterval = 0,
     cardWidth = 300,
     gap = 16,
     className = "",
@@ -24,14 +25,14 @@ export function MobileSlider({
 }: MobileSliderProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = useState(0);
-    const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
 
     const x = useMotionValue(0);
-    const springX = useSpring(x, { stiffness: 300, damping: 30 });
+    // Smoother spring with lower stiffness and higher damping
+    const springX = useSpring(x, { stiffness: 100, damping: 25, mass: 0.5 });
 
     const totalWidth = children.length * (cardWidth + gap) - gap;
-    const maxDrag = -(totalWidth - containerWidth + 24); // 24px padding
+    const maxDrag = Math.min(0, -(totalWidth - containerWidth + 24)); // 24px padding
 
     // Update container width on resize
     useEffect(() => {
@@ -44,14 +45,6 @@ export function MobileSlider({
         window.addEventListener("resize", updateWidth);
         return () => window.removeEventListener("resize", updateWidth);
     }, []);
-
-    // Scroll to specific index
-    const scrollToIndex = useCallback((index: number) => {
-        const targetX = -(index * (cardWidth + gap));
-        const clampedX = Math.max(maxDrag, Math.min(0, targetX));
-        x.set(clampedX);
-        setCurrentIndex(index);
-    }, [cardWidth, gap, maxDrag, x]);
 
     // Marquee continuous scroll effect
     useEffect(() => {
@@ -69,46 +62,13 @@ export function MobileSlider({
         return () => controls.stop();
     }, [marquee, isPaused, marqueeSpeed, totalWidth, x, children.length]);
 
-    // Regular autoplay (when not in marquee mode)
-    useEffect(() => {
-        if (marquee || isPaused || children.length <= 1) return;
-
-        const interval = setInterval(() => {
-            const nextIndex = (currentIndex + 1) % children.length;
-            scrollToIndex(nextIndex);
-        }, autoplayInterval);
-
-        return () => clearInterval(interval);
-    }, [marquee, currentIndex, isPaused, autoplayInterval, children.length, scrollToIndex]);
-
-    // Handle drag end
-    const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        const velocity = info.velocity.x;
-        const offset = info.offset.x;
-
-        // Calculate which card to snap to based on velocity and offset
-        let newIndex = currentIndex;
-
-        if (Math.abs(velocity) > 500) {
-            // Fast swipe - go to next/prev
-            newIndex = velocity > 0 ? currentIndex - 1 : currentIndex + 1;
-        } else if (Math.abs(offset) > cardWidth / 3) {
-            // Slow drag past threshold
-            newIndex = offset > 0 ? currentIndex - 1 : currentIndex + 1;
-        }
-
-        // Clamp index
-        newIndex = Math.max(0, Math.min(children.length - 1, newIndex));
-        scrollToIndex(newIndex);
-    };
-
     // For marquee mode, duplicate children for seamless loop
     const displayChildren = marquee ? [...children, ...children] : children;
 
     return (
         <div
             ref={containerRef}
-            className={`relative overflow-hidden ${className}`}
+            className={`relative overflow-hidden touch-pan-y ${className}`}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
             onTouchStart={() => setIsPaused(true)}
@@ -119,8 +79,13 @@ export function MobileSlider({
                 style={{ x: marquee ? x : springX, gap }}
                 drag={!marquee ? "x" : false}
                 dragConstraints={{ left: maxDrag, right: 0 }}
-                dragElastic={0.1}
-                onDragEnd={!marquee ? handleDragEnd : undefined}
+                dragElastic={0.05}
+                dragTransition={{
+                    bounceStiffness: 100,
+                    bounceDamping: 20,
+                    power: 0.3,
+                    timeConstant: 200
+                }}
             >
                 {displayChildren.map((child, index) => (
                     <div

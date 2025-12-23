@@ -39,13 +39,13 @@ export function ArticleGrid() {
 
                 {/* Mobile: Draggable Slider with Autoplay */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={5000} cardWidth={280} gap={16} marquee marqueeSpeed={25}>
+                    <MobileSlider autoplayInterval={0} cardWidth={300} gap={12}>
                         {articles.map((article) => (
                             <div
                                 key={article.id}
                                 onClick={() => router.push(`/article/${article.slug}`)}
                                 className="group flex flex-col cursor-pointer text-text-primary"
-                                style={{ width: '280px', minWidth: '280px' }}
+                                style={{ width: '300px', minWidth: '300px' }}
                             >
                                 <div className="relative w-full aspect-[4/3] overflow-hidden rounded-xl">
                                     <Image

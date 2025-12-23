@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Assets } from "@/lib/assets";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
@@ -59,6 +59,7 @@ export function HeroSlider() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
     const [direction, setDirection] = useState(1);
+    const [isDragging, setIsDragging] = useState(false);
 
     const nextSlide = useCallback(() => {
         setDirection(1);
@@ -75,12 +76,27 @@ export function HeroSlider() {
         setCurrentIndex(index);
     };
 
+    // Handle drag/swipe gestures
+    const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+        setIsDragging(false);
+        const threshold = 50;
+        const velocity = info.velocity.x;
+        const offset = info.offset.x;
+
+        // Determine swipe direction based on velocity or offset
+        if (velocity < -500 || offset < -threshold) {
+            nextSlide();
+        } else if (velocity > 500 || offset > threshold) {
+            prevSlide();
+        }
+    };
+
     // Auto-slide
     useEffect(() => {
-        if (!isAutoPlaying) return;
+        if (!isAutoPlaying || isDragging) return;
         const interval = setInterval(nextSlide, 5000);
         return () => clearInterval(interval);
-    }, [isAutoPlaying, nextSlide]);
+    }, [isAutoPlaying, isDragging, nextSlide]);
 
     const currentTopic = hotTopics[currentIndex];
 
@@ -112,7 +128,7 @@ export function HeroSlider() {
 
     return (
         <section
-            className="relative w-full h-screen overflow-hidden bg-black"
+            className="relative w-full h-[50vh] md:h-screen overflow-hidden bg-black touch-pan-y mt-14 md:mt-0"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
         >
@@ -141,16 +157,29 @@ export function HeroSlider() {
                 </motion.div>
             </AnimatePresence>
 
+            {/* Drag/Swipe Layer - Mobile touch handling */}
+            <motion.div
+                className="absolute inset-0 z-[5] cursor-grab active:cursor-grabbing md:hidden"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragStart={() => {
+                    setIsDragging(true);
+                    setIsAutoPlaying(false);
+                }}
+                onDragEnd={handleDragEnd}
+            />
+
             {/* Hot Topics Badge */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="absolute top-24 md:top-32 left-6 md:left-12 z-20"
+                className="absolute top-16 md:top-32 left-4 md:left-12 z-20"
             >
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2">
-                    <Flame className="w-4 h-4 text-orange-400 animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-white">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 md:px-4 md:py-2">
+                    <Flame className="w-3 h-3 md:w-4 md:h-4 text-orange-400 animate-pulse" />
+                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white">
                         Hot Topics
                     </span>
                 </div>
@@ -158,7 +187,7 @@ export function HeroSlider() {
 
             {/* Main Content */}
             <div className="absolute inset-0 flex items-end z-10">
-                <div className="w-full max-w-7xl mx-auto px-6 md:px-12 pb-24 md:pb-32">
+                <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pb-14 md:pb-32">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentIndex}
@@ -174,30 +203,32 @@ export function HeroSlider() {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="inline-block text-xs md:text-sm font-bold uppercase tracking-widest text-white/80 mb-4"
+                                className="inline-block text-[10px] md:text-sm font-bold uppercase tracking-widest text-white/80 mb-2 md:mb-4"
                             >
                                 {currentTopic.category}
                             </motion.span>
 
                             {/* Title */}
-                            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight mb-4">
+                            <h1 className="text-2xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight mb-2 md:mb-4">
                                 {currentTopic.title}
                             </h1>
 
-                            {/* Subtitle */}
-                            <p className="text-lg md:text-xl text-white/70 mb-8 max-w-xl">
+                            {/* Subtitle - Hidden on mobile for compactness */}
+                            <p className="hidden md:block text-lg md:text-xl text-white/70 mb-8 max-w-xl">
                                 {currentTopic.subtitle}
                             </p>
 
-                            {/* CTA Buttons */}
-                            <MediaOptions slug={currentTopic.slug} variant="overlay" />
+                            {/* CTA Buttons - Simplified on mobile */}
+                            <div className="hidden md:block">
+                                <MediaOptions slug={currentTopic.slug} variant="overlay" />
+                            </div>
                         </motion.div>
                     </AnimatePresence>
                 </div>
             </div>
 
-            {/* Navigation Arrows */}
-            <div className="absolute bottom-1/2 translate-y-1/2 left-4 md:left-8 z-20">
+            {/* Navigation Arrows - Hidden on mobile (use swipe instead) */}
+            <div className="hidden md:block absolute bottom-1/2 translate-y-1/2 left-4 md:left-8 z-20">
                 <motion.button
                     whileHover={{ scale: 1.1, x: -5 }}
                     whileTap={{ scale: 0.9 }}
@@ -208,7 +239,7 @@ export function HeroSlider() {
                     <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
                 </motion.button>
             </div>
-            <div className="absolute bottom-1/2 translate-y-1/2 right-4 md:right-8 z-20">
+            <div className="hidden md:block absolute bottom-1/2 translate-y-1/2 right-4 md:right-8 z-20">
                 <motion.button
                     whileHover={{ scale: 1.1, x: 5 }}
                     whileTap={{ scale: 0.9 }}
@@ -221,7 +252,7 @@ export function HeroSlider() {
             </div>
 
             {/* Slide Indicators */}
-            <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
+            <div className="absolute bottom-4 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 md:gap-3">
                 {hotTopics.map((topic, index) => (
                     <button
                         key={topic.id}
@@ -230,17 +261,17 @@ export function HeroSlider() {
                         aria-label={`Go to slide ${index + 1}`}
                     >
                         <motion.div
-                            className={`h-1.5 rounded-full transition-all duration-300 ${index === currentIndex
-                                ? "w-12 bg-white"
-                                : "w-6 bg-white/30 group-hover:bg-white/50"
+                            className={`h-1 md:h-1.5 rounded-full transition-all duration-300 ${index === currentIndex
+                                ? "w-8 md:w-12 bg-white"
+                                : "w-4 md:w-6 bg-white/30 group-hover:bg-white/50"
                                 }`}
                         />
                     </button>
                 ))}
             </div>
 
-            {/* Slide Counter */}
-            <div className="absolute bottom-8 md:bottom-12 right-6 md:right-12 z-20">
+            {/* Slide Counter - Hidden on mobile */}
+            <div className="hidden md:block absolute bottom-8 md:bottom-12 right-6 md:right-12 z-20">
                 <div className="flex items-baseline gap-1 text-white">
                     <span className="text-3xl md:text-4xl font-bold">
                         {String(currentIndex + 1).padStart(2, "0")}
@@ -253,11 +284,11 @@ export function HeroSlider() {
             </div>
 
             {/* Progress Bar */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-20">
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 md:h-1 bg-white/10 z-20">
                 <motion.div
                     key={currentIndex}
                     initial={{ width: "0%" }}
-                    animate={{ width: isAutoPlaying ? "100%" : "0%" }}
+                    animate={{ width: isAutoPlaying && !isDragging ? "100%" : "0%" }}
                     transition={{ duration: 5, ease: "linear" }}
                     className="h-full bg-white"
                 />

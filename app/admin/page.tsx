@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Shield, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // Admin credentials (in production, use proper authentication)
 const ADMIN_PASSWORD = "wisdomia2024";
@@ -165,12 +166,12 @@ export default function AdminLoginPage() {
                     transition={{ delay: 0.5 }}
                     className="text-center mt-6"
                 >
-                    <a
+                    <Link
                         href="/"
                         className="text-gray-500 hover:text-white text-sm transition-colors"
                     >
                         ← Back to Website
-                    </a>
+                    </Link>
                 </motion.div>
             </motion.div>
         </main>

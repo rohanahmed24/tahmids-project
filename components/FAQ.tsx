@@ -15,7 +15,7 @@ export function FAQ() {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
     return (
-        <section className="w-full bg-bg-primary py-32 px-6 md:px-12 border-b border-border-subtle">
+        <section className="w-full bg-bg-primary py-12 md:py-32 px-6 md:px-12 border-b border-border-subtle">
             <div className="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
                 {/* Header */}
                 <div className="lg:col-span-4 space-y-6">

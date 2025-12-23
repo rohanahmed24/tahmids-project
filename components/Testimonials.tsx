@@ -11,7 +11,7 @@ const testimonials = [
 
 export function Testimonials() {
     return (
-        <section className="w-full py-24 overflow-hidden bg-black text-white">
+        <section className="w-full py-10 md:py-24 overflow-hidden bg-black text-white">
             <div className="flex whitespace-nowrap">
                 <motion.div
                     animate={{ x: [0, -1000] }}

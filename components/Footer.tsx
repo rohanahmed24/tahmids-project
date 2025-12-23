@@ -6,7 +6,7 @@ export function Footer() {
             <div className="max-w-[1800px] mx-auto grid grid-cols-2 md:grid-cols-12 gap-8 md:gap-24 mb-16 md:mb-20">
                 {/* Brand */}
                 <div className="col-span-2 md:col-span-4 space-y-4 md:space-y-6">
-                    <h2 className="text-6xl md:text-9xl lg:text-[12rem] font-serif font-black tracking-tighter leading-none opacity-10 select-none">
+                    <h2 className="text-3xl md:text-9xl lg:text-[12rem] font-serif font-black tracking-tighter leading-none opacity-10 select-none">
                         WISDOMIA
                     </h2>
                     <p className="text-xs md:text-sm text-text-muted leading-relaxed max-w-sm">

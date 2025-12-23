@@ -30,27 +30,27 @@ export function StoriesGrid() {
     const router = useRouter();
 
     return (
-        <section className="relative w-full py-24 bg-bg-primary">
+        <section className="relative w-full py-12 md:py-24 bg-bg-primary">
             {/* <DecorativeBackgrounds />  Let's keep this clean for the grid section */}
 
             <div className="max-w-[1800px] mx-auto px-6 md:px-12">
                 {/* Section Header */}
-                <div className="text-center mb-20 text-text-primary">
+                <div className="text-center mb-10 md:mb-20 text-text-primary">
                     <span className="text-xs font-bold tracking-[0.3em] uppercase opacity-50 block mb-4">Latest Stories</span>
-                    <h2 className="text-5xl md:text-7xl font-serif font-black tracking-tighter">
+                    <h2 className="text-4xl md:text-5xl lg:text-7xl font-serif font-black tracking-tighter">
                         THE <span className="italic font-light">ARCHIVE</span>
                     </h2>
                 </div>
 
-                {/* Mobile: Draggable Slider with Autoplay */}
+                {/* Mobile: Draggable Slider (No autoplay/marquee - fully manual) */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={4000} cardWidth={280} gap={12} marquee marqueeSpeed={25}>
+                    <MobileSlider autoplayInterval={0} cardWidth={300} gap={12}>
                         {stories.slice(0, 8).map((story) => (
                             <div
                                 key={story.id}
                                 onClick={() => router.push(`/article/${story.slug}`)}
                                 className="h-[380px] relative group overflow-hidden rounded-2xl bg-bg-card cursor-pointer"
-                                style={{ width: '280px', minWidth: '280px' }}
+                                style={{ width: '300px', minWidth: '300px' }}
                             >
                                 <Image
                                     src={story.img}

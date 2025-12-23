@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export function Subscription() {
     return (
-        <section className="w-full py-20 md:py-32 bg-accent text-white overflow-hidden relative">
+        <section className="w-full py-10 md:py-32 bg-accent text-white overflow-hidden relative">
             {/* Decorative Circles */}
             <div className="absolute top-0 right-0 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-[200px] md:w-[400px] h-[200px] md:h-[400px] bg-black/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />

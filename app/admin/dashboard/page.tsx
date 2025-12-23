@@ -23,10 +23,7 @@ import {
     BookOpen,
     Bookmark,
     DollarSign,
-    ChevronRight,
-    AlertCircle,
     Check,
-    X,
     Shield,
     Bell,
     Moon,
@@ -173,8 +170,8 @@ export default function AdminDashboard() {
                             whileHover={{ x: 5 }}
                             onClick={() => setActiveTab(item.id)}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === item.id
-                                    ? "bg-gradient-to-r from-red-500/20 to-purple-500/20 text-white border border-purple-500/30"
-                                    : "text-gray-400 hover:text-white hover:bg-gray-800"
+                                ? "bg-gradient-to-r from-red-500/20 to-purple-500/20 text-white border border-purple-500/30"
+                                : "text-gray-400 hover:text-white hover:bg-gray-800"
                                 }`}
                         >
                             <item.icon className="w-5 h-5" />
@@ -314,8 +311,8 @@ export default function AdminDashboard() {
                                                         <p className="text-xs text-gray-500">{user.email}</p>
                                                     </div>
                                                     <span className={`px-2 py-1 rounded-full text-xs ${user.plan === "Visionary" ? "bg-amber-500/20 text-amber-400" :
-                                                            user.plan === "Explorer" ? "bg-blue-500/20 text-blue-400" :
-                                                                "bg-gray-700 text-gray-400"
+                                                        user.plan === "Explorer" ? "bg-blue-500/20 text-blue-400" :
+                                                            "bg-gray-700 text-gray-400"
                                                         }`}>
                                                         {user.plan}
                                                     </span>
@@ -351,8 +348,8 @@ export default function AdminDashboard() {
                                                         <p className="text-xs text-gray-500">{article.author}</p>
                                                     </div>
                                                     <span className={`px-2 py-1 rounded-full text-xs ${article.status === "published" ? "bg-green-500/20 text-green-400" :
-                                                            article.status === "draft" ? "bg-gray-700 text-gray-400" :
-                                                                "bg-amber-500/20 text-amber-400"
+                                                        article.status === "draft" ? "bg-gray-700 text-gray-400" :
+                                                            "bg-amber-500/20 text-amber-400"
                                                         }`}>
                                                         {article.status}
                                                     </span>
@@ -420,8 +417,8 @@ export default function AdminDashboard() {
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className={`px-2 py-1 rounded-full text-xs ${user.plan === "Visionary" ? "bg-amber-500/20 text-amber-400" :
-                                                                user.plan === "Explorer" ? "bg-blue-500/20 text-blue-400" :
-                                                                    "bg-gray-700 text-gray-400"
+                                                            user.plan === "Explorer" ? "bg-blue-500/20 text-blue-400" :
+                                                                "bg-gray-700 text-gray-400"
                                                             }`}>
                                                             {user.plan}
                                                         </span>
@@ -496,8 +493,8 @@ export default function AdminDashboard() {
                                                         {article.category}
                                                     </span>
                                                     <span className={`px-2 py-0.5 rounded-full text-xs ${article.status === "published" ? "bg-green-500/20 text-green-400" :
-                                                            article.status === "draft" ? "bg-gray-700 text-gray-400" :
-                                                                "bg-amber-500/20 text-amber-400"
+                                                        article.status === "draft" ? "bg-gray-700 text-gray-400" :
+                                                            "bg-amber-500/20 text-amber-400"
                                                         }`}>
                                                         {article.status}
                                                     </span>

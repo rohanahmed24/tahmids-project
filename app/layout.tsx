@@ -30,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${fraunces.variable} ${merriweatherSans.variable} antialiased bg-base text-main transition-colors duration-300`}
       >
         <ThemeProvider

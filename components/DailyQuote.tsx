@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export function DailyQuote() {
     return (
-        <section className="relative py-32 md:py-48 bg-bg-primary overflow-hidden border-y border-border-subtle">
+        <section className="relative py-12 md:py-48 bg-bg-primary overflow-hidden border-y border-border-subtle">
             {/* Texture/Grain Overlay */}
             <div className="absolute inset-0 opacity-40 mix-blend-multiply pointer-events-none"
                 style={{ backgroundImage: "url('https://transparenttextures.com/patterns/concrete-wall.png')" }}>

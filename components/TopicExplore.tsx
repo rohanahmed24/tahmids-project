@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { MotionWrapper, MotionItem } from "@/components/ui/MotionWrapper";
-import { MobileSlider } from "@/components/ui/MobileSlider";
 
 const topics = [
     { id: 1, name: "Technology", count: "120+ stories" },
@@ -13,7 +12,7 @@ const topics = [
 
 export function TopicExplore() {
     return (
-        <section className="w-full bg-bg-primary py-24 px-6 md:px-16 2xl:px-32">
+        <section className="w-full bg-bg-primary py-10 md:py-24 px-6 md:px-16 2xl:px-32">
             <div className="max-w-[1600px] mx-auto space-y-16 text-center">
                 <MotionWrapper type="slide-up">
                     <div className="space-y-4">
@@ -24,20 +23,18 @@ export function TopicExplore() {
                     </div>
                 </MotionWrapper>
 
-                {/* Mobile: Draggable Slider */}
-                <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={6000} cardWidth={120} gap={12}>
-                        {topics.map((topic) => (
-                            <Link
-                                key={topic.id}
-                                href="/stories"
-                                className="h-[80px] flex flex-col items-center justify-center gap-1 bg-bg-secondary border border-border-subtle rounded-xl p-3"
-                            >
-                                <span className="text-base font-sans font-bold text-text-primary">{topic.name}</span>
-                                <span className="text-[10px] font-bold tracking-widest text-text-muted uppercase">{topic.count}</span>
-                            </Link>
-                        ))}
-                    </MobileSlider>
+                {/* Mobile: 2-Column Grid */}
+                <div className="md:hidden grid grid-cols-2 gap-3">
+                    {topics.map((topic) => (
+                        <Link
+                            key={topic.id}
+                            href="/stories"
+                            className="h-[80px] flex flex-col items-center justify-center gap-1 bg-bg-secondary border border-border-subtle rounded-xl p-3 active:scale-95 transition-transform"
+                        >
+                            <span className="text-base font-sans font-bold text-text-primary">{topic.name}</span>
+                            <span className="text-[10px] font-bold tracking-widest text-text-muted uppercase">{topic.count}</span>
+                        </Link>
+                    ))}
                 </div>
 
                 {/* Desktop: Circular Layout */}
