@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, animate } from "framer-motion";
+import { motion, useMotionValue, animate } from "framer-motion";
 import { useRef, useEffect, useState, ReactNode } from "react";
 
 interface MobileSliderProps {
@@ -28,8 +28,6 @@ export function MobileSlider({
     const [isPaused, setIsPaused] = useState(false);
 
     const x = useMotionValue(0);
-    // Smoother spring with lower stiffness and higher damping
-    const springX = useSpring(x, { stiffness: 100, damping: 25, mass: 0.5 });
 
     const totalWidth = children.length * (cardWidth + gap) - gap;
     const maxDrag = Math.min(0, -(totalWidth - containerWidth + 24)); // 24px padding
@@ -68,7 +66,7 @@ export function MobileSlider({
     return (
         <div
             ref={containerRef}
-            className={`relative overflow-hidden touch-pan-y ${className}`}
+            className={`relative overflow-hidden touch-none ${className}`}
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
             onTouchStart={() => setIsPaused(true)}
@@ -76,15 +74,18 @@ export function MobileSlider({
         >
             <motion.div
                 className="flex cursor-grab active:cursor-grabbing"
-                style={{ x: marquee ? x : springX, gap }}
+                style={{ x, gap }}
                 drag={!marquee ? "x" : false}
                 dragConstraints={{ left: maxDrag, right: 0 }}
-                dragElastic={0.05}
+                dragElastic={0.15}
+                dragMomentum={true}
                 dragTransition={{
-                    bounceStiffness: 100,
-                    bounceDamping: 20,
-                    power: 0.3,
-                    timeConstant: 200
+                    power: 0.2,
+                    timeConstant: 300,
+                    modifyTarget: (target) => {
+                        // Snap to bounds
+                        return Math.max(maxDrag, Math.min(0, target));
+                    }
                 }}
             >
                 {displayChildren.map((child, index) => (
