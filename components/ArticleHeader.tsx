@@ -27,8 +27,8 @@ export function ArticleHeader({
         <>
             {/* Mobile Layout - Image on top, content below */}
             <header className="md:hidden relative w-full">
-                {/* Hero Image - 4:5 aspect ratio on mobile */}
-                <div className="relative w-full aspect-[4/5] overflow-hidden">
+                {/* Hero Image - 55% screen height on mobile */}
+                <div className="relative w-full h-[55svh] overflow-hidden">
                     <Image
                         src={Assets.imgArticleHero}
                         alt="Article Cover"
