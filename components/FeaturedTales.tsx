@@ -2,108 +2,157 @@
 
 import Image from "next/image";
 import { Assets } from "@/lib/assets";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, useMotionValue, animate, PanInfo } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useState, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DecorativeBackgrounds } from "@/components/ui/DecorativeBackgrounds";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 
 const breakingNews = [
-    { id: "01", category: "Technology", title: "The quiet revolution of slow interfaces", img: Assets.imgPlaceholderImage1, slug: "slow-interfaces" },
-    { id: "02", category: "Culture", title: "Why we need less information, not more", img: Assets.imgPlaceholderImage2, slug: "less-information" },
-    { id: "03", category: "Philosophy", title: "Building a digital garden for the mind", img: Assets.imgPlaceholderImage3, slug: "digital-garden" },
-    { id: "04", category: "Future", title: "Life on Mars: A Reality?", img: Assets.imgPlaceholderImage4, slug: "slow-interfaces" },
+    { id: "01", category: "History", title: "The Rise of Hitler: How a Failed Artist Became a Dictator", img: Assets.imgPlaceholderImage1, slug: "slow-interfaces", author: "John Doe", date: "1 week ago" },
+    { id: "02", category: "Mystery", title: "The Amityville Horror: The Terrifying True Story Behind", img: Assets.imgPlaceholderImage2, slug: "less-information", author: "Jane Smith", date: "2 days ago" },
+    { id: "03", category: "Philosophy", title: "Building a digital garden for the mind", img: Assets.imgPlaceholderImage3, slug: "digital-garden", author: "Mike Johnson", date: "3 days ago" },
+    { id: "04", category: "Future", title: "Life on Mars: A Reality Check", img: Assets.imgPlaceholderImage4, slug: "slow-interfaces", author: "Sarah Lee", date: "5 days ago" },
 ];
 
 export function FeaturedTales() {
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [currentPage, setCurrentPage] = useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const x = useMotionValue(0);
+    const [containerWidth, setContainerWidth] = useState(0);
 
-    const nextSlide = useCallback(() => {
-        setCurrentIndex((prev) => (prev + 1) % breakingNews.length);
+    const cardsPerPage = 2;
+    const gap = 12;
+    const totalPages = Math.ceil(breakingNews.length / cardsPerPage);
+
+    useEffect(() => {
+        if (containerRef.current) {
+            setContainerWidth(containerRef.current.offsetWidth);
+        }
+        const handleResize = () => {
+            if (containerRef.current) {
+                setContainerWidth(containerRef.current.offsetWidth);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const prevSlide = useCallback(() => {
-        setCurrentIndex((prev) => (prev - 1 + breakingNews.length) % breakingNews.length);
-    }, []);
+    const cardWidth = containerWidth > 0 ? (containerWidth - gap) / 2 : 150;
+    const slideWidth = containerWidth;
+    const maxDrag = -slideWidth * (totalPages - 1);
 
-    const currentItem = breakingNews[currentIndex];
+    const snapToPage = (page: number) => {
+        const targetX = -page * slideWidth;
+        animate(x, targetX, { type: "spring", stiffness: 300, damping: 30 });
+        setCurrentPage(page);
+    };
+
+    const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+        const offset = info.offset.x;
+        const velocity = info.velocity.x;
+        const threshold = slideWidth / 4;
+
+        let newPage = currentPage;
+        if (offset < -threshold || velocity < -500) {
+            newPage = Math.min(currentPage + 1, totalPages - 1);
+        } else if (offset > threshold || velocity > 500) {
+            newPage = Math.max(currentPage - 1, 0);
+        }
+        snapToPage(newPage);
+    };
+
+    const nextPage = () => snapToPage(Math.min(currentPage + 1, totalPages - 1));
+    const prevPage = () => snapToPage(Math.max(currentPage - 1, 0));
 
     return (
-        <section className="relative w-full py-6 md:py-24 bg-bg-primary overflow-hidden">
+        <section className="relative w-full py-4 md:py-24 bg-bg-primary overflow-hidden">
             <DecorativeBackgrounds />
 
-            <div className="max-w-[1800px] mx-auto px-6 md:px-12 relative z-10">
-                {/* Section Header - Compact on mobile */}
-                <div className="flex justify-between items-center mb-4 md:mb-16 border-b border-border-subtle pb-3 md:pb-6">
-                    <h2 className="text-xl md:text-6xl font-serif font-medium tracking-tight text-text-primary">
-                        Trending <span className="italic font-light opacity-60">Now</span>
+            <div className="max-w-[1800px] mx-auto px-4 md:px-12 relative z-10">
+                {/* Section Header */}
+                <div className="flex justify-between items-center mb-3 md:mb-16">
+                    <h2 className="text-lg md:text-6xl font-serif font-medium tracking-tight text-text-primary">
+                        Latest <span className="italic font-light opacity-60">Articles</span>
                     </h2>
-                    <Link href="/stories" className="group flex items-center gap-1 text-xs md:text-sm font-bold uppercase tracking-widest text-text-primary hover:opacity-50 transition-opacity">
-                        View All
-                        <ArrowRight className="w-3 h-3 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
                 </div>
 
-                {/* Mobile: Single Card Slider with Arrows and Pagination */}
-                <div className="md:hidden relative">
-                    {/* Slide Content */}
-                    <div className="relative overflow-hidden rounded-xl">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={currentIndex}
-                                initial={{ opacity: 0, x: 50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -50 }}
-                                transition={{ duration: 0.3 }}
-                            >
-                                <Link href={`/article/${currentItem.slug}`} className="block">
-                                    <div className="relative aspect-[16/9] overflow-hidden rounded-xl">
-                                        <span className="absolute top-2 left-2 text-xl font-serif text-white z-20 opacity-80 drop-shadow-lg">{currentItem.id}</span>
+                {/* Mobile: 2 Cards Side by Side Draggable Slider */}
+                <div className="md:hidden relative" ref={containerRef}>
+                    <div className="overflow-hidden">
+                        <motion.div
+                            className="flex"
+                            style={{ x, gap: `${gap}px` }}
+                            drag="x"
+                            dragConstraints={{ left: maxDrag, right: 0 }}
+                            dragElastic={0.1}
+                            onDragEnd={handleDragEnd}
+                        >
+                            {breakingNews.map((item) => (
+                                <Link
+                                    key={item.id}
+                                    href={`/article/${item.slug}`}
+                                    className="flex-shrink-0"
+                                    style={{ width: cardWidth }}
+                                >
+                                    <div className="relative aspect-[3/4] overflow-hidden rounded-lg mb-2">
+                                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-amber-600/90 text-[8px] uppercase font-bold tracking-wider text-white rounded z-20">
+                                            {item.category}
+                                        </span>
                                         <Image
-                                            src={currentItem.img}
+                                            src={item.img}
                                             fill
-                                            alt={currentItem.title}
+                                            alt={item.title}
                                             className="object-cover"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                        <div className="absolute bottom-2 left-2 right-2 z-10">
-                                            <span className="text-[9px] uppercase font-bold tracking-widest text-white/80">{currentItem.category}</span>
-                                            <h3 className="text-sm font-serif leading-snug text-white line-clamp-2">{currentItem.title}</h3>
-                                        </div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                                    </div>
+                                    <h3 className="text-xs font-serif leading-tight text-text-primary line-clamp-3 mb-1">
+                                        {item.title}
+                                    </h3>
+                                    <div className="flex items-center gap-1 text-[9px] text-text-muted">
+                                        <span className="text-accent">●</span>
+                                        <span>{item.author}</span>
+                                        <span>·</span>
+                                        <span>{item.date}</span>
                                     </div>
                                 </Link>
-                            </motion.div>
-                        </AnimatePresence>
+                            ))}
+                        </motion.div>
                     </div>
 
-                    {/* Navigation Arrows - Larger for visibility */}
-                    <button
-                        onClick={prevSlide}
-                        className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center text-white z-20"
-                        aria-label="Previous"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <button
-                        onClick={nextSlide}
-                        className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center text-white z-20"
-                        aria-label="Next"
-                    >
-                        <ChevronRight className="w-5 h-5" />
-                    </button>
+                    {/* Navigation Arrows */}
+                    {currentPage > 0 && (
+                        <button
+                            onClick={prevPage}
+                            className="absolute left-0 top-[35%] -translate-y-1/2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white z-20"
+                            aria-label="Previous"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                    )}
+                    {currentPage < totalPages - 1 && (
+                        <button
+                            onClick={nextPage}
+                            className="absolute right-0 top-[35%] -translate-y-1/2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white z-20"
+                            aria-label="Next"
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
+                    )}
 
                     {/* Pagination Dots */}
                     <div className="flex justify-center gap-1.5 mt-3">
-                        {breakingNews.map((_, index) => (
+                        {Array.from({ length: totalPages }).map((_, index) => (
                             <button
                                 key={index}
-                                onClick={() => setCurrentIndex(index)}
-                                className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
-                                    ? "bg-accent w-4"
-                                    : "bg-text-muted/30 hover:bg-text-muted/50"
+                                onClick={() => snapToPage(index)}
+                                className={`h-1.5 rounded-full transition-all ${index === currentPage
+                                        ? "bg-accent w-4"
+                                        : "bg-text-muted/30 w-1.5 hover:bg-text-muted/50"
                                     }`}
-                                aria-label={`Go to slide ${index + 1}`}
+                                aria-label={`Go to page ${index + 1}`}
                             />
                         ))}
                     </div>
@@ -145,4 +194,3 @@ export function FeaturedTales() {
         </section>
     );
 }
-
