@@ -128,7 +128,7 @@ export function HeroSlider() {
 
     return (
         <section
-            className="relative w-full h-[50svh] md:h-screen overflow-hidden bg-black touch-none md:touch-auto mt-14 md:mt-0"
+            className="relative w-full h-[40svh] md:h-screen overflow-hidden bg-black touch-none md:touch-auto mt-14 md:mt-0"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
         >
@@ -171,12 +171,12 @@ export function HeroSlider() {
                 onDragEnd={handleDragEnd}
             />
 
-            {/* Hot Topics Badge */}
+            {/* Hot Topics Badge - Bottom on mobile, top on desktop */}
             <motion.div
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="absolute top-16 md:top-32 left-4 md:left-12 z-20"
+                className="absolute bottom-20 md:bottom-auto md:top-32 left-4 md:left-12 z-20"
             >
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 md:px-4 md:py-2">
                     <Flame className="w-3 h-3 md:w-4 md:h-4 text-orange-400 animate-pulse" />
