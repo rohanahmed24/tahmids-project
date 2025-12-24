@@ -71,11 +71,11 @@ export function MediaOptions({ slug, variant = "default", className = "" }: Medi
                         onClick={(e) => handleClick(e, option.href)}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/20 flex items-center justify-center text-white/50 hover:text-white border border-white/10 transition-all"
+                        className="w-8 h-8 rounded-full bg-bg-secondary hover:bg-border-subtle flex items-center justify-center text-text-primary border border-border-subtle transition-all !p-0"
                         aria-label={option.label}
                         title={option.label}
                     >
-                        <option.icon className="w-3.5 h-3.5" />
+                        <option.icon className="w-5 h-5" strokeWidth={2.5} />
                     </motion.button>
                 ))}
             </div>
