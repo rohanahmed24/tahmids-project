@@ -79,14 +79,14 @@ export function HeroSlider() {
     // Handle drag/swipe gestures
     const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         setIsDragging(false);
-        const threshold = 50;
+        const threshold = 30; // Reduced threshold for easier swiping
         const velocity = info.velocity.x;
         const offset = info.offset.x;
 
         // Determine swipe direction based on velocity or offset
-        if (velocity < -500 || offset < -threshold) {
+        if (velocity < -300 || offset < -threshold) {
             nextSlide();
-        } else if (velocity > 500 || offset > threshold) {
+        } else if (velocity > 300 || offset > threshold) {
             prevSlide();
         }
     };
@@ -162,7 +162,7 @@ export function HeroSlider() {
                 className="absolute inset-0 z-[5] cursor-grab active:cursor-grabbing md:hidden"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.3}
+                dragElastic={0.5}
                 dragMomentum={false}
                 onDragStart={() => {
                     setIsDragging(true);
@@ -186,9 +186,9 @@ export function HeroSlider() {
                 </div>
             </motion.div>
 
-            {/* Main Content */}
-            <div className="absolute inset-0 flex items-end z-10">
-                <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pb-14 md:pb-32">
+            {/* Main Content - Top on mobile, bottom on desktop */}
+            <div className="absolute inset-0 flex items-start md:items-end z-10">
+                <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pt-20 md:pt-0 md:pb-32">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentIndex}
@@ -219,33 +219,34 @@ export function HeroSlider() {
                                 {currentTopic.subtitle}
                             </p>
 
-                            {/* CTA Buttons - Simplified on mobile */}
-                            <div className="hidden md:block">
-                                <MediaOptions slug={currentTopic.slug} variant="overlay" />
+                            {/* CTA Buttons - Compact on mobile, full on desktop */}
+                            <div className="mt-4 md:mt-0">
+                                <MediaOptions slug={currentTopic.slug} variant="compact" className="md:hidden" />
+                                <MediaOptions slug={currentTopic.slug} variant="overlay" className="hidden md:flex" />
                             </div>
                         </motion.div>
                     </AnimatePresence>
                 </div>
             </div>
 
-            {/* Navigation Arrows - Hidden on mobile (use swipe instead) */}
-            <div className="hidden md:block absolute bottom-1/2 translate-y-1/2 left-4 md:left-8 z-20">
+            {/* Navigation Arrows - Smaller on mobile */}
+            <div className="absolute bottom-1/2 translate-y-1/2 left-2 md:left-8 z-20">
                 <motion.button
                     whileHover={{ scale: 1.1, x: -5 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={prevSlide}
-                    className="w-12 h-12 md:w-14 md:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                    className="w-10 h-10 md:w-14 md:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
                     aria-label="Previous slide"
                 >
                     <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
                 </motion.button>
             </div>
-            <div className="hidden md:block absolute bottom-1/2 translate-y-1/2 right-4 md:right-8 z-20">
+            <div className="absolute bottom-1/2 translate-y-1/2 right-2 md:right-8 z-20">
                 <motion.button
                     whileHover={{ scale: 1.1, x: 5 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={nextSlide}
-                    className="w-12 h-12 md:w-14 md:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                    className="w-10 h-10 md:w-14 md:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
                     aria-label="Next slide"
                 >
                     <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />

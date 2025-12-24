@@ -94,14 +94,18 @@ export function MobileSlider({
                 style={{ x, gap }}
                 drag={!marquee ? "x" : false}
                 dragConstraints={{ left: maxDrag, right: 0 }}
-                dragElastic={0.15}
+                dragElastic={0.1}
                 dragMomentum={true}
                 dragTransition={{
-                    power: 0.2,
-                    timeConstant: 300,
+                    power: 0.3,
+                    timeConstant: 400,
+                    bounceDamping: 20,
+                    bounceStiffness: 300,
                     modifyTarget: (target) => {
-                        // Snap to bounds
-                        return Math.max(maxDrag, Math.min(0, target));
+                        // Snap to card positions for smoother feel
+                        const snapInterval = cardWidth + gap;
+                        const snappedTarget = Math.round(target / snapInterval) * snapInterval;
+                        return Math.max(maxDrag, Math.min(0, snappedTarget));
                     }
                 }}
             >
