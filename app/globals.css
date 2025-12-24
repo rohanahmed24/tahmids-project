@@ -137,7 +137,6 @@
 
 /* Global Reset & Base Styles */
 html {
-  scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
   /* Remove blue tap highlight on mobile */
 }

@@ -33,6 +33,7 @@ export function ArticleHeader({
                         src={Assets.imgArticleHero}
                         alt="Article Cover"
                         fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover"
                         priority
                     />
@@ -68,7 +69,7 @@ export function ArticleHeader({
                 <div className="bg-bg-primary px-4 py-1">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-bg-tertiary overflow-hidden relative border-2 border-border-subtle">
-                            <Image src={Assets.imgAuthorSarah} alt="Author" fill className="object-cover" />
+                            <Image src={Assets.imgAuthorSarah} alt="Author" fill sizes="40px" className="object-cover" />
                         </div>
                         <div>
                             <span className="block text-sm font-medium text-text-primary">by {author}</span>
@@ -89,6 +90,7 @@ export function ArticleHeader({
                             src={Assets.imgArticleHero}
                             alt="Article Cover"
                             fill
+                            sizes="100vw"
                             className="object-cover"
                             priority
                         />
@@ -126,7 +128,7 @@ export function ArticleHeader({
                     >
                         <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm pr-6 pl-2 py-2 rounded-full border border-white/10">
                             <div className="w-10 h-10 rounded-full bg-white/20 overflow-hidden relative">
-                                <Image src={Assets.imgAuthorSarah} alt="Author" fill className="object-cover" />
+                                <Image src={Assets.imgAuthorSarah} alt="Author" fill sizes="40px" className="object-cover" />
                             </div>
                             <div className="text-left">
                                 <span className="block font-bold uppercase tracking-wide text-xs">{author}</span>

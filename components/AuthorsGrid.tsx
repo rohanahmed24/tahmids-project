@@ -35,7 +35,7 @@ export function AuthorsGrid() {
                                 className="flex flex-col items-center text-center space-y-3 group w-full"
                             >
                                 <div className="w-24 h-24 rounded-full overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-500">
-                                    <Image src={author.img} alt={author.name} fill className="object-cover" />
+                                    <Image src={author.img} alt={author.name} fill sizes="96px" className="object-cover" />
                                 </div>
                                 <div>
                                     <h3 className="text-base font-serif font-bold text-text-primary">{author.name}</h3>
@@ -54,7 +54,7 @@ export function AuthorsGrid() {
                     {authors.map((author) => (
                         <div key={author.id} className="flex flex-col items-center text-center space-y-4 group">
                             <div className="w-32 h-32 rounded-full overflow-hidden relative grayscale group-hover:grayscale-0 transition-all duration-500">
-                                <Image src={author.img} alt={author.name} fill className="object-cover" />
+                                <Image src={author.img} alt={author.name} fill sizes="128px" className="object-cover" />
                             </div>
                             <div>
                                 <h3 className="text-xl font-serif font-bold text-text-primary">{author.name}</h3>

@@ -10,7 +10,7 @@ export function ArticleSidebar() {
             <div className="bg-[#f4f1ea] dark:bg-[#1a1a1a] p-8 rounded-none border border-black/5 dark:border-white/5 space-y-6">
                 <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden relative">
-                        <Image src={Assets.imgAuthorSarah} alt="Author" fill className="object-cover" />
+                        <Image src={Assets.imgAuthorSarah} alt="Author" fill sizes="64px" className="object-cover" />
                     </div>
                     <div>
                         <h3 className="font-serif text-xl font-bold leading-none">Sarah Jenkins</h3>
@@ -44,6 +44,7 @@ export function ArticleSidebar() {
                                     src={i === 1 ? Assets.imgStoryCulture : i === 2 ? Assets.imgStoryScience : Assets.imgStoryArt}
                                     alt="Related"
                                     fill
+                                    sizes="(max-width: 768px) 100vw, 300px"
                                     className="object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0"
                                 />
                             </div>

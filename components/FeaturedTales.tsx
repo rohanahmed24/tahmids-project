@@ -103,6 +103,7 @@ export function FeaturedTales() {
                                         <Image
                                             src={item.img}
                                             fill
+                                            sizes="(max-width: 768px) 50vw, 25vw"
                                             alt={item.title}
                                             className="object-cover"
                                         />
@@ -149,8 +150,8 @@ export function FeaturedTales() {
                                 key={index}
                                 onClick={() => snapToPage(index)}
                                 className={`h-1.5 rounded-full transition-all ${index === currentPage
-                                        ? "bg-accent w-4"
-                                        : "bg-text-muted/30 w-1.5 hover:bg-text-muted/50"
+                                    ? "bg-accent w-4"
+                                    : "bg-text-muted/30 w-1.5 hover:bg-text-muted/50"
                                     }`}
                                 aria-label={`Go to page ${index + 1}`}
                             />
@@ -175,6 +176,7 @@ export function FeaturedTales() {
                                     <Image
                                         src={item.img}
                                         fill
+                                        sizes="400px"
                                         alt={item.title}
                                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     />

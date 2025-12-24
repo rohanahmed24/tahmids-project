@@ -51,6 +51,7 @@ export function ArticleGrid() {
                                         src={article.img}
                                         alt={article.title}
                                         fill
+                                        sizes="(max-width: 768px) 85vw, 33vw"
                                         className="object-cover"
                                     />
                                 </div>
@@ -93,6 +94,7 @@ export function ArticleGrid() {
                                     src={article.img}
                                     alt={article.title}
                                     fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
                             </div>
@@ -118,7 +120,7 @@ export function ArticleGrid() {
                                 <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-bg-secondary relative overflow-hidden">
-                                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill className="object-cover" />
+                                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill sizes="32px" className="object-cover" />
                                         </div>
                                         <span className="text-xs font-sans font-medium text-text-secondary">{article.author}</span>
                                     </div>
