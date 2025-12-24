@@ -128,7 +128,7 @@ export function HeroSlider() {
 
     return (
         <section
-            className="relative w-full h-[55svh] md:h-screen overflow-hidden bg-black touch-none md:touch-auto mt-14 md:mt-0"
+            className="relative w-full h-[55svh] md:h-screen overflow-hidden bg-black mt-14 md:mt-0"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
         >
@@ -157,12 +157,12 @@ export function HeroSlider() {
                 </motion.div>
             </AnimatePresence>
 
-            {/* Drag/Swipe Layer - Mobile touch handling */}
+            {/* Drag/Swipe Layer - Mobile touch handling - MUST be above all content */}
             <motion.div
-                className="absolute inset-0 z-[5] cursor-grab active:cursor-grabbing md:hidden"
+                className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing md:hidden touch-pan-y"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.5}
+                dragElastic={0.3}
                 dragMomentum={false}
                 onDragStart={() => {
                     setIsDragging(true);
