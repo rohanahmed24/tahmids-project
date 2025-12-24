@@ -304,7 +304,7 @@ export default function AdminDashboard() {
                                             {recentUsers.map((user) => (
                                                 <div key={user.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-800 transition-colors">
                                                     <div className="relative w-10 h-10 rounded-full overflow-hidden">
-                                                        <Image src={user.avatar} alt={user.name} fill className="object-cover" />
+                                                        <Image src={user.avatar} alt={user.name} fill sizes="40px" className="object-cover" />
                                                     </div>
                                                     <div className="flex-1">
                                                         <p className="font-medium text-sm">{user.name}</p>
@@ -341,7 +341,7 @@ export default function AdminDashboard() {
                                             {recentArticles.map((article) => (
                                                 <div key={article.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-800 transition-colors">
                                                     <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                                                        <Image src={article.img} alt={article.title} fill className="object-cover" />
+                                                        <Image src={article.img} alt={article.title} fill sizes="48px" className="object-cover" />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-medium text-sm truncate">{article.title}</p>
@@ -407,7 +407,7 @@ export default function AdminDashboard() {
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
                                                             <div className="relative w-10 h-10 rounded-full overflow-hidden">
-                                                                <Image src={user.avatar} alt={user.name} fill className="object-cover" />
+                                                                <Image src={user.avatar} alt={user.name} fill sizes="40px" className="object-cover" />
                                                             </div>
                                                             <div>
                                                                 <p className="font-medium text-sm">{user.name}</p>
@@ -485,7 +485,7 @@ export default function AdminDashboard() {
                                             className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center gap-4"
                                         >
                                             <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                                                <Image src={article.img} alt={article.title} fill className="object-cover" />
+                                                <Image src={article.img} alt={article.title} fill sizes="80px" className="object-cover" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">

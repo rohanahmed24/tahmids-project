@@ -22,7 +22,7 @@ export default function AboutPage() {
                         Wisdomia is a digital sanctuary for stories that matter. We curate wisdom, design, and culture for the modern thinker, believing that in an age of noise, clarity is the ultimate luxury.
                     </p>
                     <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl">
-                        <Image src={Assets.imgAboutOffice} alt="Our Studio" fill className="object-cover" />
+                        <Image src={Assets.imgAboutOffice} alt="Our Studio" fill sizes="(max-width: 768px) 100vw, 80vw" className="object-cover" />
                     </div>
                 </MotionWrapper>
             </section>

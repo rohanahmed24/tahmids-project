@@ -22,7 +22,7 @@ export default function ContactPage() {
 
             {/* 1.5 Conceptual Image */}
             <section className="w-full h-[400px] relative">
-                <Image src={Assets.imgContactStationery} alt="The Art of Correspondence" fill className="object-cover" />
+                <Image src={Assets.imgContactStationery} alt="The Art of Correspondence" fill sizes="100vw" className="object-cover" />
                 <div className="absolute inset-0 bg-black/20" />
             </section>
 

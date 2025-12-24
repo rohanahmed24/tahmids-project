@@ -30,6 +30,7 @@ export default function AdvertisePage() {
                             src={Assets.imgAdvertiseCollaboration}
                             alt="Strategic Collaboration"
                             fill
+                            sizes="(max-width: 768px) 100vw, 80vw"
                             className="object-cover"
                             priority
                         />

@@ -101,6 +101,7 @@ export default function DashboardPage() {
                                 src={userData.avatar}
                                 alt={userData.name}
                                 fill
+                                sizes="64px"
                                 className="object-cover"
                             />
                         </div>
@@ -212,7 +213,7 @@ export default function DashboardPage() {
                                                     className="flex items-center gap-4 p-3 rounded-xl hover:bg-bg-primary transition-colors group"
                                                 >
                                                     <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                                                        <Image src={item.img} alt={item.title} fill className="object-cover" />
+                                                        <Image src={item.img} alt={item.title} fill sizes="48px" className="object-cover" />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <h3 className="font-medium text-sm truncate group-hover:text-accent transition-colors">
@@ -264,7 +265,7 @@ export default function DashboardPage() {
                                                     className="flex items-center gap-4 p-3 rounded-xl hover:bg-bg-primary transition-colors group"
                                                 >
                                                     <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                                                        <Image src={item.img} alt={item.title} fill className="object-cover" />
+                                                        <Image src={item.img} alt={item.title} fill sizes="48px" className="object-cover" />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <h3 className="font-medium text-sm truncate group-hover:text-accent transition-colors">
@@ -308,7 +309,7 @@ export default function DashboardPage() {
                                             className="flex items-center gap-4 p-4 bg-bg-secondary border border-border-subtle rounded-2xl hover:border-accent transition-colors group"
                                         >
                                             <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                                                <Image src={item.img} alt={item.title} fill className="object-cover" />
+                                                <Image src={item.img} alt={item.title} fill sizes="80px" className="object-cover" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <span className="text-xs font-bold uppercase tracking-widest text-accent">
@@ -364,7 +365,7 @@ export default function DashboardPage() {
                                             className="block bg-bg-secondary border border-border-subtle rounded-2xl overflow-hidden hover:border-accent transition-colors group"
                                         >
                                             <div className="relative w-full aspect-video">
-                                                <Image src={item.img} alt={item.title} fill className="object-cover" />
+                                                <Image src={item.img} alt={item.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
                                                 <button
                                                     onClick={(e) => {
                                                         e.preventDefault();

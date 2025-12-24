@@ -32,6 +32,7 @@ export function Hero() {
                         src={Assets.imgPlaceholderImage7}
                         alt="Editorial Hero"
                         fill
+                        sizes="(max-width: 768px) 100vw"
                         className="object-cover"
                         priority
                     />
@@ -85,6 +86,7 @@ export function Hero() {
                             src={Assets.imgPlaceholderImage7}
                             alt="Editorial Hero"
                             fill
+                            sizes="50vw"
                             className="object-cover"
                             priority
                         />
@@ -103,6 +105,7 @@ export function Hero() {
                                 src={Assets.imgPlaceholderImage5}
                                 alt="Secondary Feature"
                                 fill
+                                sizes="33vw"
                                 className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
                             />
                         </div>

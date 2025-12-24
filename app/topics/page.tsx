@@ -33,6 +33,7 @@ export default function TopicsPage() {
                                 src={Assets.imgPlaceholderImage7}
                                 alt="Featured Collection"
                                 fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
                                 className="object-cover"
                             />
                         </div>

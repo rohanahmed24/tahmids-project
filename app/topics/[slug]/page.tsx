@@ -82,6 +82,7 @@ export default function TopicPage() {
                         src={topic.heroImage}
                         alt={topic.title}
                         fill
+                        sizes="100vw"
                         className="object-cover opacity-20"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-base/50 via-base/80 to-base" />

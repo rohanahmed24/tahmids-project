@@ -148,6 +148,7 @@ export function HeroSlider() {
                         src={currentTopic.image}
                         alt={currentTopic.title}
                         fill
+                        sizes="100vw"
                         className="object-cover"
                         priority
                     />
@@ -312,6 +313,7 @@ export function HeroSlider() {
                             src={topic.image}
                             alt={topic.title}
                             fill
+                            sizes="120px"
                             className="object-cover"
                         />
                     </motion.button>

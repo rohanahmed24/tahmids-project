@@ -54,6 +54,7 @@ export function StoriesGrid() {
                                 <Image
                                     src={story.img}
                                     fill
+                                    sizes="(max-width: 768px) 85vw, 25vw"
                                     alt={story.title}
                                     className="object-cover"
                                 />
@@ -111,6 +112,7 @@ export function StoriesGrid() {
                                 <Image
                                     src={story.img}
                                     fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                                     alt={story.title}
                                     className="object-cover transition-transform duration-[1s] group-hover:scale-110"
                                 />
