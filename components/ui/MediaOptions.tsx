@@ -6,7 +6,7 @@ import { BookOpen, Headphones, Play } from "lucide-react";
 
 interface MediaOptionsProps {
     slug: string;
-    variant?: "default" | "compact" | "overlay" | "minimal";
+    variant?: "default" | "compact" | "overlay" | "minimal" | "prominent";
     className?: string;
 }
 
@@ -40,8 +40,8 @@ export function MediaOptions({ slug, variant = "default", className = "" }: Medi
         router.push(href);
     };
 
-    // Compact/Minimal variant - PROMINENT icons with labels for mobile
-    if (variant === "minimal" || variant === "compact") {
+    // Prominent variant - Labeled icons for mobile hero/sliders
+    if (variant === "prominent") {
         return (
             <div className={`flex items-center gap-3 ${className}`}>
                 {options.map((option) => (
@@ -55,6 +55,27 @@ export function MediaOptions({ slug, variant = "default", className = "" }: Medi
                     >
                         <option.icon className="w-4 h-4" />
                         <span>{option.label}</span>
+                    </motion.button>
+                ))}
+            </div>
+        );
+    }
+
+    // Compact/Minimal variant - Subtle icons for grid cards
+    if (variant === "minimal" || variant === "compact") {
+        return (
+            <div className={`flex items-center gap-2 ${className}`}>
+                {options.map((option) => (
+                    <motion.button
+                        key={option.id}
+                        onClick={(e) => handleClick(e, option.href)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/20 flex items-center justify-center text-white/50 hover:text-white border border-white/10 transition-all"
+                        aria-label={option.label}
+                        title={option.label}
+                    >
+                        <option.icon className="w-3.5 h-3.5" />
                     </motion.button>
                 ))}
             </div>

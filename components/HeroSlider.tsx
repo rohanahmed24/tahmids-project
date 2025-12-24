@@ -221,7 +221,7 @@ export function HeroSlider() {
 
                             {/* CTA Buttons - Compact on mobile, full on desktop */}
                             <div className="mt-4 md:mt-0">
-                                <MediaOptions slug={currentTopic.slug} variant="compact" className="md:hidden" />
+                                <MediaOptions slug={currentTopic.slug} variant="prominent" className="md:hidden" />
                                 <MediaOptions slug={currentTopic.slug} variant="overlay" className="hidden md:flex" />
                             </div>
                         </motion.div>
