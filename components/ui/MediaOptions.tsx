@@ -40,21 +40,21 @@ export function MediaOptions({ slug, variant = "default", className = "" }: Medi
         router.push(href);
     };
 
-    // Compact/Minimal variant - subtle icons with proper mobile touch targets
+    // Compact/Minimal variant - PROMINENT icons with labels for mobile
     if (variant === "minimal" || variant === "compact") {
         return (
-            <div className={`flex items-center gap-2 ${className}`}>
+            <div className={`flex items-center gap-3 ${className}`}>
                 {options.map((option) => (
                     <motion.button
                         key={option.id}
                         onClick={(e) => handleClick(e, option.href)}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white transition-all"
-                        title={option.label}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white font-medium text-xs transition-all"
                         aria-label={option.label}
                     >
                         <option.icon className="w-4 h-4" />
+                        <span>{option.label}</span>
                     </motion.button>
                 ))}
             </div>
