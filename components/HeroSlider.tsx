@@ -128,7 +128,7 @@ export function HeroSlider() {
 
     return (
         <section
-            className="relative w-full h-[40svh] md:h-screen overflow-hidden bg-black touch-none md:touch-auto mt-14 md:mt-0"
+            className="relative w-full h-[55svh] md:h-screen overflow-hidden bg-black touch-none md:touch-auto mt-14 md:mt-0"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
         >
@@ -171,24 +171,24 @@ export function HeroSlider() {
                 onDragEnd={handleDragEnd}
             />
 
-            {/* Hot Topics Badge - Bottom on mobile, top on desktop */}
+            {/* Hot Topics Badge - Top on mobile, top on desktop */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="absolute bottom-20 md:bottom-auto md:top-32 left-4 md:left-12 z-20"
+                className="absolute top-4 md:top-32 left-4 md:left-12 z-20"
             >
-                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5 md:px-4 md:py-2">
-                    <Flame className="w-3 h-3 md:w-4 md:h-4 text-orange-400 animate-pulse" />
+                <div className="flex items-center gap-2 bg-orange-500/80 backdrop-blur-md rounded-full px-3 py-1.5 md:px-4 md:py-2">
+                    <Flame className="w-3 h-3 md:w-4 md:h-4 text-white" />
                     <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white">
                         Hot Topics
                     </span>
                 </div>
             </motion.div>
 
-            {/* Main Content - Top on mobile, bottom on desktop */}
+            {/* Main Content - Below Hot Topics badge on mobile */}
             <div className="absolute inset-0 flex items-start md:items-end z-10">
-                <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pt-20 md:pt-0 md:pb-32">
+                <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pt-16 md:pt-0 md:pb-32">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentIndex}
@@ -204,18 +204,18 @@ export function HeroSlider() {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2 }}
-                                className="inline-block text-[10px] md:text-sm font-bold uppercase tracking-widest text-white/80 mb-2 md:mb-4"
+                                className="inline-block text-[10px] md:text-sm font-bold uppercase tracking-widest text-white/80 mb-1 md:mb-4"
                             >
                                 {currentTopic.category}
                             </motion.span>
 
                             {/* Title */}
-                            <h1 className="text-2xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight mb-2 md:mb-4">
+                            <h1 className="text-xl md:text-6xl lg:text-7xl font-serif font-bold text-white leading-tight mb-2 md:mb-4">
                                 {currentTopic.title}
                             </h1>
 
-                            {/* Subtitle - Hidden on mobile for compactness */}
-                            <p className="hidden md:block text-lg md:text-xl text-white/70 mb-8 max-w-xl">
+                            {/* Subtitle - Show on mobile too */}
+                            <p className="text-xs md:text-xl text-white/70 mb-3 md:mb-8 max-w-xl line-clamp-2 md:line-clamp-none">
                                 {currentTopic.subtitle}
                             </p>
 
