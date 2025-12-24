@@ -9,7 +9,7 @@ export default function AdvertisePage() {
     return (
         <main className="min-h-screen bg-bg-primary transition-colors duration-300">
             {/* 1. Hero Section */}
-            <section className="pt-40 pb-20 px-6 text-center border-b border-border-subtle">
+            <section className="pt-28 pb-20 px-6 text-center border-b border-border-subtle">
                 <MotionWrapper type="slide-up">
                     <span className="text-xs font-bold tracking-[0.3em] uppercase opacity-40 text-text-primary mb-6 block">Partnerships</span>
                     <h1 className="text-5xl md:text-7xl font-serif font-medium text-text-primary tracking-tighter leading-tight mb-8">

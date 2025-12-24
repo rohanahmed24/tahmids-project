@@ -6,7 +6,7 @@ export default function PrivacyPage() {
     return (
         <main className="min-h-screen bg-base transition-colors duration-300">
             {/* Header */}
-            <div className="bg-surface pt-40 pb-20 px-6 text-center">
+            <div className="bg-surface pt-28 pb-20 px-6 text-center">
                 <MotionWrapper type="slide-up">
                     <span className="text-xs font-bold tracking-[0.3em] uppercase opacity-40 text-main mb-6 block">Legal</span>
                     <h1 className="text-5xl md:text-7xl font-serif font-medium text-main tracking-tighter leading-[0.9]">

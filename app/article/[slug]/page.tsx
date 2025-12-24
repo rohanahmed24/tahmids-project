@@ -26,7 +26,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
     return (
         <main className="min-h-screen bg-bg-primary selection:bg-bg-inverse selection:text-text-inverse">
-            <article className="pt-16 md:pt-32 pb-20">
+            <article className="pb-20">
                 <MotionWrapper type="fade-in" delay={0.1}>
                     {/* Passing title and metadata to header would be ideal, but for now we keep the layout */}
                     <ArticleHeader title={post.title} author={post.author} date={post.date} category={post.category} />

@@ -11,7 +11,7 @@ export default function AboutPage() {
     return (
         <main className="min-h-screen bg-bg-primary transition-colors duration-300">
             {/* 1. Hero Section */}
-            <section className="pt-40 pb-20 px-6 text-center border-b border-border-subtle">
+            <section className="pt-28 pb-20 px-6 text-center border-b border-border-subtle">
                 <MotionWrapper type="slide-up">
                     <span className="text-xs font-bold tracking-[0.3em] uppercase opacity-40 text-text-primary mb-6 block">Our Mission</span>
                     <h1 className="text-5xl md:text-7xl font-serif font-medium text-text-primary tracking-tighter leading-tight mb-8">
@@ -22,7 +22,7 @@ export default function AboutPage() {
                         Wisdomia is a digital sanctuary for stories that matter. We curate wisdom, design, and culture for the modern thinker, believing that in an age of noise, clarity is the ultimate luxury.
                     </p>
                     <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden shadow-2xl">
-                        <Image src={Assets.imgAboutOffice} alt="Our Studio" fill sizes="(max-width: 768px) 100vw, 80vw" className="object-cover" />
+                        <Image src={Assets.imgAboutOffice} alt="Our Studio" fill sizes="(max-width: 768px) 100vw, 80vw" className="object-cover" priority />
                     </div>
                 </MotionWrapper>
             </section>

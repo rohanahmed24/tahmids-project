@@ -35,7 +35,6 @@ export function ArticleHeader({
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover"
-                        priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
@@ -79,7 +78,7 @@ export function ArticleHeader({
             </header>
 
             {/* Desktop Layout - Original parallax hero */}
-            <header className="hidden md:flex relative w-full h-[85vh] items-end justify-center overflow-hidden pb-20">
+            <header className="hidden md:flex relative w-full h-[100vh] pt-28 items-center justify-center overflow-hidden pb-12">
                 {/* Background Image Parallax */}
                 <motion.div
                     style={{ y }}
@@ -99,18 +98,7 @@ export function ArticleHeader({
                 </motion.div>
 
                 {/* Title Content */}
-                <div className="relative z-10 max-w-5xl mx-auto px-6 text-center text-white space-y-12">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="flex justify-center gap-4"
-                    >
-                        <span className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-[0.2em] text-white">
-                            {category}
-                        </span>
-                    </motion.div>
-
+                <div className="relative z-10 max-w-5xl mx-auto px-6 text-center text-white space-y-8">
                     <motion.h1
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -121,9 +109,20 @@ export function ArticleHeader({
                     </motion.h1>
 
                     <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.4 }}
+                        className="flex justify-center gap-4"
+                    >
+                        <span className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-[0.2em] text-white">
+                            {category}
+                        </span>
+                    </motion.div>
+
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 1, delay: 0.4 }}
+                        transition={{ duration: 1, delay: 0.6 }}
                         className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-sm font-sans"
                     >
                         <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm pr-6 pl-2 py-2 rounded-full border border-white/10">

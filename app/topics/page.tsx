@@ -11,7 +11,7 @@ export default function TopicsPage() {
     return (
         <main className="min-h-screen bg-bg-primary transition-colors duration-300">
             {/* 1. Hero Section */}
-            <section className="pt-40 pb-20 px-6 text-center bg-bg-primary">
+            <section className="pt-28 pb-20 px-6 text-center bg-bg-primary">
                 <MotionWrapper type="slide-up">
                     <span className="text-xs font-bold tracking-[0.3em] uppercase opacity-40 text-text-primary mb-6 block">Discovery</span>
                     <h1 className="text-6xl md:text-8xl font-serif font-medium text-text-primary tracking-tighter leading-[0.9]">

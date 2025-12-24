@@ -7,7 +7,7 @@ export default function SignInPage() {
     return (
         <main className="min-h-screen bg-bg-primary transition-colors duration-300">
             {/* 1. Header / Hero */}
-            <section className="pt-40 pb-12 px-6 text-center">
+            <section className="pt-28 pb-12 px-6 text-center">
                 <MotionWrapper type="slide-up">
                     <h1 className="text-5xl md:text-6xl font-serif font-medium text-text-primary tracking-tighter mb-4">
                         Welcome <span className="italic font-light opacity-60">Back</span>
