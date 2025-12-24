@@ -171,12 +171,12 @@ export function HeroSlider() {
                 onDragEnd={handleDragEnd}
             />
 
-            {/* Hot Topics Badge - Top on mobile, top on desktop */}
+            {/* Hot Topics Badge - Desktop only */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="absolute top-4 md:top-32 left-4 md:left-12 z-20"
+                className="hidden md:block absolute top-32 left-12 z-20"
             >
                 <div className="flex items-center gap-2 bg-orange-500/80 backdrop-blur-md rounded-full px-3 py-1.5 md:px-4 md:py-2">
                     <Flame className="w-3 h-3 md:w-4 md:h-4 text-white" />
