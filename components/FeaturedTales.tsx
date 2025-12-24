@@ -77,20 +77,20 @@ export function FeaturedTales() {
                         </AnimatePresence>
                     </div>
 
-                    {/* Navigation Arrows */}
+                    {/* Navigation Arrows - Larger for visibility */}
                     <button
                         onClick={prevSlide}
-                        className="absolute left-1 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center text-white z-20"
+                        className="absolute left-1 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center text-white z-20"
                         aria-label="Previous"
                     >
-                        <ChevronLeft className="w-4 h-4" />
+                        <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button
                         onClick={nextSlide}
-                        className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center text-white z-20"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 backdrop-blur-sm border border-white/30 rounded-full flex items-center justify-center text-white z-20"
                         aria-label="Next"
                     >
-                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-5 h-5" />
                     </button>
 
                     {/* Pagination Dots */}
@@ -100,8 +100,8 @@ export function FeaturedTales() {
                                 key={index}
                                 onClick={() => setCurrentIndex(index)}
                                 className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
-                                        ? "bg-accent w-4"
-                                        : "bg-text-muted/30 hover:bg-text-muted/50"
+                                    ? "bg-accent w-4"
+                                    : "bg-text-muted/30 hover:bg-text-muted/50"
                                     }`}
                                 aria-label={`Go to slide ${index + 1}`}
                             />

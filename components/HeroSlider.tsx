@@ -229,16 +229,16 @@ export function HeroSlider() {
                 </div>
             </div>
 
-            {/* Navigation Arrows - Smaller on mobile */}
+            {/* Navigation Arrows - Larger on mobile for visibility */}
             <div className="absolute bottom-1/2 translate-y-1/2 left-2 md:left-8 z-20">
                 <motion.button
                     whileHover={{ scale: 1.1, x: -5 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={prevSlide}
-                    className="w-10 h-10 md:w-14 md:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                    className="w-12 h-12 md:w-14 md:h-14 bg-black/40 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-colors"
                     aria-label="Previous slide"
                 >
-                    <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+                    <ChevronLeft className="w-6 h-6 md:w-6 md:h-6" />
                 </motion.button>
             </div>
             <div className="absolute bottom-1/2 translate-y-1/2 right-2 md:right-8 z-20">
@@ -246,10 +246,10 @@ export function HeroSlider() {
                     whileHover={{ scale: 1.1, x: 5 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={nextSlide}
-                    className="w-10 h-10 md:w-14 md:h-14 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                    className="w-12 h-12 md:w-14 md:h-14 bg-black/40 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-colors"
                     aria-label="Next slide"
                 >
-                    <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+                    <ChevronRight className="w-6 h-6 md:w-6 md:h-6" />
                 </motion.button>
             </div>
 
