@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { DevToolsBlocker } from "@/components/DevToolsBlocker";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -39,6 +40,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <DevToolsBlocker />
           {children}
           <Navbar />
           <Footer />
