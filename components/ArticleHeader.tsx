@@ -49,9 +49,6 @@ export function ArticleHeader({
                         >
                             {title}
                         </motion.h1>
-                        <p className="text-sm text-white/80 leading-relaxed mb-4">
-                            {subtitle}
-                        </p>
 
                         {/* Media Options - Read, Listen, Watch */}
                         <MediaOptions slug="slow-interfaces" variant="prominent" />
