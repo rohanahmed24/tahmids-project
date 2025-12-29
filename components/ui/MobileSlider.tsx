@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, animate, useAnimation, PanInfo } from "framer-motion";
+import { motion, useMotionValue, animate, PanInfo } from "framer-motion";
 import { useRef, useEffect, useState, ReactNode, useCallback } from "react";
 
 interface MobileSliderProps {
@@ -28,7 +28,7 @@ export function MobileSlider({
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const x = useMotionValue(0);
-    const controls = useAnimation();
+
 
     // Calculate card width as percentage of container
     const cardWidth = (containerWidth * cardWidthPercent) / 100;
@@ -171,8 +171,8 @@ export function MobileSlider({
                             key={index}
                             onClick={() => scrollToIndex(index)}
                             className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
-                                    ? "bg-accent w-6"
-                                    : "bg-white/30 hover:bg-white/50"
+                                ? "bg-accent w-6"
+                                : "bg-white/30 hover:bg-white/50"
                                 }`}
                             aria-label={`Go to slide ${index + 1}`}
                         />
