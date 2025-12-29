@@ -63,6 +63,21 @@ export default function Navbar() {
                         <div className="hidden md:flex">
                             <ThemeToggle />
                         </div>
+                        {/* Language/Region Selector */}
+                        <div className="flex items-center gap-1">
+                            <button
+                                className="w-8 h-6 rounded overflow-hidden border border-white/20 hover:border-white/50 transition-all hover:scale-105"
+                                title="English"
+                            >
+                                <span className="text-lg leading-none">🇬🇧</span>
+                            </button>
+                            <button
+                                className="w-8 h-6 rounded overflow-hidden border border-white/20 hover:border-white/50 transition-all hover:scale-105"
+                                title="বাংলা"
+                            >
+                                <span className="text-lg leading-none">🇧🇩</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </motion.nav>
