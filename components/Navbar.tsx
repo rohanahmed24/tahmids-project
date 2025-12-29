@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Menu, ShoppingBag, X } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -63,9 +63,6 @@ export default function Navbar() {
                         <div className="hidden md:flex">
                             <ThemeToggle />
                         </div>
-                        <button className="hover:opacity-60 transition-opacity relative">
-                            <ShoppingBag className="w-5 h-5" />
-                        </button>
                     </div>
                 </div>
             </motion.nav>
