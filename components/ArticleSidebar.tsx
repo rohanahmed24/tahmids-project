@@ -1,7 +1,7 @@
 import { Assets } from "@/lib/assets";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export function ArticleSidebar() {
     return (
@@ -30,61 +30,24 @@ export function ArticleSidebar() {
                 </div>
             </div>
 
-            {/* Watch Video Section */}
-            <div>
-                <h4 className="font-serif text-lg font-bold mb-6 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                    Watch Video
-                </h4>
-                <Link href="#" className="group block">
-                    <div className="relative w-full aspect-video overflow-hidden rounded-sm bg-black">
-                        <Image
-                            src={Assets.imgStoryCulture}
-                            alt="Video Thumbnail"
-                            fill
-                            sizes="(max-width: 768px) 100vw, 350px"
-                            className="object-cover opacity-80 transition-all duration-500 group-hover:opacity-100 group-hover:scale-105"
-                        />
-                        {/* Play Button Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-16 h-16 rounded-full bg-white/90 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover:scale-110">
-                                <Play className="w-6 h-6 text-black dark:text-white ml-1" fill="currentColor" />
-                            </div>
-                        </div>
-                        {/* Duration Badge */}
-                        <div className="absolute bottom-3 right-3 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded">
-                            12:45
-                        </div>
-                    </div>
-                    <div className="mt-4 space-y-2">
-                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest opacity-60 text-text-muted">
-                            <span>Video</span>
-                            <span>•</span>
-                            <span>12 min</span>
-                        </div>
-                        <h5 className="font-serif text-base leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary">
-                            The Art of Slow Interfaces: A Visual Journey
-                        </h5>
-                    </div>
-                </Link>
-            </div>
-
-            {/* Related Stories - List */}
+            {/* Related Stories */}
             <div>
                 <h4 className="font-serif text-lg font-bold mb-6 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-background-blue"></span>
                     Related Stories
                 </h4>
-                <div className="grid grid-cols-2 gap-4">
+                {/* Mobile: 2 columns, PC: 1 column (larger cards look better) */}
+                <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
                     {[1, 2, 3, 4].map((i) => (
                         <Link href="#" key={i} className="group block space-y-3">
-                            <div className="relative w-full aspect-square overflow-hidden rounded-sm">
+                            {/* Mobile: square aspect, PC: 3:2 aspect for larger display */}
+                            <div className="relative w-full aspect-square md:aspect-[3/2] overflow-hidden rounded-sm">
                                 <Image
-                                    src={i === 1 ? Assets.imgStoryCulture : i === 2 ? Assets.imgStoryScience : i === 3 ? Assets.imgStoryArt : Assets.imgStoryCulture}
+                                    src={i === 1 ? Assets.imgStoryCulture : i === 2 ? Assets.imgStoryScience : i === 3 ? Assets.imgStoryArt : Assets.imgStoryHistory}
                                     alt="Related"
                                     fill
-                                    sizes="(max-width: 768px) 50vw, 150px"
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0"
+                                    sizes="(max-width: 768px) 50vw, 350px"
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
                             </div>
                             <div className="space-y-1">
@@ -93,7 +56,7 @@ export function ArticleSidebar() {
                                     <span>•</span>
                                     <span>Oct 12</span>
                                 </div>
-                                <h5 className="font-serif text-sm leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2">
+                                <h5 className="font-serif text-sm md:text-base leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2">
                                     When design becomes invisible
                                 </h5>
                             </div>
@@ -104,3 +67,4 @@ export function ArticleSidebar() {
         </aside>
     );
 }
+
