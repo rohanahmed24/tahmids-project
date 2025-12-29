@@ -64,18 +64,20 @@ export default function Navbar() {
                             <ThemeToggle />
                         </div>
                         {/* Language/Region Selector */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                             <button
-                                className="text-xl hover:scale-110 transition-transform"
+                                className="flex items-center gap-1 px-2 py-1 text-xs font-bold uppercase tracking-wider hover:bg-white/10 rounded transition-colors"
                                 title="English"
                             >
-                                🇬🇧
+                                <span className="text-base">🇬🇧</span>
+                                <span>EN</span>
                             </button>
                             <button
-                                className="text-xl hover:scale-110 transition-transform"
+                                className="flex items-center gap-1 px-2 py-1 text-xs font-bold hover:bg-white/10 rounded transition-colors"
                                 title="বাংলা"
                             >
-                                🇧🇩
+                                <span className="text-base">🇧🇩</span>
+                                <span>বাংলা</span>
                             </button>
                         </div>
                     </div>
