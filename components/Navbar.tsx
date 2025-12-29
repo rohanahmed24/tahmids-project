@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -65,19 +65,19 @@ export default function Navbar() {
                         </div>
                         {/* Language/Region Selector */}
                         <div className="flex items-center gap-1">
+                            <Globe className="w-4 h-4 opacity-60" />
                             <button
-                                className="flex items-center gap-1 px-2 py-1 text-xs font-bold uppercase tracking-wider hover:bg-white/10 rounded transition-colors"
+                                className="px-2 py-1 text-xs font-bold uppercase tracking-wider hover:bg-white/10 rounded transition-colors"
                                 title="English"
                             >
-                                <span className="text-base">🇬🇧</span>
-                                <span>EN</span>
+                                EN
                             </button>
+                            <span className="opacity-40">|</span>
                             <button
-                                className="flex items-center gap-1 px-2 py-1 text-xs font-bold hover:bg-white/10 rounded transition-colors"
+                                className="px-2 py-1 text-xs font-bold hover:bg-white/10 rounded transition-colors"
                                 title="বাংলা"
                             >
-                                <span className="text-base">🇧🇩</span>
-                                <span>বাংলা</span>
+                                বাংলা
                             </button>
                         </div>
                     </div>
