@@ -110,22 +110,6 @@ export function ArticleHeader({
                             {title}
                         </motion.h1>
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.5 }}
-                            className="flex items-center gap-6"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full bg-white/20 overflow-hidden relative border-2 border-white/30">
-                                    <Image src={Assets.imgAuthorSarah} alt="Author" fill sizes="48px" className="object-cover" />
-                                </div>
-                                <div className="text-white">
-                                    <span className="block font-medium">{author}</span>
-                                    <span className="block text-sm text-white/60">8 min read</span>
-                                </div>
-                            </div>
-                        </motion.div>
 
                         {/* Media Options - Read, Listen, Watch */}
                         <motion.div
