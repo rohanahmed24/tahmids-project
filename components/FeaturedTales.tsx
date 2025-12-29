@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { motion, useMotionValue, animate, PanInfo } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { DecorativeBackgrounds } from "@/components/ui/DecorativeBackgrounds";
@@ -62,9 +61,6 @@ export function FeaturedTales() {
         }
         snapToPage(newPage);
     };
-
-    const nextPage = () => snapToPage(Math.min(currentPage + 1, totalPages - 1));
-    const prevPage = () => snapToPage(Math.max(currentPage - 1, 0));
 
     return (
         <section className="relative w-full py-4 md:py-24 bg-bg-primary overflow-hidden">

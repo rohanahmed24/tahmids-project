@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Play } from "lucide-react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 
 interface ArticleHeaderProps {
@@ -19,7 +18,6 @@ export function ArticleHeader({
     author = "Sarah Jenkins",
     date = "Oct 24, 2024",
     category = "Design",
-    subtitle = "Revisiting the dark and terrifying witch hunts that tore through 17th-century Massachusetts."
 }: ArticleHeaderProps) {
     const { scrollY } = useScroll();
     const y = useTransform(scrollY, [0, 500], [0, 150]);
