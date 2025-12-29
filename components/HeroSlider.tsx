@@ -230,8 +230,8 @@ export function HeroSlider() {
                 </div>
             </div>
 
-            {/* Navigation Arrows - Positioned lower on mobile */}
-            <div className="absolute top-[60%] md:bottom-1/2 md:top-auto -translate-y-1/2 left-2 md:left-8 z-20">
+            {/* Navigation Arrows - Desktop only */}
+            <div className="hidden md:flex absolute bottom-1/2 -translate-y-1/2 left-8 z-20">
                 <motion.button
                     whileHover={{ scale: 1.1, x: -5 }}
                     whileTap={{ scale: 0.9 }}
@@ -242,7 +242,7 @@ export function HeroSlider() {
                     <ChevronLeft className="w-6 h-6 md:w-6 md:h-6" />
                 </motion.button>
             </div>
-            <div className="absolute top-[60%] md:bottom-1/2 md:top-auto -translate-y-1/2 right-2 md:right-8 z-20">
+            <div className="hidden md:flex absolute bottom-1/2 -translate-y-1/2 right-8 z-20">
                 <motion.button
                     whileHover={{ scale: 1.1, x: 5 }}
                     whileTap={{ scale: 0.9 }}

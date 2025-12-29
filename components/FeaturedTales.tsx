@@ -123,25 +123,7 @@ export function FeaturedTales() {
                         </motion.div>
                     </div>
 
-                    {/* Navigation Arrows */}
-                    {currentPage > 0 && (
-                        <button
-                            onClick={prevPage}
-                            className="absolute left-0 top-[35%] -translate-y-1/2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white z-20"
-                            aria-label="Previous"
-                        >
-                            <ChevronLeft className="w-5 h-5" />
-                        </button>
-                    )}
-                    {currentPage < totalPages - 1 && (
-                        <button
-                            onClick={nextPage}
-                            className="absolute right-0 top-[35%] -translate-y-1/2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center text-white z-20"
-                            aria-label="Next"
-                        >
-                            <ChevronRight className="w-5 h-5" />
-                        </button>
-                    )}
+
 
                     {/* Pagination Dots */}
                     <div className="flex justify-center gap-1.5 mt-3">

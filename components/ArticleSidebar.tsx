@@ -7,17 +7,17 @@ export function ArticleSidebar() {
     return (
         <aside className="space-y-12 shrink-0">
             {/* Author Card - Bento Style */}
-            <div className="bg-[#f4f1ea] dark:bg-[#1a1a1a] p-8 rounded-none border border-black/5 dark:border-white/5 space-y-6">
+            <div className="bg-[#f4f1ea] dark:bg-[#1a1a1a] text-[#1a1a1a] dark:text-white p-8 rounded-none border border-black/5 dark:border-white/5 space-y-6">
                 <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden relative">
                         <Image src={Assets.imgAuthorSarah} alt="Author" fill sizes="64px" className="object-cover" />
                     </div>
                     <div>
                         <h3 className="font-serif text-xl font-bold leading-none">Sarah Jenkins</h3>
-                        <p className="text-[10px] uppercase tracking-widest opacity-60 mt-1">Design Anthropologist</p>
+                        <p className="text-[10px] uppercase tracking-widest opacity-70 mt-1">Design Anthropologist</p>
                     </div>
                 </div>
-                <p className="text-sm opacity-80 leading-relaxed font-sans">
+                <p className="text-sm opacity-90 leading-relaxed font-sans">
                     Exploring the intersection of human behavior and digital interfaces. Writing about silence, minimalism, and focus.
                 </p>
                 <div className="flex gap-2">

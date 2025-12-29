@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Play } from "lucide-react";
+import { MediaOptions } from "@/components/ui/MediaOptions";
 
 interface ArticleHeaderProps {
     title?: string;
@@ -52,15 +53,8 @@ export function ArticleHeader({
                             {subtitle}
                         </p>
 
-                        {/* Watch Video Button */}
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-full text-sm font-medium transition-colors"
-                        >
-                            <Play className="w-4 h-4 fill-current" />
-                            Watch Video
-                        </motion.button>
+                        {/* Media Options - Read, Listen, Watch */}
+                        <MediaOptions slug="slow-interfaces" variant="prominent" />
                     </div>
                 </div>
 
