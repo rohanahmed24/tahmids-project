@@ -26,9 +26,9 @@ export default function Navbar() {
     return (
         <>
             <motion.nav
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b bg-base md:bg-transparent ${isScrolled
-                    ? 'md:bg-base/80 backdrop-blur-xl border-border py-4'
-                    : 'border-transparent md:border-transparent py-4 md:py-6'
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b bg-base ${isScrolled
+                    ? 'border-border py-4'
+                    : 'border-transparent py-4 md:py-6'
                     }`}
             >
                 <div className="max-w-[1800px] mx-auto px-6 md:px-12 flex items-center">
