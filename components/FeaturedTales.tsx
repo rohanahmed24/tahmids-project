@@ -62,8 +62,24 @@ export function FeaturedTales() {
         snapToPage(newPage);
     };
 
+    // Autoslide every 2 seconds
+    useEffect(() => {
+        if (containerWidth === 0) return;
+
+        const timer = setInterval(() => {
+            setCurrentPage(prev => {
+                const next = (prev + 1) % totalPages;
+                const targetX = -next * slideWidth;
+                animate(x, targetX, { type: "spring", stiffness: 300, damping: 30 });
+                return next;
+            });
+        }, 2000);
+
+        return () => clearInterval(timer);
+    }, [containerWidth, slideWidth, totalPages, x]);
+
     return (
-        <section className="relative w-full py-4 md:py-24 bg-bg-primary overflow-hidden">
+        <section className="relative w-full pt-8 pb-4 md:py-24 bg-bg-primary overflow-hidden">
             <DecorativeBackgrounds />
 
             <div className="max-w-[1800px] mx-auto px-4 md:px-12 relative z-10">
