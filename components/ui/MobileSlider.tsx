@@ -49,8 +49,9 @@ export function MobileSlider({
 
     // Scroll to specific index with smooth animation
     const scrollToIndex = useCallback((index: number) => {
-        if (cardWidth === 0) return;
-        const targetX = -(index * (cardWidth + gap));
+        if (cardWidth === 0 || children.length === 0) return;
+        const clampedIndex = index % children.length;
+        const targetX = -(clampedIndex * (cardWidth + gap));
         const clampedX = Math.max(maxDrag, Math.min(0, targetX));
 
         animate(x, clampedX, {
@@ -58,20 +59,37 @@ export function MobileSlider({
             stiffness: 300,
             damping: 30,
         });
-        setCurrentIndex(index);
-    }, [cardWidth, gap, maxDrag, x]);
+        setCurrentIndex(clampedIndex);
+    }, [cardWidth, gap, maxDrag, x, children.length]);
 
-    // Auto-slide effect (when not marquee mode)
+    // Auto-slide effect
     useEffect(() => {
-        if (marquee || isPaused || children.length <= 1 || autoplayInterval === 0 || cardWidth === 0) return;
+        // Skip if marquee mode, paused, only one child, disabled, or not initialized
+        if (marquee || isPaused || children.length <= 1 || autoplayInterval === 0) {
+            return;
+        }
 
-        const interval = setInterval(() => {
-            const nextIndex = (currentIndex + 1) % children.length;
-            scrollToIndex(nextIndex);
+        // Wait for cardWidth to be initialized
+        if (cardWidth === 0) {
+            return;
+        }
+
+        const timer = setInterval(() => {
+            setCurrentIndex(prev => {
+                const next = (prev + 1) % children.length;
+                const targetX = -(next * (cardWidth + gap));
+                const clampedX = Math.max(maxDrag, Math.min(0, targetX));
+                animate(x, clampedX, {
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
+                });
+                return next;
+            });
         }, autoplayInterval);
 
-        return () => clearInterval(interval);
-    }, [marquee, currentIndex, isPaused, autoplayInterval, children.length, scrollToIndex, cardWidth]);
+        return () => clearInterval(timer);
+    }, [marquee, isPaused, autoplayInterval, children.length, cardWidth, gap, maxDrag, x]);
 
     // Marquee continuous scroll effect
     useEffect(() => {
