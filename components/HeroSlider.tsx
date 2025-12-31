@@ -189,7 +189,7 @@ export function HeroSlider() {
 
             {/* Main Content - At bottom on mobile */}
             <div className="absolute inset-0 flex items-end z-10">
-                <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pb-6 md:pb-32">
+                <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pb-16 md:pb-32">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentIndex}
@@ -255,7 +255,7 @@ export function HeroSlider() {
             </div>
 
             {/* Slide Indicators */}
-            <div className="absolute bottom-4 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 md:gap-3">
+            <div className="absolute bottom-3 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 md:gap-3">
                 {hotTopics.map((topic, index) => (
                     <button
                         key={topic.id}
