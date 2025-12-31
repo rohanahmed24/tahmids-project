@@ -39,24 +39,26 @@ export function ArticleGrid() {
 
                 {/* Mobile: Draggable Slider with Autoplay */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={2000} cardWidthPercent={85} gap={12}>
+                    <MobileSlider autoplayInterval={2000} cardWidthPercent={90} gap={16}>
                         {articles.map((article) => (
                             <div
                                 key={article.id}
                                 onClick={() => router.push(`/article/${article.slug}`)}
-                                className="group flex flex-col cursor-pointer text-text-primary w-full"
+                                className="group flex flex-row gap-4 cursor-pointer text-text-primary w-full bg-bg-secondary rounded-xl overflow-hidden"
                             >
-                                <div className="relative w-full aspect-[4/3] overflow-hidden rounded-xl">
+                                {/* Horizontal image on left */}
+                                <div className="relative w-[40%] aspect-square shrink-0 overflow-hidden">
                                     <Image
                                         src={article.img}
                                         alt={article.title}
                                         fill
-                                        sizes="(max-width: 768px) 85vw, 33vw"
+                                        sizes="(max-width: 768px) 40vw, 33vw"
                                         className="object-cover"
                                     />
                                 </div>
-                                <div className="pt-3 space-y-1">
-                                    <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider">
+                                {/* Content on right */}
+                                <div className="flex-1 py-3 pr-3 flex flex-col justify-center space-y-2">
+                                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
                                         {article.topicSlug ? (
                                             <Link
                                                 href={`/topics/${article.topicSlug}`}
@@ -68,13 +70,15 @@ export function ArticleGrid() {
                                         ) : (
                                             <span className="text-accent">{article.category}</span>
                                         )}
-                                        <span className="text-text-muted">•</span>
-                                        <span className="text-text-muted">{article.date}</span>
                                     </div>
-                                    <h3 className="text-sm font-serif font-semibold leading-snug">
+                                    <h3 className="text-base font-serif font-bold leading-snug line-clamp-2">
                                         {article.title}
                                     </h3>
-                                    <MediaOptions slug={article.slug} variant="compact" className="mt-2" />
+                                    <div className="flex items-center gap-2 text-[10px] text-text-muted">
+                                        <span>{article.author}</span>
+                                        <span>•</span>
+                                        <span>{article.date}</span>
+                                    </div>
                                 </div>
                             </div>
                         ))}
