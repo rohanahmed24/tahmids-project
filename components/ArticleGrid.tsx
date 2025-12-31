@@ -39,43 +39,33 @@ export function ArticleGrid() {
 
                 {/* Mobile: Draggable Slider with Autoplay */}
                 <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={2000} cardWidthPercent={90} gap={16}>
+                    <MobileSlider autoplayInterval={2000} cardWidthPercent={92} gap={20}>
                         {articles.map((article) => (
                             <div
                                 key={article.id}
                                 onClick={() => router.push(`/article/${article.slug}`)}
-                                className="group flex flex-row gap-4 cursor-pointer text-text-primary w-full bg-bg-secondary rounded-xl overflow-hidden"
+                                className="group flex flex-row gap-3 cursor-pointer text-text-primary w-full bg-bg-secondary rounded-2xl overflow-hidden shadow-sm"
                             >
                                 {/* Horizontal image on left */}
-                                <div className="relative w-[40%] aspect-square shrink-0 overflow-hidden">
+                                <div className="relative w-[35%] aspect-[3/4] shrink-0 overflow-hidden">
                                     <Image
                                         src={article.img}
                                         alt={article.title}
                                         fill
-                                        sizes="(max-width: 768px) 40vw, 33vw"
+                                        sizes="(max-width: 768px) 35vw, 33vw"
                                         className="object-cover"
                                     />
                                 </div>
                                 {/* Content on right */}
-                                <div className="flex-1 py-3 pr-3 flex flex-col justify-center space-y-2">
-                                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
-                                        {article.topicSlug ? (
-                                            <Link
-                                                href={`/topics/${article.topicSlug}`}
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="text-accent"
-                                            >
-                                                {article.category}
-                                            </Link>
-                                        ) : (
-                                            <span className="text-accent">{article.category}</span>
-                                        )}
-                                    </div>
-                                    <h3 className="text-base font-serif font-bold leading-snug line-clamp-2">
+                                <div className="flex-1 py-4 pr-4 flex flex-col justify-center gap-2">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-accent">
+                                        {article.category}
+                                    </span>
+                                    <h3 className="text-[15px] font-serif font-bold leading-tight line-clamp-2">
                                         {article.title}
                                     </h3>
-                                    <div className="flex items-center gap-2 text-[10px] text-text-muted">
-                                        <span>{article.author}</span>
+                                    <div className="flex items-center gap-2 text-[11px] text-text-muted mt-1">
+                                        <span className="font-medium">{article.author}</span>
                                         <span>•</span>
                                         <span>{article.date}</span>
                                     </div>
