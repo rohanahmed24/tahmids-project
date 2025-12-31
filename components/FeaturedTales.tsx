@@ -165,7 +165,7 @@ export function FeaturedTales() {
                             className="min-w-[400px] snap-start group cursor-pointer"
                         >
                             <Link href={`/article/${item.slug}`}>
-                                <div className="relative aspect-[3/4] overflow-hidden mb-6 filter grayscale group-hover:grayscale-0 transition-all duration-700">
+                                <div className="relative aspect-[3/4] overflow-hidden mb-6 transition-all duration-700">
                                     <span className="absolute top-4 left-4 text-4xl font-serif text-white z-20 opacity-80 drop-shadow-lg">{item.id}</span>
                                     <Image
                                         src={item.img}
