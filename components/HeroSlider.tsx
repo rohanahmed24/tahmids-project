@@ -128,7 +128,7 @@ export function HeroSlider() {
 
     return (
         <section
-            className="relative w-full h-[55svh] md:h-screen overflow-hidden bg-black mt-14 md:mt-0"
+            className="relative w-full h-[50vh] md:h-screen overflow-hidden bg-black mt-14 md:mt-0"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
         >
@@ -187,9 +187,9 @@ export function HeroSlider() {
                 </div>
             </motion.div>
 
-            {/* Main Content - Below Hot Topics badge on mobile */}
-            <div className="absolute inset-0 flex items-start md:items-end z-10">
-                <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pt-16 md:pt-0 md:pb-32">
+            {/* Main Content - At bottom on mobile */}
+            <div className="absolute inset-0 flex items-end z-10">
+                <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pb-6 md:pb-32">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={currentIndex}
