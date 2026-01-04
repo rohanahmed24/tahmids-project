@@ -11,7 +11,7 @@ import { StaticImageData } from "next/image";
 interface Article {
     id: string;
     title: string;
-    img: StaticImageData;
+    img: StaticImageData | string;
     slug: string;
     author: string;
     date: string;
