@@ -38,13 +38,18 @@ export function ArticleSidebar() {
                 </h4>
                 {/* Mobile: 2 columns, PC: 1 column (larger cards look better) */}
                 <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
-                    {[1, 2, 3, 4].map((i) => (
-                        <Link href="#" key={i} className="group block space-y-3">
+                    {[
+                        { slug: "creative-process", title: "The Creative Process Unveiled", category: "Design", date: "Dec 12", image: Assets.imgStoryCulture },
+                        { slug: "science-sleep", title: "The Science of Sleep", category: "Science", date: "Dec 9", image: Assets.imgStoryScience },
+                        { slug: "future-cities", title: "Cities of Tomorrow: Reimagining Urban Life", category: "Future Tech", date: "Dec 14", image: Assets.imgStoryArt },
+                        { slug: "philosophy-simplicity", title: "The Philosophy of Simplicity", category: "Minimalism", date: "Dec 10", image: Assets.imgStoryHistory },
+                    ].map((story) => (
+                        <Link href={`/article/${story.slug}`} key={story.slug} className="group block space-y-3">
                             {/* Mobile: square aspect, PC: 3:2 aspect for larger display */}
                             <div className="relative w-full aspect-square md:aspect-[3/2] overflow-hidden rounded-sm">
                                 <Image
-                                    src={i === 1 ? Assets.imgStoryCulture : i === 2 ? Assets.imgStoryScience : i === 3 ? Assets.imgStoryArt : Assets.imgStoryHistory}
-                                    alt="Related"
+                                    src={story.image}
+                                    alt={story.title}
                                     fill
                                     sizes="(max-width: 768px) 50vw, 350px"
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -52,12 +57,12 @@ export function ArticleSidebar() {
                             </div>
                             <div className="space-y-1.5">
                                 <p className="text-[11px] font-bold uppercase tracking-widest text-text-secondary">
-                                    <span>Tech</span>
+                                    <span>{story.category}</span>
                                     <span className="mx-1.5">•</span>
-                                    <span>Oct 12</span>
+                                    <span>{story.date}</span>
                                 </p>
                                 <h5 className="font-serif text-sm md:text-base leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2">
-                                    When design becomes invisible
+                                    {story.title}
                                 </h5>
                             </div>
                         </Link>
