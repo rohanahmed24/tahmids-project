@@ -32,8 +32,8 @@ export function ArticleSidebar() {
 
             {/* Related Stories */}
             <div>
-                <h4 className="font-serif text-lg font-bold mb-6 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-background-blue"></span>
+                <h4 className="font-serif text-lg font-bold mb-6 flex items-center gap-2 text-text-primary">
+                    <span className="w-2 h-2 rounded-full bg-accent"></span>
                     Related Stories
                 </h4>
                 {/* Mobile: 2 columns, PC: 1 column (larger cards look better) */}
@@ -50,12 +50,12 @@ export function ArticleSidebar() {
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
                             </div>
-                            <div className="space-y-1">
-                                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest opacity-60 text-text-muted">
+                            <div className="space-y-1.5">
+                                <p className="text-[11px] font-bold uppercase tracking-widest text-text-secondary">
                                     <span>Tech</span>
-                                    <span>•</span>
+                                    <span className="mx-1.5">•</span>
                                     <span>Oct 12</span>
-                                </div>
+                                </p>
                                 <h5 className="font-serif text-sm md:text-base leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2">
                                     When design becomes invisible
                                 </h5>
