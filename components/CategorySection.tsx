@@ -75,12 +75,16 @@ export function CategorySection({ title, slug, articles }: CategorySectionProps)
             <div className="max-w-[1800px] mx-auto px-4 md:px-12">
                 {/* Section Header */}
                 <div className="flex justify-between items-center mb-4 md:mb-10">
-                    <h2 className="text-lg md:text-4xl font-serif font-medium tracking-tight text-text-primary">
+                    <h2
+                        className="font-serif font-medium tracking-tight text-text-primary"
+                        style={{ fontSize: 'clamp(1.125rem, 3vw, 2.25rem)' }}
+                    >
                         {title}
                     </h2>
                     <Link
                         href={`/topics/${slug}`}
-                        className="text-xs md:text-sm font-bold uppercase tracking-widest text-accent hover:underline"
+                        className="font-bold uppercase tracking-widest text-accent hover:underline"
+                        style={{ fontSize: 'clamp(0.625rem, 1vw, 0.875rem)' }}
                     >
                         View All
                     </Link>
@@ -170,12 +174,20 @@ export function CategorySection({ title, slug, articles }: CategorySectionProps)
                                 </div>
 
                                 <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest">
+                                    <div
+                                        className="flex items-center gap-2 uppercase font-bold tracking-widest"
+                                        style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.625rem)' }}
+                                    >
                                         <span className="text-accent">{title}</span>
                                         <span className="text-text-muted">•</span>
                                         <span className="text-text-muted">{item.date}</span>
                                     </div>
-                                    <h3 className="text-lg font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2">{item.title}</h3>
+                                    <h3
+                                        className="font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2"
+                                        style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.125rem)' }}
+                                    >
+                                        {item.title}
+                                    </h3>
                                     <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
                                 </div>
                             </Link>
