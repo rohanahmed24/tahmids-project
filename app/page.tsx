@@ -8,12 +8,22 @@ import { CTABanner } from "@/components/CTABanner";
 import { DailyQuote } from "@/components/DailyQuote";
 import { TopicExplore } from "@/components/TopicExplore";
 import { AuthorsGrid } from "@/components/AuthorsGrid";
+import { CategorySection, categoryData } from "@/components/CategorySection";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-background-light text-text-primary font-sans selection:bg-background-darkest selection:text-white">
       <HeroSlider />
       <FeaturedTales />
+
+      {/* Category Sections */}
+      <CategorySection {...categoryData.politics} />
+      <CategorySection {...categoryData.mystery} />
+      <CategorySection {...categoryData.crime} />
+      <CategorySection {...categoryData.history} />
+      <CategorySection {...categoryData.news} />
+      <CategorySection {...categoryData.science} />
+
       <DailyQuote />
       <Subscription />
       <ArticleGrid />
