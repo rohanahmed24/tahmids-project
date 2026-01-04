@@ -23,7 +23,7 @@ interface CategorySectionProps {
     articles: Article[];
 }
 
-export function CategorySection({ title, slug, articles }: CategorySectionProps) {
+export function CategorySection({ title, slug, articles = [] }: CategorySectionProps) {
     const [currentPage, setCurrentPage] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
@@ -31,7 +31,8 @@ export function CategorySection({ title, slug, articles }: CategorySectionProps)
 
     const cardsPerPage = 2;
     const gap = 12;
-    const totalPages = Math.ceil(articles.length / cardsPerPage);
+    const safeArticles = articles || [];
+    const totalPages = Math.ceil(safeArticles.length / cardsPerPage) || 1;
 
     useEffect(() => {
         if (containerRef.current) {
@@ -70,6 +71,10 @@ export function CategorySection({ title, slug, articles }: CategorySectionProps)
         snapToPage(newPage);
     };
 
+    if (safeArticles.length === 0) {
+        return null;
+    }
+
     return (
         <section className="w-full py-6 md:py-16 bg-bg-primary">
             <div className="max-w-[1800px] mx-auto px-4 md:px-12">
@@ -101,7 +106,7 @@ export function CategorySection({ title, slug, articles }: CategorySectionProps)
                             dragElastic={0.1}
                             onDragEnd={handleDragEnd}
                         >
-                            {articles.map((item) => (
+                            {safeArticles.map((item) => (
                                 <Link
                                     key={item.id}
                                     href={`/article/${item.slug}`}
@@ -152,7 +157,7 @@ export function CategorySection({ title, slug, articles }: CategorySectionProps)
 
                 {/* Desktop: 4 per row grid */}
                 <div className="hidden md:grid grid-cols-4 gap-6">
-                    {articles.slice(0, 4).map((item) => (
+                    {safeArticles.slice(0, 4).map((item) => (
                         <motion.div
                             key={item.id}
                             initial={{ opacity: 0, y: 30 }}
