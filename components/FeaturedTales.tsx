@@ -9,10 +9,14 @@ import { DecorativeBackgrounds } from "@/components/ui/DecorativeBackgrounds";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 
 const breakingNews = [
-    { id: "01", category: "History", title: "The Rise of Hitler: How a Failed Artist Became a Dictator", img: Assets.imgPlaceholderImage1, slug: "slow-interfaces", author: "John Doe", date: "1 week ago" },
-    { id: "02", category: "Mystery", title: "The Amityville Horror: The Terrifying True Story Behind", img: Assets.imgPlaceholderImage2, slug: "less-information", author: "Jane Smith", date: "2 days ago" },
-    { id: "03", category: "Philosophy", title: "Building a digital garden for the mind", img: Assets.imgPlaceholderImage3, slug: "digital-garden", author: "Mike Johnson", date: "3 days ago" },
-    { id: "04", category: "Future", title: "Life on Mars: A Reality Check", img: Assets.imgPlaceholderImage4, slug: "slow-interfaces", author: "Sarah Lee", date: "5 days ago" },
+    { id: "01", category: "Design", title: "The quiet revolution of slow interfaces", img: Assets.imgPlaceholderImage1, slug: "slow-interfaces", author: "Sarah Jenkins", date: "Dec 24" },
+    { id: "02", category: "Tech", title: "Why we need less information, not more", img: Assets.imgPlaceholderImage2, slug: "less-information", author: "David Miller", date: "Dec 23" },
+    { id: "03", category: "Philosophy", title: "Building a digital garden for the mind", img: Assets.imgPlaceholderImage3, slug: "digital-garden", author: "John Smith", date: "Dec 22" },
+    { id: "04", category: "Technology", title: "The Ethics of Artificial Intelligence", img: Assets.imgPlaceholderImage4, slug: "ai-ethics", author: "David Miller", date: "Dec 15" },
+    { id: "05", category: "Science", title: "The Science of Sleep: Why Rest Matters", img: Assets.imgStoryCulture, slug: "science-sleep", author: "Emily Rose", date: "Dec 9" },
+    { id: "06", category: "Lifestyle", title: "Mindful Living in a Digital Age", img: Assets.imgStoryScience, slug: "mindful-living", author: "Sarah Jenkins", date: "Dec 18" },
+    { id: "07", category: "Future Tech", title: "Cities of Tomorrow: Reimagining Urban Life", img: Assets.imgStoryArt, slug: "future-cities", author: "James L.", date: "Dec 14" },
+    { id: "08", category: "Culture", title: "The Creative Process Unveiled", img: Assets.imgStoryHistory, slug: "creative-process", author: "Sarah Jenkins", date: "Dec 12" },
 ];
 
 export function FeaturedTales() {
@@ -153,8 +157,8 @@ export function FeaturedTales() {
                     </div>
                 </div>
 
-                {/* Desktop: Horizontal Scroll */}
-                <div className="hidden md:flex gap-8 overflow-x-auto pb-8 hide-scrollbar snap-x snap-mandatory scroll-smooth">
+                {/* Desktop: 4 per row grid */}
+                <div className="hidden md:grid grid-cols-4 gap-6">
                     {breakingNews.map((item) => (
                         <motion.div
                             key={item.id}
@@ -162,15 +166,14 @@ export function FeaturedTales() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8 }}
-                            className="min-w-[400px] snap-start group cursor-pointer"
+                            className="group cursor-pointer"
                         >
                             <Link href={`/article/${item.slug}`}>
-                                <div className="relative aspect-[3/4] overflow-hidden mb-6 transition-all duration-700">
-                                    <span className="absolute top-4 left-4 text-4xl font-serif text-white z-20 opacity-80 drop-shadow-lg">{item.id}</span>
+                                <div className="relative aspect-[3/4] overflow-hidden mb-4 transition-all duration-700">
                                     <Image
                                         src={item.img}
                                         fill
-                                        sizes="400px"
+                                        sizes="(max-width: 1200px) 25vw, 300px"
                                         alt={item.title}
                                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
@@ -178,9 +181,13 @@ export function FeaturedTales() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <span className="text-[10px] uppercase font-bold tracking-widest text-text-muted">{item.category}</span>
-                                    <h3 className="text-2xl font-serif leading-none group-hover:underline decoration-1 underline-offset-4 text-text-primary">{item.title}</h3>
-                                    <MediaOptions slug={item.slug} variant="compact" className="mt-3" />
+                                    <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest">
+                                        <span className="text-accent">{item.category}</span>
+                                        <span className="text-text-muted">•</span>
+                                        <span className="text-text-muted">{item.date}</span>
+                                    </div>
+                                    <h3 className="text-lg font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2">{item.title}</h3>
+                                    <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
                                 </div>
                             </Link>
                         </motion.div>
