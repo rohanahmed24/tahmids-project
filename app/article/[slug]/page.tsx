@@ -28,8 +28,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <main className="min-h-screen bg-bg-primary selection:bg-bg-inverse selection:text-text-inverse">
             <article className="pb-20">
                 <MotionWrapper type="fade-in" delay={0.1}>
-                    {/* Passing title and metadata to header would be ideal, but for now we keep the layout */}
-                    <ArticleHeader title={post.title} author={post.author} date={post.date} category={post.category} />
+                    <ArticleHeader
+                        title={post.title}
+                        author={post.author}
+                        date={post.date}
+                        category={post.category}
+                        coverImage={post.coverImage}
+                        slug={post.slug}
+                    />
                 </MotionWrapper>
 
                 <div className="max-w-[1440px] mx-auto px-6 md:px-16 2xl:px-32 mt-12 md:mt-20 flex flex-col lg:flex-row gap-12 2xl:gap-24 relative">
