@@ -2,22 +2,148 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, ArrowRight, Sparkles, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Sparkles, Mail, Lock, User, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         password: "",
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Handle registration logic here
-
+    const validateForm = () => {
+        if (!formData.name.trim()) {
+            setError("Please enter your full name");
+            return false;
+        }
+        if (!formData.email.trim()) {
+            setError("Please enter your email address");
+            return false;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            setError("Please enter a valid email address");
+            return false;
+        }
+        if (formData.password.length < 8) {
+            setError("Password must be at least 8 characters");
+            return false;
+        }
+        return true;
     };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+
+        if (!validateForm()) return;
+
+        setIsLoading(true);
+
+        // Simulate API call delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        try {
+            // Check if user already exists
+            const existingUsers = JSON.parse(localStorage.getItem("wisdomia_users") || "[]");
+            const userExists = existingUsers.some((user: { email: string }) =>
+                user.email.toLowerCase() === formData.email.toLowerCase()
+            );
+
+            if (userExists) {
+                setError("An account with this email already exists. Please sign in instead.");
+                setIsLoading(false);
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                id: Date.now().toString(),
+                name: formData.name.trim(),
+                email: formData.email.toLowerCase().trim(),
+                password: formData.password, // In production, this should be hashed!
+                createdAt: new Date().toISOString(),
+            };
+
+            // Save to localStorage
+            existingUsers.push(newUser);
+            localStorage.setItem("wisdomia_users", JSON.stringify(existingUsers));
+
+            setSuccess(true);
+            setIsLoading(false);
+
+            // Redirect to signin after 2 seconds
+            setTimeout(() => {
+                router.push("/signin");
+            }, 2000);
+
+        } catch {
+            setError("Something went wrong. Please try again.");
+            setIsLoading(false);
+        }
+    };
+
+    const handleSocialLogin = (provider: string) => {
+        setError("");
+        setIsLoading(true);
+
+        // Simulate social login
+        setTimeout(() => {
+            // Create a demo user for social login
+            const socialUser = {
+                id: Date.now().toString(),
+                name: `${provider} User`,
+                email: `user@${provider.toLowerCase()}.com`,
+                provider,
+                createdAt: new Date().toISOString(),
+            };
+
+            // Save current user session
+            localStorage.setItem("wisdomia_current_user", JSON.stringify(socialUser));
+
+            setSuccess(true);
+            setIsLoading(false);
+
+            setTimeout(() => {
+                router.push("/");
+            }, 1500);
+        }, 1500);
+    };
+
+    if (success) {
+        return (
+            <main className="min-h-screen bg-bg-primary text-text-primary flex items-center justify-center p-8">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center space-y-6 max-w-md"
+                >
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2, type: "spring" }}
+                        className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto"
+                    >
+                        <CheckCircle className="w-10 h-10 text-green-500" />
+                    </motion.div>
+                    <h2 className="text-3xl font-serif font-bold">Account Created!</h2>
+                    <p className="text-text-secondary">
+                        Welcome to Wisdomia, {formData.name.split(" ")[0]}! Redirecting you to sign in...
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-accent">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Redirecting...</span>
+                    </div>
+                </motion.div>
+            </main>
+        );
+    }
 
     return (
         <main className="min-h-screen bg-bg-primary text-text-primary flex">
@@ -106,7 +232,7 @@ export default function RegisterPage() {
                     className="relative z-10"
                 >
                     <p className="text-white/60 text-sm italic">
-                        "The only true wisdom is knowing you know nothing."
+                        &quot;The only true wisdom is knowing you know nothing.&quot;
                     </p>
                     <p className="text-white/40 text-xs mt-2">— Socrates</p>
                 </motion.div>
@@ -153,6 +279,18 @@ export default function RegisterPage() {
                         </p>
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500"
+                        >
+                            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                            <p className="text-sm">{error}</p>
+                        </motion.div>
+                    )}
+
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Name Field */}
@@ -170,9 +308,13 @@ export default function RegisterPage() {
                                 <input
                                     type="text"
                                     value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, name: e.target.value });
+                                        setError("");
+                                    }}
                                     placeholder="Enter your full name"
-                                    className="w-full pl-12 pr-4 py-4 bg-bg-secondary border border-border-subtle rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+                                    className="w-full pl-12 pr-4 py-4 bg-bg-secondary border border-border-subtle rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all disabled:opacity-50"
+                                    disabled={isLoading}
                                     required
                                 />
                             </div>
@@ -193,9 +335,13 @@ export default function RegisterPage() {
                                 <input
                                     type="email"
                                     value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, email: e.target.value });
+                                        setError("");
+                                    }}
                                     placeholder="Enter your email"
-                                    className="w-full pl-12 pr-4 py-4 bg-bg-secondary border border-border-subtle rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+                                    className="w-full pl-12 pr-4 py-4 bg-bg-secondary border border-border-subtle rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all disabled:opacity-50"
+                                    disabled={isLoading}
                                     required
                                 />
                             </div>
@@ -216,9 +362,13 @@ export default function RegisterPage() {
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, password: e.target.value });
+                                        setError("");
+                                    }}
                                     placeholder="Create a password"
-                                    className="w-full pl-12 pr-12 py-4 bg-bg-secondary border border-border-subtle rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+                                    className="w-full pl-12 pr-12 py-4 bg-bg-secondary border border-border-subtle rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all disabled:opacity-50"
+                                    disabled={isLoading}
                                     required
                                     minLength={8}
                                 />
@@ -226,6 +376,7 @@ export default function RegisterPage() {
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
+                                    disabled={isLoading}
                                 >
                                     {showPassword ? (
                                         <EyeOff className="w-5 h-5" />
@@ -250,6 +401,7 @@ export default function RegisterPage() {
                                 type="checkbox"
                                 id="terms"
                                 required
+                                disabled={isLoading}
                                 className="mt-1 w-4 h-4 accent-accent"
                             />
                             <label htmlFor="terms" className="text-sm text-text-secondary">
@@ -269,13 +421,23 @@ export default function RegisterPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.7 }}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                            whileTap={{ scale: isLoading ? 1 : 0.98 }}
                             type="submit"
-                            className="w-full py-4 bg-accent text-white font-bold uppercase tracking-widest text-sm rounded-xl hover:shadow-lg hover:shadow-accent/30 transition-all flex items-center justify-center gap-2 group"
+                            disabled={isLoading}
+                            className="w-full py-4 bg-accent text-white font-bold uppercase tracking-widest text-sm rounded-xl hover:shadow-lg hover:shadow-accent/30 transition-all flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            Create Account
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Creating Account...
+                                </>
+                            ) : (
+                                <>
+                                    Create Account
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
                         </motion.button>
                     </form>
 
@@ -298,7 +460,12 @@ export default function RegisterPage() {
                         transition={{ delay: 0.8 }}
                         className="grid grid-cols-2 gap-4"
                     >
-                        <button className="flex items-center justify-center gap-2 py-3 bg-bg-secondary border border-border-subtle rounded-xl hover:bg-black hover:text-white hover:border-black transition-all font-medium text-sm">
+                        <button
+                            type="button"
+                            onClick={() => handleSocialLogin("Google")}
+                            disabled={isLoading}
+                            className="flex items-center justify-center gap-2 py-3 bg-bg-secondary border border-border-subtle rounded-xl hover:bg-black hover:text-white hover:border-black transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                                 <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -307,7 +474,12 @@ export default function RegisterPage() {
                             </svg>
                             Google
                         </button>
-                        <button className="flex items-center justify-center gap-2 py-3 bg-bg-secondary border border-border-subtle rounded-xl hover:bg-black hover:text-white hover:border-black transition-all font-medium text-sm">
+                        <button
+                            type="button"
+                            onClick={() => handleSocialLogin("GitHub")}
+                            disabled={isLoading}
+                            className="flex items-center justify-center gap-2 py-3 bg-bg-secondary border border-border-subtle rounded-xl hover:bg-black hover:text-white hover:border-black transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
                             </svg>
