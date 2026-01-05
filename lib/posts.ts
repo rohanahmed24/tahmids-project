@@ -12,6 +12,7 @@ export type Post = {
     category: string;
     content: string;
     coverImage?: string;
+    videoUrl?: string;
 };
 
 // Helper type for frontmatter
