@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MobileSlider } from "@/components/ui/MobileSlider";
 import { MediaOptions } from "@/components/ui/MediaOptions";
+import { DesktopArticleSlider } from "@/components/ui/DesktopArticleSlider";
 
 const articles = [
     { id: 1, title: "The quiet revolution of slow interfaces", author: "Sarah Jenkins", date: "Dec 24", img: Assets.imgArticleBreakout, category: "Design", slug: "slow-interfaces", topicSlug: "design-culture" },
@@ -20,6 +21,58 @@ const articles = [
 
 export function ArticleGrid() {
     const router = useRouter();
+
+    // Split articles into top 4 and bottom 4 for desktop slider
+    const topRowArticles = articles.slice(0, 4);
+    const bottomRowArticles = articles.slice(4, 8);
+
+    // Render article card component
+    const renderArticleCard = (article: typeof articles[0]) => (
+        <div
+            key={article.id}
+            onClick={() => router.push(`/article/${article.slug}`)}
+            className="group flex flex-col gap-5 cursor-pointer text-text-primary"
+        >
+            <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-bg-card shadow-sm transition-shadow group-hover:shadow-md">
+                <Image
+                    src={article.img}
+                    alt={article.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+            </div>
+            <div className="space-y-3">
+                <div className="flex items-center gap-3 text-xs font-bold text-text-muted uppercase tracking-wider">
+                    {article.topicSlug ? (
+                        <Link
+                            href={`/topics/${article.topicSlug}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-accent hover:underline"
+                        >
+                            {article.category}
+                        </Link>
+                    ) : (
+                        <span className="text-accent">{article.category}</span>
+                    )}
+                    <span>•</span>
+                    <span>{article.date}</span>
+                </div>
+                <h3 className="text-lg md:text-xl font-serif font-semibold leading-tight group-hover:text-accent transition-colors">
+                    {article.title}
+                </h3>
+                <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-bg-secondary relative overflow-hidden">
+                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill sizes="32px" className="object-cover" />
+                        </div>
+                        <span className="text-xs font-sans font-medium text-text-secondary">{article.author}</span>
+                    </div>
+                    <MediaOptions slug={article.slug} variant="compact" />
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <section className="w-full bg-bg-primary py-12 md:py-32 px-6 md:px-16 border-t border-border-subtle">
@@ -75,54 +128,12 @@ export function ArticleGrid() {
                     </MobileSlider>
                 </div>
 
-                {/* Desktop: Grid */}
-                <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-                    {articles.map((article) => (
-                        <div
-                            key={article.id}
-                            onClick={() => router.push(`/article/${article.slug}`)}
-                            className="group flex flex-col gap-5 cursor-pointer text-text-primary"
-                        >
-                            <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-bg-card shadow-sm transition-shadow group-hover:shadow-md">
-                                <Image
-                                    src={article.img}
-                                    alt={article.title}
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                            </div>
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3 text-xs font-bold text-text-muted uppercase tracking-wider">
-                                    {article.topicSlug ? (
-                                        <Link
-                                            href={`/topics/${article.topicSlug}`}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="text-accent hover:underline"
-                                        >
-                                            {article.category}
-                                        </Link>
-                                    ) : (
-                                        <span className="text-accent">{article.category}</span>
-                                    )}
-                                    <span>•</span>
-                                    <span>{article.date}</span>
-                                </div>
-                                <h3 className="text-lg md:text-xl font-serif font-semibold leading-tight group-hover:text-accent transition-colors">
-                                    {article.title}
-                                </h3>
-                                <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-bg-secondary relative overflow-hidden">
-                                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill sizes="32px" className="object-cover" />
-                                        </div>
-                                        <span className="text-xs font-sans font-medium text-text-secondary">{article.author}</span>
-                                    </div>
-                                    <MediaOptions slug={article.slug} variant="compact" />
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                {/* Desktop: Slider with opposite directions */}
+                <div className="hidden md:block">
+                    <DesktopArticleSlider
+                        topRowChildren={topRowArticles.map(renderArticleCard)}
+                        bottomRowChildren={bottomRowArticles.map(renderArticleCard)}
+                    />
                 </div>
             </div>
         </section>
