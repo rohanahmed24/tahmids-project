@@ -35,7 +35,7 @@ export function DesktopArticleSlider({
             x: 0,
             opacity: 1,
             transition: {
-                type: "spring",
+                type: "spring" as const,
                 stiffness: 100,
                 damping: 15,
                 mass: 0.8,
@@ -52,7 +52,7 @@ export function DesktopArticleSlider({
             x: 0,
             opacity: 1,
             transition: {
-                type: "spring",
+                type: "spring" as const,
                 stiffness: 100,
                 damping: 15,
                 mass: 0.8,
