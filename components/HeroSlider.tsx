@@ -200,32 +200,13 @@ export function HeroSlider() {
                             transition={{ duration: 0.5 }}
                             className="max-w-3xl"
                         >
-                            {/* Category */}
-                            <motion.span
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="inline-block font-bold uppercase tracking-widest text-white/80 mb-1 md:mb-4"
-                                style={{ fontSize: 'clamp(0.625rem, 1vw, 0.875rem)' }}
-                            >
-                                {currentTopic.category}
-                            </motion.span>
-
                             {/* Title */}
                             <h1
-                                className="font-serif font-bold text-white leading-tight mb-2 md:mb-4"
+                                className="font-serif font-bold text-white leading-tight mb-6 md:mb-8"
                                 style={{ fontSize: 'clamp(1.25rem, 5vw, 4.5rem)' }}
                             >
                                 {currentTopic.title}
                             </h1>
-
-                            {/* Subtitle - Show on mobile too */}
-                            <p
-                                className="text-white/70 mb-3 md:mb-8 max-w-xl line-clamp-2 md:line-clamp-none"
-                                style={{ fontSize: 'clamp(0.75rem, 1.5vw, 1.25rem)' }}
-                            >
-                                {currentTopic.subtitle}
-                            </p>
 
                             {/* CTA Buttons - Compact on mobile, full on desktop */}
                             <div className="mt-4 md:mt-0">
