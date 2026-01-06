@@ -158,52 +158,59 @@ export function ArticleGrid() {
     const bottomRowArticles = articles.slice(6, 12);
 
     return (
-        <section className="w-full bg-bg-primary py-12 md:py-32 px-6 md:px-16 border-t border-border-subtle">
-            <div className="max-w-[1280px] mx-auto space-y-12 md:space-y-20">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-border-subtle pb-8">
-                    <div className="space-y-4">
-                        <span className="text-text-muted text-xs font-sans font-bold tracking-widest uppercase">The List</span>
-                        <h2 className="text-3xl md:text-5xl lg:text-6xl font-serif font-semibold text-text-primary leading-tight">
-                            Latest <span className="italic font-light">Perspectives</span>
-                        </h2>
-                    </div>
+        <section className="w-full bg-bg-primary py-16 md:py-24 border-t border-border-subtle">
+            <div className="w-full px-6 md:px-12 lg:px-16">
+                {/* Header */}
+                <div className="max-w-[1400px] mx-auto mb-12 md:mb-16">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-border-subtle">
+                        <div className="space-y-3">
+                            <span className="text-text-muted text-xs font-sans font-bold tracking-widest uppercase">The List</span>
+                            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-semibold text-text-primary leading-tight">
+                                Latest <span className="italic font-light">Perspectives</span>
+                            </h2>
+                        </div>
 
-                    <Link href="/stories" className="group flex items-center gap-2 text-xs md:text-sm font-bold font-sans uppercase tracking-[0.2em] text-text-primary hover:text-text-secondary transition-colors pb-1">
-                        View All <span className="group-hover:translate-x-1 transition-transform">→</span>
-                    </Link>
+                        <Link
+                            href="/stories"
+                            className="group flex items-center gap-2 text-sm font-bold font-sans uppercase tracking-wider text-text-primary hover:text-accent transition-colors"
+                        >
+                            View All <span className="group-hover:translate-x-1 transition-transform">→</span>
+                        </Link>
+                    </div>
                 </div>
 
-                {/* Mobile: Draggable Slider with Autoplay */}
-                <div className="md:hidden -mx-6 px-6">
-                    <MobileSlider autoplayInterval={2000} cardWidthPercent={92} gap={20}>
+                {/* Mobile: Draggable Slider */}
+                <div className="md:hidden -mx-6">
+                    <MobileSlider autoplayInterval={3000} cardWidthPercent={90} gap={16}>
                         {articles.map((article) => (
                             <div
                                 key={article.id}
                                 onClick={() => router.push(`/article/${article.slug}`)}
-                                className="group flex flex-row gap-3 cursor-pointer text-text-primary w-full bg-bg-secondary rounded-2xl overflow-hidden shadow-sm"
+                                className="group flex flex-col bg-bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                             >
-                                {/* Horizontal image on left */}
-                                <div className="relative w-[35%] aspect-[3/4] shrink-0 overflow-hidden">
+                                <div className="relative w-full aspect-[16/9] overflow-hidden">
                                     <Image
                                         src={article.img}
                                         alt={article.title}
                                         fill
-                                        sizes="(max-width: 768px) 35vw, 33vw"
-                                        className="object-cover"
+                                        sizes="90vw"
+                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                                     />
                                 </div>
-                                {/* Content on right */}
-                                <div className="flex-1 py-4 pr-4 flex flex-col justify-center gap-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-accent">
-                                        {article.category}
-                                    </span>
-                                    <h3 className="text-[15px] font-serif font-bold leading-tight line-clamp-2">
-                                        {article.title}
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-[11px] text-text-muted mt-1">
-                                        <span className="font-medium">{article.author}</span>
+                                <div className="p-4 space-y-3">
+                                    <div className="flex items-center gap-2 text-[10px] font-bold text-text-muted uppercase tracking-wider">
+                                        <span className="text-accent">{article.category}</span>
                                         <span>•</span>
                                         <span>{article.date}</span>
+                                    </div>
+                                    <h3 className="text-base font-serif font-semibold leading-tight text-text-primary line-clamp-2">
+                                        {article.title}
+                                    </h3>
+                                    <div className="flex items-center gap-2 pt-2">
+                                        <div className="w-6 h-6 rounded-full bg-bg-secondary relative overflow-hidden">
+                                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill sizes="24px" className="object-cover" />
+                                        </div>
+                                        <span className="text-xs font-medium text-text-secondary">{article.author}</span>
                                     </div>
                                 </div>
                             </div>
@@ -211,8 +218,8 @@ export function ArticleGrid() {
                     </MobileSlider>
                 </div>
 
-                {/* Desktop: 2 Horizontal Sliders with opposite directions */}
-                <div className="hidden md:block space-y-12">
+                {/* Desktop: 2 Horizontal Sliders */}
+                <div className="hidden md:block max-w-[1600px] mx-auto space-y-16">
                     <HorizontalSlider articles={topRowArticles} direction="left" />
                     <HorizontalSlider articles={bottomRowArticles} direction="right" />
                 </div>
