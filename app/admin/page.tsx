@@ -29,7 +29,7 @@ export default function AdminLoginPage() {
             } else {
                 setError(result.error || "Access denied.");
             }
-        } catch (err) {
+        } catch {
             setError("An error occurred. Please try again.");
         } finally {
             setIsLoading(false);

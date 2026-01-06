@@ -1,5 +1,5 @@
 
-import mysql from 'mysql2/promise';
+import mysql, { RowDataPacket } from 'mysql2/promise';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
@@ -75,7 +75,7 @@ async function setup() {
         // Seed Assets
         console.log("Seeding assets...");
         for (const [key, value] of Object.entries(Assets)) {
-            const [rows] = await connection.query<any[]>("SELECT id FROM assets WHERE name = ?", [key]);
+            const [rows] = await connection.query<RowDataPacket[]>("SELECT id FROM assets WHERE name = ?", [key]);
             if (rows.length === 0) {
                 await connection.query("INSERT INTO assets (name, url) VALUES (?, ?)", [key, value]);
             }
@@ -94,7 +94,7 @@ async function setup() {
                 const fileContents = fs.readFileSync(fullPath, 'utf8');
                 const { data, content } = matter(fileContents);
 
-                const [rows] = await connection.query<any[]>("SELECT id FROM posts WHERE slug = ?", [slug]);
+                const [rows] = await connection.query<RowDataPacket[]>("SELECT id FROM posts WHERE slug = ?", [slug]);
                 if (rows.length === 0) {
                     await connection.query(
                         "INSERT INTO posts (slug, title, date, author, category, content, coverImage, videoUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",

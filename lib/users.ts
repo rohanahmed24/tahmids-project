@@ -33,7 +33,7 @@ export async function getUserStats() {
         try {
              const [viewRows] = await db.query<RowDataPacket[]>("SELECT SUM(views) as total FROM posts");
              totalViews = viewRows[0].total || 0;
-        } catch (e) {
+        } catch {
             // views column might not exist yet
             console.warn("Could not fetch views sum, defaulting to 0");
         }

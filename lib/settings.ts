@@ -10,9 +10,9 @@ export async function getSettings(): Promise<SiteSettings> {
     const db = getDb();
     try {
         const [rows] = await db.query<RowDataPacket[]>("SELECT key_name, value FROM settings");
-        const settings: any = {};
-        rows.forEach((row: any) => {
-            settings[row.key_name] = row.value;
+        const settings: Record<string, string> = {};
+        rows.forEach((row) => {
+            settings[row.key_name as string] = row.value as string;
         });
 
         return {

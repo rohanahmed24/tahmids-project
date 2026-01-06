@@ -22,7 +22,7 @@ export default async function DashboardPage() {
         author: post.author,
         category: post.category,
         status: "published", // Assuming all in DB are published for now
-        views: (post as any).views || 0, // Use views if available
+        views: post.views || 0, // Use views if available
         date: post.date,
         img: post.coverImage || "/imgs/Chernobyl.png",
         slug: post.slug // Needed for edit link

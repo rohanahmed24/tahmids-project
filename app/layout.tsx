@@ -1,22 +1,9 @@
 import type { Metadata } from "next";
-import { Fraunces, Merriweather_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { DevToolsBlocker } from "@/components/DevToolsBlocker";
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  display: "swap",
-});
-
-const merriweatherSans = Merriweather_Sans({
-  subsets: ["latin"],
-  variable: "--font-merriweather-sans",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Wisdomia",
@@ -32,7 +19,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${fraunces.variable} ${merriweatherSans.variable} antialiased bg-base text-main transition-colors duration-300`}
+        className="antialiased bg-base text-main transition-colors duration-300"
       >
         <ThemeProvider
           attribute="class"

@@ -22,8 +22,8 @@ async function updateDb() {
         try {
             await connection.query("ALTER TABLE posts ADD COLUMN views INT DEFAULT 0");
             console.log("Added 'views' column to posts.");
-        } catch (e: any) {
-            if (e.code === 'ER_DUP_FIELDNAME') {
+        } catch (e) {
+            if ((e as { code?: string }).code === 'ER_DUP_FIELDNAME') {
                 console.log("'views' column already exists in posts.");
             } else {
                 throw e;
@@ -34,8 +34,8 @@ async function updateDb() {
         try {
             await connection.query("ALTER TABLE users ADD COLUMN plan VARCHAR(50) DEFAULT 'Explorer'");
             console.log("Added 'plan' column to users.");
-        } catch (e: any) {
-             if (e.code === 'ER_DUP_FIELDNAME') {
+        } catch (e) {
+             if ((e as { code?: string }).code === 'ER_DUP_FIELDNAME') {
                 console.log("'plan' column already exists in users.");
             } else {
                 throw e;

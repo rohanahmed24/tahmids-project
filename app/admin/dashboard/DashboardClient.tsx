@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Assets } from "@/lib/assets";
 import { logoutAdmin } from "@/actions/admin-auth";
 import { deletePost } from "@/actions/posts";
 import { deleteUser, updateUserPlan } from "@/actions/users";
@@ -24,9 +23,6 @@ import {
     Eye,
     TrendingUp,
     TrendingDown,
-    Clock,
-    BookOpen,
-    Bookmark,
     DollarSign,
     Check,
     Shield,
@@ -34,7 +30,8 @@ import {
     Moon,
     Sun,
     X,
-    UserPlus
+    UserPlus,
+    type LucideIcon
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -109,7 +106,7 @@ interface DashboardClientProps {
     initialSettings: SiteSettings;
 }
 
-const icons: Record<string, any> = {
+const icons: Record<string, LucideIcon> = {
     Users,
     FileText,
     Eye,
@@ -131,8 +128,8 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     // Data states
     const [articles, setArticles] = useState(initialArticles);
     const [users, setUsers] = useState(initialUsers);
-    const [stats, setStats] = useState(initialStats);
-    const [settings, setSettings] = useState(initialSettings);
+    const [stats] = useState(initialStats);
+    const [settings] = useState(initialSettings);
 
     // Filtered Data
     const filteredArticles = articles.filter(article =>
@@ -170,18 +167,6 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     };
 
     const confirmDelete = async () => {
-<<<<<<< HEAD
-        if (deleteTarget && deleteTarget.type === "article") {
-            try {
-                await deletePost(deleteTarget.name); // passing slug which I put in name for article
-                // Optimistically update the UI or let revalidatePath handle it?
-                // RevalidatePath in server action handles server side, but client state 'articles' needs update
-                // Since this is a client component with initialArticles passed as prop, we might need to refresh or filter.
-                setArticles(articles.filter(a => a.slug !== deleteTarget.name));
-            } catch (error) {
-                console.error("Failed to delete", error);
-                alert("Failed to delete article");
-=======
         if (deleteTarget) {
             try {
                 if (deleteTarget.type === "article") {
@@ -196,7 +181,6 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
             } catch (error) {
                 console.error("Failed to delete", error);
                 alert(`Failed to delete ${deleteTarget.type}`);
->>>>>>> origin/cms-features-8736145947038865530
             }
         }
         setShowDeleteModal(false);
