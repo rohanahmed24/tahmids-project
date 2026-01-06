@@ -17,6 +17,10 @@ const breakingNews = [
     { id: "06", category: "Lifestyle", title: "Mindful Living in a Digital Age", img: Assets.imgStoryScience, slug: "mindful-living", author: "Sarah Jenkins", date: "Dec 18" },
     { id: "07", category: "Future Tech", title: "Cities of Tomorrow: Reimagining Urban Life", img: Assets.imgStoryArt, slug: "future-cities", author: "James L.", date: "Dec 14" },
     { id: "08", category: "Culture", title: "The Creative Process Unveiled", img: Assets.imgStoryHistory, slug: "creative-process", author: "Sarah Jenkins", date: "Dec 12" },
+    { id: "09", category: "Design", title: "Minimalism in Modern Design", img: Assets.imgPlaceholderImage1, slug: "minimalism-design", author: "Sarah Jenkins", date: "Dec 11" },
+    { id: "10", category: "Tech", title: "Blockchain and the Future", img: Assets.imgPlaceholderImage2, slug: "blockchain-future", author: "David Miller", date: "Dec 10" },
+    { id: "11", category: "Science", title: "Climate Change Solutions", img: Assets.imgStoryCulture, slug: "climate-solutions", author: "Emily Rose", date: "Dec 9" },
+    { id: "12", category: "Culture", title: "The Art of Storytelling", img: Assets.imgStoryHistory, slug: "art-storytelling", author: "John Smith", date: "Dec 8" },
 ];
 
 // Desktop Horizontal Slider Component
@@ -37,7 +41,7 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof
         return () => window.removeEventListener("resize", updateWidth);
     }, []);
 
-    const cardWidth = 300;
+    const cardWidth = 350; // Increased card width
     const gap = 24;
     const totalWidth = items.length * (cardWidth + gap);
     const maxDrag = -(totalWidth - containerWidth);
@@ -125,9 +129,9 @@ export function FeaturedTales() {
     const gap = 12;
     const totalPages = Math.ceil(breakingNews.length / cardsPerPage);
 
-    // Split breakingNews into top 4 and bottom 4 for desktop sliders
-    const topRowItems = breakingNews.slice(0, 4);
-    const bottomRowItems = breakingNews.slice(4, 8);
+    // Split breakingNews into top 6 and bottom 6 for desktop sliders
+    const topRowItems = breakingNews.slice(0, 6);
+    const bottomRowItems = breakingNews.slice(6, 12);
 
     useEffect(() => {
         if (containerRef.current) {
