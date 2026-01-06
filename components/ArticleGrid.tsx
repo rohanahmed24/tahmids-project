@@ -33,7 +33,7 @@ export function ArticleGrid() {
             onClick={() => router.push(`/article/${article.slug}`)}
             className="group flex flex-col gap-5 cursor-pointer text-text-primary"
         >
-            <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-bg-card shadow-sm transition-shadow group-hover:shadow-md">
+            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-bg-card shadow-sm transition-shadow group-hover:shadow-md">
                 <Image
                     src={article.img}
                     alt={article.title}
