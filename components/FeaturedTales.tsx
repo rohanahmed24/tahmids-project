@@ -20,7 +20,7 @@ const breakingNews = [
 ];
 
 // Desktop Horizontal Slider Component
-function DesktopFeaturedSlider() {
+function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof breakingNews; direction?: "left" | "right" }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const [containerWidth, setContainerWidth] = useState(0);
@@ -39,7 +39,7 @@ function DesktopFeaturedSlider() {
 
     const cardWidth = 300;
     const gap = 24;
-    const totalWidth = breakingNews.length * (cardWidth + gap);
+    const totalWidth = items.length * (cardWidth + gap);
     const maxDrag = -(totalWidth - containerWidth);
 
     // Auto-scroll effect
@@ -49,7 +49,10 @@ function DesktopFeaturedSlider() {
         const scrollRange = totalWidth - containerWidth;
         const duration = (scrollRange / 30); // 30px per second
 
-        const controls = animate(x, [0, -scrollRange], {
+        const startX = direction === "left" ? 0 : -scrollRange;
+        const endX = direction === "left" ? -scrollRange : 0;
+
+        const controls = animate(x, [startX, endX], {
             duration,
             ease: "linear",
             repeat: Infinity,
@@ -57,7 +60,7 @@ function DesktopFeaturedSlider() {
         });
 
         return () => controls.stop();
-    }, [containerWidth, totalWidth, x, isPaused]);
+    }, [containerWidth, totalWidth, direction, x, isPaused]);
 
     return (
         <div
@@ -76,7 +79,7 @@ function DesktopFeaturedSlider() {
                 onDragStart={() => setIsPaused(true)}
                 onDragEnd={() => setIsPaused(false)}
             >
-                {breakingNews.map((item) => (
+                {items.map((item) => (
                     <Link
                         key={item.id}
                         href={`/article/${item.slug}`}
@@ -121,6 +124,10 @@ export function FeaturedTales() {
     const cardsPerPage = 2;
     const gap = 12;
     const totalPages = Math.ceil(breakingNews.length / cardsPerPage);
+
+    // Split breakingNews into top 4 and bottom 4 for desktop sliders
+    const topRowItems = breakingNews.slice(0, 4);
+    const bottomRowItems = breakingNews.slice(4, 8);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -253,9 +260,10 @@ export function FeaturedTales() {
                     </div>
                 </div>
 
-                {/* Desktop: Horizontal Slider */}
-                <div className="hidden md:block">
-                    <DesktopFeaturedSlider />
+                {/* Desktop: 2 Horizontal Sliders with opposite directions */}
+                <div className="hidden md:block space-y-12">
+                    <FeaturedHorizontalSlider items={topRowItems} direction="left" />
+                    <FeaturedHorizontalSlider items={bottomRowItems} direction="right" />
                 </div>
             </div>
         </section>
