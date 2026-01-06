@@ -115,7 +115,7 @@ export function FeaturedTales() {
                                     className="flex-shrink-0"
                                     style={{ width: cardWidth }}
                                 >
-                                    <div className="relative aspect-[3/4] overflow-hidden rounded-lg mb-2">
+                                    <div className="relative aspect-[16/9] overflow-hidden rounded-lg mb-2">
                                         <span className="absolute top-2 left-2 px-2 py-0.5 bg-amber-600/90 text-[8px] uppercase font-bold tracking-wider text-white rounded z-20">
                                             {item.category}
                                         </span>
@@ -172,7 +172,7 @@ export function FeaturedTales() {
                             className="group cursor-pointer"
                         >
                             <Link href={`/article/${item.slug}`}>
-                                <div className="relative aspect-[3/4] overflow-hidden mb-4 transition-all duration-700">
+                                <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700">
                                     <Image
                                         src={item.img}
                                         fill
