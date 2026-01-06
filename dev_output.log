@@ -1,0 +1,41 @@
+
+> project-1@0.1.0 dev
+> next dev
+
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://192.168.0.2:3000
+
+ ✓ Starting...
+ ✓ Ready in 1128ms
+ ○ Compiling /_not-found/page ...
+ GET /robots.txt 404 in 4.6s (compile: 4.2s, render: 394ms)
+ GET /register 200 in 1528ms (compile: 1405ms, render: 122ms)
+ GET /register 200 in 137ms (compile: 21ms, render: 117ms)
+Registration error: AggregateError:
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  fatal: true
+}
+ POST /register 200 in 126ms (compile: 8ms, render: 118ms)
+ GET /register 200 in 118ms (compile: 6ms, render: 112ms)
+Registration error: AggregateError:
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  fatal: true
+}
+ POST /register 200 in 31ms (compile: 8ms, render: 23ms)
+ GET /register 200 in 128ms (compile: 7ms, render: 122ms)
+Registration error: AggregateError:
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  fatal: true
+}
+ POST /register 200 in 29ms (compile: 5ms, render: 23ms)
+ GET /register 200 in 116ms (compile: 6ms, render: 110ms)
+Registration error: AggregateError:
+    at ignore-listed frames {
+  code: 'ECONNREFUSED',
+  fatal: true
+}
+ POST /register 200 in 27ms (compile: 7ms, render: 21ms)
