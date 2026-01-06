@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { motion, useMotionValue, animate, PanInfo } from "framer-motion";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { DecorativeBackgrounds } from "@/components/ui/DecorativeBackgrounds";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 
@@ -29,6 +29,7 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof
     const x = useMotionValue(0);
     const [containerWidth, setContainerWidth] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         const updateWidth = () => {
@@ -41,80 +42,143 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof
         return () => window.removeEventListener("resize", updateWidth);
     }, []);
 
-    const cardWidth = 350; // Increased card width
+    const cardWidth = 350;
     const gap = 24;
     const totalWidth = items.length * (cardWidth + gap);
     const maxDrag = -(totalWidth - containerWidth);
 
-    // Auto-scroll effect
-    useEffect(() => {
-        if (containerWidth === 0 || isPaused) return;
-
-        const scrollRange = totalWidth - containerWidth;
-        const duration = (scrollRange / 30); // 30px per second
-
-        const startX = direction === "left" ? 0 : -scrollRange;
-        const endX = direction === "left" ? -scrollRange : 0;
-
-        const controls = animate(x, [startX, endX], {
-            duration,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "reverse",
+    // Scroll to specific index
+    const scrollToIndex = useCallback((index: number) => {
+        const targetX = -(index * (cardWidth + gap));
+        const clampedX = Math.max(maxDrag, Math.min(0, targetX));
+        animate(x, clampedX, {
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
         });
+        setCurrentIndex(index);
+    }, [cardWidth, gap, maxDrag, x]);
 
-        return () => controls.stop();
-    }, [containerWidth, totalWidth, direction, x, isPaused]);
+    // Auto-advance slider
+    useEffect(() => {
+        if (containerWidth === 0 || isPaused || items.length === 0) return;
+
+        const timer = setInterval(() => {
+            setCurrentIndex((prev) => {
+                const nextIndex = direction === "left"
+                    ? (prev + 1) % items.length
+                    : (prev - 1 + items.length) % items.length;
+                scrollToIndex(nextIndex);
+                return nextIndex;
+            });
+        }, 3000);
+
+        return () => clearInterval(timer);
+    }, [containerWidth, isPaused, items.length, direction, scrollToIndex]);
+
+    // Handle drag end
+    const handleDragEnd = () => {
+        const currentX = x.get();
+        const newIndex = Math.round(-currentX / (cardWidth + gap));
+        const clampedIndex = Math.max(0, Math.min(items.length - 1, newIndex));
+        scrollToIndex(clampedIndex);
+        setIsPaused(false);
+    };
+
+    const goToPrevious = () => {
+        const newIndex = (currentIndex - 1 + items.length) % items.length;
+        scrollToIndex(newIndex);
+    };
+
+    const goToNext = () => {
+        const newIndex = (currentIndex + 1) % items.length;
+        scrollToIndex(newIndex);
+    };
 
     return (
-        <div
-            ref={containerRef}
-            className="overflow-hidden"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-        >
-            <motion.div
-                className="flex cursor-grab active:cursor-grabbing"
-                style={{ x, gap }}
-                drag="x"
-                dragConstraints={{ left: maxDrag, right: 0 }}
-                dragElastic={0.1}
-                dragMomentum={false}
-                onDragStart={() => setIsPaused(true)}
-                onDragEnd={() => setIsPaused(false)}
+        <div className="relative group">
+            <div
+                ref={containerRef}
+                className="overflow-hidden"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
             >
-                {items.map((item) => (
-                    <Link
-                        key={item.id}
-                        href={`/article/${item.slug}`}
-                        className="flex-shrink-0 group"
-                        style={{ width: cardWidth }}
-                    >
-                        <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700 rounded-lg">
-                            <Image
-                                src={item.img}
-                                fill
-                                sizes="300px"
-                                alt={item.title}
-                                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-                        </div>
-
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2 uppercase font-bold tracking-widest text-[10px]">
-                                <span className="text-accent">{item.category}</span>
-                                <span className="text-text-muted">•</span>
-                                <span className="text-text-muted">{item.date}</span>
+                <motion.div
+                    className="flex cursor-grab active:cursor-grabbing"
+                    style={{ x, gap }}
+                    drag="x"
+                    dragConstraints={{ left: maxDrag, right: 0 }}
+                    dragElastic={0.1}
+                    dragMomentum={false}
+                    onDragStart={() => setIsPaused(true)}
+                    onDragEnd={handleDragEnd}
+                >
+                    {items.map((item) => (
+                        <Link
+                            key={item.id}
+                            href={`/article/${item.slug}`}
+                            className="flex-shrink-0 group"
+                            style={{ width: cardWidth }}
+                        >
+                            <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700 rounded-lg">
+                                <Image
+                                    src={item.img}
+                                    fill
+                                    sizes="300px"
+                                    alt={item.title}
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                             </div>
-                            <h3 className="font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2 text-base">
-                                {item.title}
-                            </h3>
-                            <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
-                        </div>
-                    </Link>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 uppercase font-bold tracking-widest text-[10px]">
+                                    <span className="text-accent">{item.category}</span>
+                                    <span className="text-text-muted">•</span>
+                                    <span className="text-text-muted">{item.date}</span>
+                                </div>
+                                <h3 className="font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2 text-base">
+                                    {item.title}
+                                </h3>
+                                <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
+                            </div>
+                        </Link>
+                    ))}
+                </motion.div>
+            </div>
+
+            {/* Navigation Arrows */}
+            <button
+                onClick={goToPrevious}
+                className="absolute left-4 top-1/3 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+                aria-label="Previous"
+            >
+                <span className="text-text-primary text-xl">←</span>
+            </button>
+
+            <button
+                onClick={goToNext}
+                className="absolute right-4 top-1/3 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+                aria-label="Next"
+            >
+                <span className="text-text-primary text-xl">→</span>
+            </button>
+
+            {/* Pagination Dots */}
+            <div className="flex justify-center gap-2 mt-6">
+                {items.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => scrollToIndex(index)}
+                        className={`h-2 rounded-full transition-all ${
+                            index === currentIndex
+                                ? "bg-accent w-8"
+                                : "bg-text-muted/30 w-2 hover:bg-text-muted/50"
+                        }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                    />
                 ))}
-            </motion.div>
+            </div>
         </div>
     );
 }
