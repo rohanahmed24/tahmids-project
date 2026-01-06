@@ -1,8 +1,5 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
-
-const postsDirectory = path.join(process.cwd(), 'content/posts');
+import { getDb } from "@/lib/db";
+import { RowDataPacket } from "mysql2";
 
 export type Post = {
     slug: string;
@@ -15,43 +12,30 @@ export type Post = {
     videoUrl?: string;
 };
 
-// Helper type for frontmatter
-type PostMetadata = Omit<Post, 'slug' | 'content'>;
-
-export function getAllPosts(): Post[] {
-    if (!fs.existsSync(postsDirectory)) {
+export async function getAllPosts(): Promise<Post[]> {
+    const db = getDb();
+    try {
+        const [rows] = await db.query<RowDataPacket[]>(
+            "SELECT slug, title, date, author, category, content, coverImage, videoUrl FROM posts ORDER BY date DESC"
+        );
+        return rows as Post[];
+    } catch (error) {
+        console.error("Error fetching posts:", error);
         return [];
     }
-
-    const fileNames = fs.readdirSync(postsDirectory);
-    const allPosts = fileNames.map((fileName) => {
-        const slug = fileName.replace(/\.mdx$/, '');
-        const fullPath = path.join(postsDirectory, fileName);
-        const fileContents = fs.readFileSync(fullPath, 'utf8');
-        const { data, content } = matter(fileContents);
-
-        return {
-            slug,
-            content,
-            ...(data as PostMetadata),
-        };
-    });
-
-    return allPosts.sort((a, b) => (a.date > b.date ? -1 : 1));
 }
 
-export function getPostBySlug(slug: string): Post | null {
-    const fullPath = path.join(postsDirectory, `${slug}.mdx`);
-    if (!fs.existsSync(fullPath)) {
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+    const db = getDb();
+    try {
+        const [rows] = await db.query<RowDataPacket[]>(
+            "SELECT slug, title, date, author, category, content, coverImage, videoUrl FROM posts WHERE slug = ?",
+            [slug]
+        );
+        if (rows.length === 0) return null;
+        return rows[0] as Post;
+    } catch (error) {
+        console.error("Error fetching post by slug:", error);
         return null;
     }
-
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
-    const { data, content } = matter(fileContents);
-
-    return {
-        slug,
-        content,
-        ...(data as PostMetadata),
-    };
 }
