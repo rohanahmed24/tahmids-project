@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { MobileSlider } from "@/components/ui/MobileSlider";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { motion, useMotionValue, animate } from "framer-motion";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 type Article = {
     id: number;
@@ -42,6 +42,7 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
     const x = useMotionValue(0);
     const [containerWidth, setContainerWidth] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         const updateWidth = () => {
@@ -54,30 +55,39 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
         return () => window.removeEventListener("resize", updateWidth);
     }, []);
 
-    const cardWidth = 350; // Fixed card width - increased size
+    const cardWidth = 350;
     const gap = 32;
     const totalWidth = articles.length * (cardWidth + gap);
     const maxDrag = -(totalWidth - containerWidth);
 
-    // Auto-scroll effect
-    useEffect(() => {
-        if (containerWidth === 0 || isPaused) return;
-
-        const scrollRange = totalWidth - containerWidth;
-        const duration = (scrollRange / 30); // 30px per second
-
-        const startX = direction === "left" ? 0 : -scrollRange;
-        const endX = direction === "left" ? -scrollRange : 0;
-
-        const controls = animate(x, [startX, endX], {
-            duration,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "reverse",
+    // Scroll to specific index
+    const scrollToIndex = useCallback((index: number) => {
+        const targetX = -(index * (cardWidth + gap));
+        const clampedX = Math.max(maxDrag, Math.min(0, targetX));
+        animate(x, clampedX, {
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
         });
+        setCurrentIndex(index);
+    }, [cardWidth, gap, maxDrag, x]);
 
-        return () => controls.stop();
-    }, [containerWidth, totalWidth, direction, x, isPaused]);
+    // Auto-advance slider
+    useEffect(() => {
+        if (containerWidth === 0 || isPaused || articles.length === 0) return;
+
+        const timer = setInterval(() => {
+            setCurrentIndex((prev) => {
+                const nextIndex = direction === "left"
+                    ? (prev + 1) % articles.length
+                    : (prev - 1 + articles.length) % articles.length;
+                scrollToIndex(nextIndex);
+                return nextIndex;
+            });
+        }, 3000); // Advance every 3 seconds
+
+        return () => clearInterval(timer);
+    }, [containerWidth, isPaused, articles.length, direction, scrollToIndex]);
 
     const renderArticleCard = (article: Article) => (
         <div
@@ -127,25 +137,79 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
         </div>
     );
 
+    // Handle drag end
+    const handleDragEnd = () => {
+        const currentX = x.get();
+        const newIndex = Math.round(-currentX / (cardWidth + gap));
+        const clampedIndex = Math.max(0, Math.min(articles.length - 1, newIndex));
+        scrollToIndex(clampedIndex);
+        setIsPaused(false);
+    };
+
+    const goToPrevious = () => {
+        const newIndex = (currentIndex - 1 + articles.length) % articles.length;
+        scrollToIndex(newIndex);
+    };
+
+    const goToNext = () => {
+        const newIndex = (currentIndex + 1) % articles.length;
+        scrollToIndex(newIndex);
+    };
+
     return (
-        <div
-            ref={containerRef}
-            className="overflow-hidden"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-        >
-            <motion.div
-                className="flex cursor-grab active:cursor-grabbing"
-                style={{ x, gap }}
-                drag="x"
-                dragConstraints={{ left: maxDrag, right: 0 }}
-                dragElastic={0.1}
-                dragMomentum={false}
-                onDragStart={() => setIsPaused(true)}
-                onDragEnd={() => setIsPaused(false)}
+        <div className="relative group">
+            <div
+                ref={containerRef}
+                className="overflow-hidden"
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
             >
-                {articles.map(renderArticleCard)}
-            </motion.div>
+                <motion.div
+                    className="flex cursor-grab active:cursor-grabbing"
+                    style={{ x, gap }}
+                    drag="x"
+                    dragConstraints={{ left: maxDrag, right: 0 }}
+                    dragElastic={0.1}
+                    dragMomentum={false}
+                    onDragStart={() => setIsPaused(true)}
+                    onDragEnd={handleDragEnd}
+                >
+                    {articles.map(renderArticleCard)}
+                </motion.div>
+            </div>
+
+            {/* Navigation Arrows */}
+            <button
+                onClick={goToPrevious}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+                aria-label="Previous"
+            >
+                <span className="text-text-primary text-xl">←</span>
+            </button>
+
+            <button
+                onClick={goToNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+                aria-label="Next"
+            >
+                <span className="text-text-primary text-xl">→</span>
+            </button>
+
+            {/* Pagination Dots */}
+            <div className="flex justify-center gap-2 mt-6">
+                {articles.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => scrollToIndex(index)}
+                        className={`h-2 rounded-full transition-all ${
+                            index === currentIndex
+                                ? "bg-accent w-8"
+                                : "bg-text-muted/30 w-2 hover:bg-text-muted/50"
+                        }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                    />
+                ))}
+            </div>
         </div>
     );
 }
