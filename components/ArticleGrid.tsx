@@ -57,8 +57,11 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
 
     const cardWidth = 350;
     const gap = 32;
+    const cardsPerView = 4; // Maximum 4 cards visible at once
+    const visibleCards = Math.min(articles.length, cardsPerView);
+    const containerMaxWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
     const totalWidth = articles.length * (cardWidth + gap);
-    const maxDrag = -(totalWidth - containerWidth);
+    const maxDrag = -(totalWidth - (visibleCards * cardWidth + (visibleCards - 1) * gap));
 
     // Scroll to specific index
     const scrollToIndex = useCallback((index: number) => {
@@ -157,7 +160,7 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
     };
 
     return (
-        <div className="relative group">
+        <div className="relative group mx-auto" style={{ maxWidth: `${containerMaxWidth}px` }}>
             <div
                 ref={containerRef}
                 className="overflow-hidden"
