@@ -27,28 +27,23 @@ const breakingNews = [
 function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof breakingNews; direction?: "left" | "right" }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
-    const [containerWidth, setContainerWidth] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    useEffect(() => {
-        const updateWidth = () => {
-            if (containerRef.current) {
-                setContainerWidth(containerRef.current.offsetWidth);
-            }
-        };
-        updateWidth();
-        window.addEventListener("resize", updateWidth);
-        return () => window.removeEventListener("resize", updateWidth);
-    }, []);
+    // STRICT 4-CARDS-PER-VIEW CONFIGURATION
+    const cardWidth = 350; // Fixed card width in pixels
+    const gap = 24; // Gap between cards in pixels
+    const cardsPerView = 4; // MAXIMUM 4 cards visible at once - STRICTLY ENFORCED
+    const visibleCards = Math.min(items.length, cardsPerView); // Never exceed 4
 
-    const cardWidth = 350;
-    const gap = 24;
-    const cardsPerView = 4; // Maximum 4 cards visible at once
-    const visibleCards = Math.min(items.length, cardsPerView);
-    const containerMaxWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
+    // Calculate exact container width for 4 cards: (4 × 350px) + (3 × 24px gaps) = 1472px
+    const sliderWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
+
+    // Total width of all cards in the slider
     const totalWidth = items.length * (cardWidth + gap);
-    const maxDrag = -(totalWidth - (visibleCards * cardWidth + (visibleCards - 1) * gap));
+
+    // Maximum drag distance to show only visible cards
+    const maxDrag = -(totalWidth - sliderWidth);
 
     // Scroll to specific index
     const scrollToIndex = useCallback((index: number) => {
@@ -64,20 +59,24 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof
 
     // Auto-advance slider
     useEffect(() => {
-        if (containerWidth === 0 || isPaused || items.length === 0) return;
+        if (isPaused || items.length === 0) return;
 
         const timer = setInterval(() => {
             setCurrentIndex((prev) => {
                 const nextIndex = direction === "left"
                     ? (prev + 1) % items.length
                     : (prev - 1 + items.length) % items.length;
-                scrollToIndex(nextIndex);
                 return nextIndex;
             });
         }, 3000);
 
         return () => clearInterval(timer);
-    }, [containerWidth, isPaused, items.length, direction, scrollToIndex]);
+    }, [isPaused, items.length, direction]);
+
+    // Sync slider position with currentIndex
+    useEffect(() => {
+        scrollToIndex(currentIndex);
+    }, [currentIndex, scrollToIndex]);
 
     // Handle drag end
     const handleDragEnd = () => {
@@ -99,10 +98,17 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof
     };
 
     return (
-        <div className="relative group mx-auto" style={{ width: `${containerMaxWidth}px`, maxWidth: '100%' }}>
+        <div
+            className="relative group mx-auto"
+            style={{
+                width: `${sliderWidth}px`,
+                minWidth: `${sliderWidth}px`,
+                maxWidth: '100%'
+            }}
+        >
             <div
                 ref={containerRef}
-                className="overflow-hidden"
+                className="overflow-hidden w-full"
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
             >
@@ -121,7 +127,7 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof
                             key={item.id}
                             href={`/article/${item.slug}`}
                             className="flex-shrink-0 group"
-                            style={{ width: cardWidth }}
+                            style={{ width: `${cardWidth}px`, minWidth: `${cardWidth}px`, maxWidth: `${cardWidth}px` }}
                         >
                             <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700 rounded-lg">
                                 <Image
