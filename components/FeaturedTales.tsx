@@ -19,6 +19,99 @@ const breakingNews = [
     { id: "08", category: "Culture", title: "The Creative Process Unveiled", img: Assets.imgStoryHistory, slug: "creative-process", author: "Sarah Jenkins", date: "Dec 12" },
 ];
 
+// Desktop Horizontal Slider Component
+function DesktopFeaturedSlider() {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const x = useMotionValue(0);
+    const [containerWidth, setContainerWidth] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+
+    useEffect(() => {
+        const updateWidth = () => {
+            if (containerRef.current) {
+                setContainerWidth(containerRef.current.offsetWidth);
+            }
+        };
+        updateWidth();
+        window.addEventListener("resize", updateWidth);
+        return () => window.removeEventListener("resize", updateWidth);
+    }, []);
+
+    const cardWidth = 300;
+    const gap = 24;
+    const totalWidth = breakingNews.length * (cardWidth + gap);
+    const maxDrag = -(totalWidth - containerWidth);
+
+    // Auto-scroll effect
+    useEffect(() => {
+        if (containerWidth === 0 || isPaused) return;
+
+        const scrollRange = totalWidth - containerWidth;
+        const duration = (scrollRange / 30); // 30px per second
+
+        const controls = animate(x, [0, -scrollRange], {
+            duration,
+            ease: "linear",
+            repeat: Infinity,
+            repeatType: "reverse",
+        });
+
+        return () => controls.stop();
+    }, [containerWidth, totalWidth, x, isPaused]);
+
+    return (
+        <div
+            ref={containerRef}
+            className="overflow-hidden"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+        >
+            <motion.div
+                className="flex cursor-grab active:cursor-grabbing"
+                style={{ x, gap }}
+                drag="x"
+                dragConstraints={{ left: maxDrag, right: 0 }}
+                dragElastic={0.1}
+                dragMomentum={false}
+                onDragStart={() => setIsPaused(true)}
+                onDragEnd={() => setIsPaused(false)}
+            >
+                {breakingNews.map((item) => (
+                    <Link
+                        key={item.id}
+                        href={`/article/${item.slug}`}
+                        className="flex-shrink-0 group"
+                        style={{ width: cardWidth }}
+                    >
+                        <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700 rounded-lg">
+                            <Image
+                                src={item.img}
+                                fill
+                                sizes="300px"
+                                alt={item.title}
+                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 uppercase font-bold tracking-widest text-[10px]">
+                                <span className="text-accent">{item.category}</span>
+                                <span className="text-text-muted">•</span>
+                                <span className="text-text-muted">{item.date}</span>
+                            </div>
+                            <h3 className="font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2 text-base">
+                                {item.title}
+                            </h3>
+                            <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
+                        </div>
+                    </Link>
+                ))}
+            </motion.div>
+        </div>
+    );
+}
+
 export function FeaturedTales() {
     const [currentPage, setCurrentPage] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -160,49 +253,9 @@ export function FeaturedTales() {
                     </div>
                 </div>
 
-                {/* Desktop: 4 per row grid */}
-                <div className="hidden md:grid grid-cols-4 gap-6">
-                    {breakingNews.map((item) => (
-                        <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, y: 50 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8 }}
-                            className="group cursor-pointer"
-                        >
-                            <Link href={`/article/${item.slug}`}>
-                                <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700">
-                                    <Image
-                                        src={item.img}
-                                        fill
-                                        sizes="(max-width: 1200px) 25vw, 300px"
-                                        alt={item.title}
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div
-                                        className="flex items-center gap-2 uppercase font-bold tracking-widest"
-                                        style={{ fontSize: 'clamp(0.5rem, 0.8vw, 0.625rem)' }}
-                                    >
-                                        <span className="text-accent">{item.category}</span>
-                                        <span className="text-text-muted">•</span>
-                                        <span className="text-text-muted">{item.date}</span>
-                                    </div>
-                                    <h3
-                                        className="font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2"
-                                        style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.125rem)' }}
-                                    >
-                                        {item.title}
-                                    </h3>
-                                    <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
-                                </div>
-                            </Link>
-                        </motion.div>
-                    ))}
+                {/* Desktop: Horizontal Slider */}
+                <div className="hidden md:block">
+                    <DesktopFeaturedSlider />
                 </div>
             </div>
         </section>
