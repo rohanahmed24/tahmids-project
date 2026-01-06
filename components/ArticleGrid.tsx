@@ -9,7 +9,18 @@ import { MediaOptions } from "@/components/ui/MediaOptions";
 import { motion, useMotionValue, animate } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 
-const articles = [
+type Article = {
+    id: number;
+    title: string;
+    author: string;
+    date: string;
+    img: string;
+    category: string;
+    slug: string;
+    topicSlug: string | null;
+};
+
+const articles: Article[] = [
     { id: 1, title: "The quiet revolution of slow interfaces", author: "Sarah Jenkins", date: "Dec 24", img: Assets.imgArticleBreakout, category: "Design", slug: "slow-interfaces", topicSlug: "design-culture" },
     { id: 2, title: "Why we need less information, not more", author: "David Miller", date: "Dec 23", img: Assets.imgStoryHistory, category: "Tech", slug: "less-information", topicSlug: "technology-ai" },
     { id: 3, title: "Building a digital garden for the mind", author: "John Smith", date: "Dec 22", img: Assets.imgArticleHero, category: "Philosophy", slug: "digital-garden", topicSlug: null },
@@ -21,7 +32,7 @@ const articles = [
 ];
 
 // Horizontal Slider Component
-function HorizontalSlider({ articles, direction = "left" }: { articles: typeof articles; direction?: "left" | "right" }) {
+function HorizontalSlider({ articles, direction = "left" }: { articles: Article[]; direction?: "left" | "right" }) {
     const router = useRouter();
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
@@ -64,7 +75,7 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: typeof a
         return () => controls.stop();
     }, [containerWidth, totalWidth, direction, x, isPaused]);
 
-    const renderArticleCard = (article: typeof articles[0]) => (
+    const renderArticleCard = (article: Article) => (
         <div
             key={article.id}
             onClick={() => router.push(`/article/${article.slug}`)}
@@ -143,7 +154,7 @@ export function ArticleGrid() {
     const bottomRowArticles = articles.slice(4, 8);
 
     // Render article card component for mobile
-    const renderArticleCard = (article: typeof articles[0]) => (
+    const renderArticleCard = (article: Article) => (
         <div
             key={article.id}
             onClick={() => router.push(`/article/${article.slug}`)}
