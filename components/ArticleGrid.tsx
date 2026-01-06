@@ -9,7 +9,18 @@ import { MediaOptions } from "@/components/ui/MediaOptions";
 import { motion, useMotionValue, animate } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 
-const articles = [
+type Article = {
+    id: number;
+    title: string;
+    author: string;
+    date: string;
+    img: string;
+    category: string;
+    slug: string;
+    topicSlug: string | null;
+};
+
+const articles: Article[] = [
     { id: 1, title: "The quiet revolution of slow interfaces", author: "Sarah Jenkins", date: "Dec 24", img: Assets.imgArticleBreakout, category: "Design", slug: "slow-interfaces", topicSlug: "design-culture" },
     { id: 2, title: "Why we need less information, not more", author: "David Miller", date: "Dec 23", img: Assets.imgStoryHistory, category: "Tech", slug: "less-information", topicSlug: "technology-ai" },
     { id: 3, title: "Building a digital garden for the mind", author: "John Smith", date: "Dec 22", img: Assets.imgArticleHero, category: "Philosophy", slug: "digital-garden", topicSlug: null },
@@ -21,7 +32,7 @@ const articles = [
 ];
 
 // Horizontal Slider Component
-function HorizontalSlider({ articles, direction = "left" }: { articles: typeof articles; direction?: "left" | "right" }) {
+function HorizontalSlider({ articles, direction = "left" }: { articles: Article[]; direction?: "left" | "right" }) {
     const router = useRouter();
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
@@ -64,7 +75,7 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: typeof a
         return () => controls.stop();
     }, [containerWidth, totalWidth, direction, x, isPaused]);
 
-    const renderArticleCard = (article: typeof articles[0]) => (
+    const renderArticleCard = (article: Article) => (
         <div
             key={article.id}
             onClick={() => router.push(`/article/${article.slug}`)}
@@ -141,54 +152,6 @@ export function ArticleGrid() {
     // Split articles into top 4 and bottom 4 for desktop slider
     const topRowArticles = articles.slice(0, 4);
     const bottomRowArticles = articles.slice(4, 8);
-
-    // Render article card component for mobile
-    const renderArticleCard = (article: typeof articles[0]) => (
-        <div
-            key={article.id}
-            onClick={() => router.push(`/article/${article.slug}`)}
-            className="group flex flex-col gap-5 cursor-pointer text-text-primary"
-        >
-            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-bg-card shadow-sm transition-shadow group-hover:shadow-md">
-                <Image
-                    src={article.img}
-                    alt={article.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-            </div>
-            <div className="space-y-3">
-                <div className="flex items-center gap-3 text-xs font-bold text-text-muted uppercase tracking-wider">
-                    {article.topicSlug ? (
-                        <Link
-                            href={`/topics/${article.topicSlug}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-accent hover:underline"
-                        >
-                            {article.category}
-                        </Link>
-                    ) : (
-                        <span className="text-accent">{article.category}</span>
-                    )}
-                    <span>•</span>
-                    <span>{article.date}</span>
-                </div>
-                <h3 className="text-lg md:text-xl font-serif font-semibold leading-tight group-hover:text-accent transition-colors">
-                    {article.title}
-                </h3>
-                <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-bg-secondary relative overflow-hidden">
-                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill sizes="32px" className="object-cover" />
-                        </div>
-                        <span className="text-xs font-sans font-medium text-text-secondary">{article.author}</span>
-                    </div>
-                    <MediaOptions slug={article.slug} variant="compact" />
-                </div>
-            </div>
-        </div>
-    );
 
     return (
         <section className="w-full bg-bg-primary py-12 md:py-32 px-6 md:px-16 border-t border-border-subtle">
