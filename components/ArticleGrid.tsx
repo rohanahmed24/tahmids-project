@@ -26,6 +26,7 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: typeof a
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const [containerWidth, setContainerWidth] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
 
     useEffect(() => {
         const updateWidth = () => {
@@ -41,10 +42,11 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: typeof a
     const cardWidth = 300; // Fixed card width
     const gap = 32;
     const totalWidth = articles.length * (cardWidth + gap);
+    const maxDrag = -(totalWidth - containerWidth);
 
     // Auto-scroll effect
     useEffect(() => {
-        if (containerWidth === 0) return;
+        if (containerWidth === 0 || isPaused) return;
 
         const scrollRange = totalWidth - containerWidth;
         const duration = (scrollRange / 30); // 30px per second
@@ -60,7 +62,7 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: typeof a
         });
 
         return () => controls.stop();
-    }, [containerWidth, totalWidth, direction, x]);
+    }, [containerWidth, totalWidth, direction, x, isPaused]);
 
     const renderArticleCard = (article: typeof articles[0]) => (
         <div
@@ -111,10 +113,21 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: typeof a
     );
 
     return (
-        <div ref={containerRef} className="overflow-hidden">
+        <div
+            ref={containerRef}
+            className="overflow-hidden"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+        >
             <motion.div
-                className="flex"
+                className="flex cursor-grab active:cursor-grabbing"
                 style={{ x, gap }}
+                drag="x"
+                dragConstraints={{ left: maxDrag, right: 0 }}
+                dragElastic={0.1}
+                dragMomentum={false}
+                onDragStart={() => setIsPaused(true)}
+                onDragEnd={() => setIsPaused(false)}
             >
                 {articles.map(renderArticleCard)}
             </motion.div>
