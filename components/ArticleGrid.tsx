@@ -29,6 +29,10 @@ const articles: Article[] = [
     { id: 6, title: "The Art of Mindful Living", author: "Emily Rose", date: "Dec 13", img: Assets.imgStoryScience, category: "Psychology", slug: "mindful-living", topicSlug: "psychology" },
     { id: 7, title: "The Creative Process Unveiled", author: "Sarah Jenkins", date: "Dec 12", img: Assets.imgStoryArt, category: "Design", slug: "creative-process", topicSlug: "design-culture" },
     { id: 8, title: "The Remote Work Revolution", author: "David Miller", date: "Dec 11", img: Assets.imgStoryCulture, category: "Culture", slug: "remote-work", topicSlug: "design-culture" },
+    { id: 9, title: "Understanding Modern Architecture", author: "Sarah Jenkins", date: "Dec 10", img: Assets.imgArticleBreakout, category: "Design", slug: "modern-architecture", topicSlug: "design-culture" },
+    { id: 10, title: "The Future of Work and Automation", author: "David Miller", date: "Dec 9", img: Assets.imgStoryHistory, category: "Tech", slug: "future-work", topicSlug: "technology-ai" },
+    { id: 11, title: "Meditation and Mental Health", author: "Emily Rose", date: "Dec 8", img: Assets.imgStoryScience, category: "Psychology", slug: "meditation", topicSlug: "psychology" },
+    { id: 12, title: "Sustainable Living in Urban Spaces", author: "James L.", date: "Dec 7", img: Assets.imgArticleFutureCities, category: "Lifestyle", slug: "sustainable-living", topicSlug: "future-tech" },
 ];
 
 // Horizontal Slider Component
@@ -50,7 +54,7 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
         return () => window.removeEventListener("resize", updateWidth);
     }, []);
 
-    const cardWidth = 300; // Fixed card width
+    const cardWidth = 350; // Fixed card width - increased size
     const gap = 32;
     const totalWidth = articles.length * (cardWidth + gap);
     const maxDrag = -(totalWidth - containerWidth);
@@ -149,9 +153,9 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
 export function ArticleGrid() {
     const router = useRouter();
 
-    // Split articles into top 4 and bottom 4 for desktop slider
-    const topRowArticles = articles.slice(0, 4);
-    const bottomRowArticles = articles.slice(4, 8);
+    // Split articles into top 6 and bottom 6 for desktop slider
+    const topRowArticles = articles.slice(0, 6);
+    const bottomRowArticles = articles.slice(6, 12);
 
     return (
         <section className="w-full bg-bg-primary py-12 md:py-32 px-6 md:px-16 border-t border-border-subtle">
