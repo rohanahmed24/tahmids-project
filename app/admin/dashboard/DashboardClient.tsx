@@ -33,7 +33,8 @@ import {
     Bell,
     Moon,
     Sun,
-    X
+    X,
+    UserPlus
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -125,12 +126,26 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: number; name: string } | null>(null);
     const [showEditUserModal, setShowEditUserModal] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [showAddUserModal, setShowAddUserModal] = useState(false);
 
     // Data states
     const [articles, setArticles] = useState(initialArticles);
     const [users, setUsers] = useState(initialUsers);
     const [stats, setStats] = useState(initialStats);
     const [settings, setSettings] = useState(initialSettings);
+
+    // Filtered Data
+    const filteredArticles = articles.filter(article =>
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const filteredUsers = users.filter(user =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.plan.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const router = useRouter();
     const { theme, setTheme } = useTheme();
@@ -195,6 +210,12 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                 alert("Failed to update user plan");
             }
         }
+    };
+
+    const handleAddUser = (e: React.FormEvent) => {
+        e.preventDefault();
+        alert("User creation is not fully implemented yet (requires Auth integration).");
+        setShowAddUserModal(false);
     };
 
     const handleSaveSettings = async (e: React.FormEvent) => {
@@ -366,7 +387,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                     })}
                                 </motion.div>
 
-                                {/* Recent Activity */}
+                                {/* Recent Activity - Still using slice(0,4) of full lists for overview */}
                                 <div className="grid grid-cols-2 gap-8">
                                     {/* Recent Users */}
                                     <motion.div
@@ -447,7 +468,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                             </motion.div>
                         )}
 
-                        {/* Users Tab - NOW DYNAMIC */}
+                        {/* Users Tab - NOW DYNAMIC & FILTERED */}
                         {activeTab === "users" && (
                             <motion.div
                                 key="users"
@@ -460,7 +481,10 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                         <h1 className="text-2xl font-bold mb-1">User Management</h1>
                                         <p className="text-gray-400 text-sm">Manage all registered users</p>
                                     </div>
-                                    <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-xl font-medium text-sm hover:opacity-90 transition-opacity">
+                                    <button
+                                        onClick={() => setShowAddUserModal(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-xl font-medium text-sm hover:opacity-90 transition-opacity"
+                                    >
                                         <Plus className="w-4 h-4" />
                                         Add User
                                     </button>
@@ -484,7 +508,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {users.map((user) => (
+                                            {filteredUsers.map((user) => (
                                                 <motion.tr
                                                     key={user.id}
                                                     variants={itemVariants}
@@ -535,13 +559,20 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                                     </td>
                                                 </motion.tr>
                                             ))}
+                                            {filteredUsers.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                                        No users found matching "{searchQuery}".
+                                                    </td>
+                                                </tr>
+                                            )}
                                         </tbody>
                                     </table>
                                 </motion.div>
                             </motion.div>
                         )}
 
-                        {/* Articles Tab */}
+                        {/* Articles Tab - FILTERED */}
                         {activeTab === "articles" && (
                             <motion.div
                                 key="articles"
@@ -566,7 +597,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                     animate="visible"
                                     className="grid gap-4"
                                 >
-                                    {articles.map((article) => (
+                                    {filteredArticles.map((article) => (
                                         <motion.div
                                             key={article.id}
                                             variants={itemVariants}
@@ -615,6 +646,9 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                             </div>
                                         </motion.div>
                                     ))}
+                                    {filteredArticles.length === 0 && (
+                                         <p className="text-gray-500 text-sm p-4 text-center">No articles found matching "{searchQuery}".</p>
+                                    )}
                                 </motion.div>
                             </motion.div>
                         )}
@@ -874,6 +908,74 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                     className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity mt-4"
                                 >
                                     Save Changes
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+             {/* Add User Modal */}
+            <AnimatePresence>
+                {showAddUserModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
+                        onClick={() => setShowAddUserModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full"
+                        >
+                             <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold">Add New User</h3>
+                                <button onClick={() => setShowAddUserModal(false)} className="text-gray-400 hover:text-white">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleAddUser} className="space-y-4">
+                                <div>
+                                    <label className="text-sm text-gray-400 block mb-2">Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Full Name"
+                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                                        required
+                                    />
+                                </div>
+                                 <div>
+                                    <label className="text-sm text-gray-400 block mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        placeholder="user@example.com"
+                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-400 block mb-2">Plan</label>
+                                    <select
+                                        name="plan"
+                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                                    >
+                                        <option value="Explorer">Explorer</option>
+                                        <option value="Reader">Reader</option>
+                                        <option value="Visionary">Visionary</option>
+                                    </select>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity mt-4 flex items-center justify-center gap-2"
+                                >
+                                    <UserPlus className="w-4 h-4" />
+                                    Create User
                                 </button>
                             </form>
                         </motion.div>
