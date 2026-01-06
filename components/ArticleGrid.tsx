@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MobileSlider } from "@/components/ui/MobileSlider";
 import { MediaOptions } from "@/components/ui/MediaOptions";
-import { DesktopArticleSlider } from "@/components/ui/DesktopArticleSlider";
+import { motion, useMotionValue, animate } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
 
 const articles = [
     { id: 1, title: "The quiet revolution of slow interfaces", author: "Sarah Jenkins", date: "Dec 24", img: Assets.imgArticleBreakout, category: "Design", slug: "slow-interfaces", topicSlug: "design-culture" },
@@ -19,6 +20,108 @@ const articles = [
     { id: 8, title: "The Remote Work Revolution", author: "David Miller", date: "Dec 11", img: Assets.imgStoryCulture, category: "Culture", slug: "remote-work", topicSlug: "design-culture" },
 ];
 
+// Horizontal Slider Component
+function HorizontalSlider({ articles, direction = "left" }: { articles: typeof articles; direction?: "left" | "right" }) {
+    const router = useRouter();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const x = useMotionValue(0);
+    const [containerWidth, setContainerWidth] = useState(0);
+
+    useEffect(() => {
+        const updateWidth = () => {
+            if (containerRef.current) {
+                setContainerWidth(containerRef.current.offsetWidth);
+            }
+        };
+        updateWidth();
+        window.addEventListener("resize", updateWidth);
+        return () => window.removeEventListener("resize", updateWidth);
+    }, []);
+
+    const cardWidth = 300; // Fixed card width
+    const gap = 32;
+    const totalWidth = articles.length * (cardWidth + gap);
+
+    // Auto-scroll effect
+    useEffect(() => {
+        if (containerWidth === 0) return;
+
+        const scrollRange = totalWidth - containerWidth;
+        const duration = (scrollRange / 30); // 30px per second
+
+        const startX = direction === "left" ? 0 : -scrollRange;
+        const endX = direction === "left" ? -scrollRange : 0;
+
+        const controls = animate(x, [startX, endX], {
+            duration,
+            ease: "linear",
+            repeat: Infinity,
+            repeatType: "reverse",
+        });
+
+        return () => controls.stop();
+    }, [containerWidth, totalWidth, direction, x]);
+
+    const renderArticleCard = (article: typeof articles[0]) => (
+        <div
+            key={article.id}
+            onClick={() => router.push(`/article/${article.slug}`)}
+            className="group flex flex-col gap-5 cursor-pointer text-text-primary"
+            style={{ width: cardWidth }}
+        >
+            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-bg-card shadow-sm transition-shadow group-hover:shadow-md">
+                <Image
+                    src={article.img}
+                    alt={article.title}
+                    fill
+                    sizes="300px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+            </div>
+            <div className="space-y-3">
+                <div className="flex items-center gap-3 text-xs font-bold text-text-muted uppercase tracking-wider">
+                    {article.topicSlug ? (
+                        <Link
+                            href={`/topics/${article.topicSlug}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-accent hover:underline"
+                        >
+                            {article.category}
+                        </Link>
+                    ) : (
+                        <span className="text-accent">{article.category}</span>
+                    )}
+                    <span>•</span>
+                    <span>{article.date}</span>
+                </div>
+                <h3 className="text-lg md:text-xl font-serif font-semibold leading-tight group-hover:text-accent transition-colors">
+                    {article.title}
+                </h3>
+                <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-bg-secondary relative overflow-hidden">
+                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill sizes="32px" className="object-cover" />
+                        </div>
+                        <span className="text-xs font-sans font-medium text-text-secondary">{article.author}</span>
+                    </div>
+                    <MediaOptions slug={article.slug} variant="compact" />
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <div ref={containerRef} className="overflow-hidden">
+            <motion.div
+                className="flex"
+                style={{ x, gap }}
+            >
+                {articles.map(renderArticleCard)}
+            </motion.div>
+        </div>
+    );
+}
+
 export function ArticleGrid() {
     const router = useRouter();
 
@@ -26,7 +129,7 @@ export function ArticleGrid() {
     const topRowArticles = articles.slice(0, 4);
     const bottomRowArticles = articles.slice(4, 8);
 
-    // Render article card component
+    // Render article card component for mobile
     const renderArticleCard = (article: typeof articles[0]) => (
         <div
             key={article.id}
@@ -128,12 +231,10 @@ export function ArticleGrid() {
                     </MobileSlider>
                 </div>
 
-                {/* Desktop: Slider with opposite directions */}
-                <div className="hidden md:block">
-                    <DesktopArticleSlider
-                        topRowChildren={topRowArticles.map(renderArticleCard)}
-                        bottomRowChildren={bottomRowArticles.map(renderArticleCard)}
-                    />
+                {/* Desktop: 2 Horizontal Sliders with opposite directions */}
+                <div className="hidden md:block space-y-12">
+                    <HorizontalSlider articles={topRowArticles} direction="left" />
+                    <HorizontalSlider articles={bottomRowArticles} direction="right" />
                 </div>
             </div>
         </section>
