@@ -1,66 +1,60 @@
-import { getPostBySlug } from "@/lib/posts";
-import { updatePost } from "@/actions/posts";
-import { notFound } from "next/navigation";
+import { createPost } from "@/actions/posts";
 
-export default async function EditPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
-    const post = await getPostBySlug(slug);
-
-    if (!post) {
-        notFound();
-    }
-
-    // Bind the slug to the server action
-    const updateAction = updatePost.bind(null, slug);
-
+export default function WritePage() {
     return (
         <main className="min-h-screen bg-gray-950 text-white p-8 md:p-12">
             <div className="max-w-4xl mx-auto">
                 <header className="mb-8 flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold font-serif mb-2">Edit Article</h1>
-                        <p className="text-gray-400">Editing: <span className="text-purple-400">{post.title}</span></p>
+                        <h1 className="text-3xl font-bold font-serif mb-2">Write New Article</h1>
+                        <p className="text-gray-400">Create a new story for Wisdomia</p>
                     </div>
                     <a href="/admin/dashboard" className="px-4 py-2 bg-gray-800 rounded-lg text-sm hover:bg-gray-700 transition-colors">
                         Back to Dashboard
                     </a>
                 </header>
 
-                <form action={updateAction} className="space-y-6 bg-gray-900 border border-gray-800 rounded-2xl p-8">
+                <form action={createPost} className="space-y-6 bg-gray-900 border border-gray-800 rounded-2xl p-8">
                     {/* Title */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-400">Title</label>
                         <input
                             type="text"
                             name="title"
-                            defaultValue={post.title}
+                            required
+                            placeholder="Enter article title..."
                             className="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-white"
                         />
                     </div>
 
-                    {/* Slug (Read-only for now) */}
+                    {/* Category */}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-400">Slug</label>
-                        <input
-                            type="text"
-                            value={post.slug}
-                            readOnly
-                            disabled
-                            className="w-full px-4 py-3 bg-gray-950/50 border border-gray-800 rounded-xl text-gray-500 cursor-not-allowed"
-                        />
+                        <label className="text-sm font-medium text-gray-400">Category</label>
+                        <select
+                            name="category"
+                            required
+                            className="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-white"
+                        >
+                            <option value="Technology">Technology</option>
+                            <option value="Philosophy">Philosophy</option>
+                            <option value="History">History</option>
+                            <option value="Culture">Culture</option>
+                            <option value="Science">Science</option>
+                            <option value="Art">Art</option>
+                        </select>
                     </div>
 
                     {/* Cover Image */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-400">Cover Image</label>
-                        <div className="flex flex-col gap-4">
+                         <div className="flex flex-col gap-4">
                             <input
                                 type="file"
                                 name="coverImageFile"
                                 accept="image/*"
                                 className="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-500/10 file:text-purple-400 hover:file:bg-purple-500/20 transition-colors"
                             />
-                             <div className="relative">
+                            <div className="relative">
                                 <div className="absolute inset-0 flex items-center">
                                     <div className="w-full border-t border-gray-800"></div>
                                 </div>
@@ -71,23 +65,19 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                             <input
                                 type="text"
                                 name="coverImage"
-                                defaultValue={post.coverImage}
                                 placeholder="https://example.com/image.jpg"
                                 className="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-white font-mono text-sm"
                             />
                         </div>
-                         <p className="text-xs text-gray-500 mt-2">
-                            Current image: {post.coverImage}
-                        </p>
                     </div>
 
                      {/* Video URL */}
-                    <div className="space-y-2">
+                     <div className="space-y-2">
                         <label className="text-sm font-medium text-gray-400">Video URL (Optional)</label>
                          <input
                             type="text"
                             name="videoUrl"
-                            defaultValue={post.videoUrl || ''}
+                            placeholder="https://youtube.com/..."
                             className="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-white font-mono text-sm"
                         />
                     </div>
@@ -97,7 +87,8 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                         <label className="text-sm font-medium text-gray-400">Content (MDX)</label>
                         <textarea
                             name="content"
-                            defaultValue={post.content}
+                            required
+                            placeholder="# Write your story here..."
                             rows={20}
                             className="w-full px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-white font-mono text-sm leading-relaxed"
                         />
@@ -112,7 +103,7 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                             type="submit"
                             className="px-8 py-3 bg-gradient-to-r from-red-500 to-purple-600 font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity"
                         >
-                            Save Changes
+                            Publish Article
                         </button>
                     </div>
                 </form>
