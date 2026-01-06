@@ -40,20 +40,8 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
     const router = useRouter();
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
-    const [containerWidth, setContainerWidth] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-
-    useEffect(() => {
-        const updateWidth = () => {
-            if (containerRef.current) {
-                setContainerWidth(containerRef.current.offsetWidth);
-            }
-        };
-        updateWidth();
-        window.addEventListener("resize", updateWidth);
-        return () => window.removeEventListener("resize", updateWidth);
-    }, []);
 
     // STRICT 4-CARDS-PER-VIEW CONFIGURATION
     const cardWidth = 350; // Fixed card width in pixels
@@ -84,20 +72,24 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
 
     // Auto-advance slider
     useEffect(() => {
-        if (containerWidth === 0 || isPaused || articles.length === 0) return;
+        if (isPaused || articles.length === 0) return;
 
         const timer = setInterval(() => {
             setCurrentIndex((prev) => {
                 const nextIndex = direction === "left"
                     ? (prev + 1) % articles.length
                     : (prev - 1 + articles.length) % articles.length;
-                scrollToIndex(nextIndex);
                 return nextIndex;
             });
         }, 3000); // Advance every 3 seconds
 
         return () => clearInterval(timer);
-    }, [containerWidth, isPaused, articles.length, direction, scrollToIndex]);
+    }, [isPaused, articles.length, direction]);
+
+    // Sync slider position with currentIndex
+    useEffect(() => {
+        scrollToIndex(currentIndex);
+    }, [currentIndex, scrollToIndex]);
 
     const renderArticleCard = (article: Article) => (
         <div
