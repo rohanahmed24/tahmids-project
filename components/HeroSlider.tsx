@@ -1,59 +1,38 @@
 "use client";
 
 import Image from "next/image";
-import { Assets } from "@/lib/assets";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
+import { hotTopics } from "@/lib/mock-data";
 
-const hotTopics = [
-    {
-        id: 1,
-        title: "The Art of Digital Silence",
-        subtitle: "Exploring minimalism in the age of noise",
-        category: "Technology",
-        image: Assets.imgPlaceholderImage7,
-        slug: "slow-interfaces",
-        accent: "from-purple-600/80 to-blue-600/80",
+// Move variants outside component to avoid recreation
+const slideVariants = {
+    enter: (direction: number) => ({
+        x: direction > 0 ? "100%" : "-100%",
+        opacity: 0,
+        scale: 1.1,
+    }),
+    center: {
+        zIndex: 1,
+        x: 0,
+        opacity: 1,
+        scale: 1,
     },
-    {
-        id: 2,
-        title: "Building a Digital Garden",
-        subtitle: "Creating spaces for thought to grow",
-        category: "Philosophy",
-        image: Assets.imgPlaceholderImage5,
-        slug: "digital-garden",
-        accent: "from-emerald-600/80 to-teal-600/80",
-    },
-    {
-        id: 3,
-        title: "The Ethics of AI",
-        subtitle: "Navigating the moral landscape of intelligence",
-        category: "AI & Future",
-        image: Assets.imgArticleAiEthics,
-        slug: "ai-ethics",
-        accent: "from-red-600/80 to-orange-600/80",
-    },
-    {
-        id: 4,
-        title: "Cities of Tomorrow",
-        subtitle: "Architecture reimagined for the future",
-        category: "Future Tech",
-        image: Assets.imgArticleFutureCities,
-        slug: "future-cities",
-        accent: "from-cyan-600/80 to-blue-600/80",
-    },
-    {
-        id: 5,
-        title: "Mindful Living",
-        subtitle: "The psychology of presence",
-        category: "Psychology",
-        image: Assets.imgStoryScience,
-        slug: "mindful-living",
-        accent: "from-amber-600/80 to-yellow-600/80",
-    },
-];
+    exit: (direction: number) => ({
+        zIndex: 0,
+        x: direction < 0 ? "100%" : "-100%",
+        opacity: 0,
+        scale: 0.9,
+    }),
+};
+
+const textVariants = {
+    enter: { y: 50, opacity: 0 },
+    center: { y: 0, opacity: 1 },
+    exit: { y: -50, opacity: 0 },
+};
 
 export function HeroSlider() {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -100,32 +79,6 @@ export function HeroSlider() {
 
     const currentTopic = hotTopics[currentIndex];
 
-    const slideVariants = {
-        enter: (direction: number) => ({
-            x: direction > 0 ? "100%" : "-100%",
-            opacity: 0,
-            scale: 1.1,
-        }),
-        center: {
-            zIndex: 1,
-            x: 0,
-            opacity: 1,
-            scale: 1,
-        },
-        exit: (direction: number) => ({
-            zIndex: 0,
-            x: direction < 0 ? "100%" : "-100%",
-            opacity: 0,
-            scale: 0.9,
-        }),
-    };
-
-    const textVariants = {
-        enter: { y: 50, opacity: 0 },
-        center: { y: 0, opacity: 1 },
-        exit: { y: -50, opacity: 0 },
-    };
-
     return (
         <section
             className="relative w-full h-[50vh] md:h-screen overflow-hidden bg-black mt-14 md:mt-0"
@@ -145,7 +98,7 @@ export function HeroSlider() {
                     className="absolute inset-0"
                 >
                     <Image
-                        src={currentTopic.image}
+                        src={currentTopic.img}
                         alt={currentTopic.title}
                         fill
                         sizes="100vw"
@@ -298,7 +251,7 @@ export function HeroSlider() {
                             }`}
                     >
                         <Image
-                            src={topic.image}
+                            src={topic.img}
                             alt={topic.title}
                             fill
                             sizes="120px"
