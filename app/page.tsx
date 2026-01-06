@@ -8,7 +8,8 @@ import { CTABanner } from "@/components/CTABanner";
 import { DailyQuote } from "@/components/DailyQuote";
 import { TopicExplore } from "@/components/TopicExplore";
 import { AuthorsGrid } from "@/components/AuthorsGrid";
-import { CategorySection, categoryData } from "@/components/CategorySection";
+import { CategorySection } from "@/components/CategorySection";
+import { categoryData } from "@/lib/mock-data";
 
 export default function Home() {
   return (

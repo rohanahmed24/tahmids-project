@@ -1,30 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { Assets } from "@/lib/assets";
 import { motion, useMotionValue, animate, PanInfo } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DecorativeBackgrounds } from "@/components/ui/DecorativeBackgrounds";
 import { MediaOptions } from "@/components/ui/MediaOptions";
-
-const breakingNews = [
-    { id: "01", category: "Design", title: "The quiet revolution of slow interfaces", img: Assets.imgPlaceholderImage1, slug: "slow-interfaces", author: "Sarah Jenkins", date: "Dec 24" },
-    { id: "02", category: "Tech", title: "Why we need less information, not more", img: Assets.imgPlaceholderImage2, slug: "less-information", author: "David Miller", date: "Dec 23" },
-    { id: "03", category: "Philosophy", title: "Building a digital garden for the mind", img: Assets.imgPlaceholderImage3, slug: "digital-garden", author: "John Smith", date: "Dec 22" },
-    { id: "04", category: "Technology", title: "The Ethics of Artificial Intelligence", img: Assets.imgPlaceholderImage4, slug: "ai-ethics", author: "David Miller", date: "Dec 15" },
-    { id: "05", category: "Science", title: "The Science of Sleep: Why Rest Matters", img: Assets.imgStoryCulture, slug: "science-sleep", author: "Emily Rose", date: "Dec 9" },
-    { id: "06", category: "Lifestyle", title: "Mindful Living in a Digital Age", img: Assets.imgStoryScience, slug: "mindful-living", author: "Sarah Jenkins", date: "Dec 18" },
-    { id: "07", category: "Future Tech", title: "Cities of Tomorrow: Reimagining Urban Life", img: Assets.imgStoryArt, slug: "future-cities", author: "James L.", date: "Dec 14" },
-    { id: "08", category: "Culture", title: "The Creative Process Unveiled", img: Assets.imgStoryHistory, slug: "creative-process", author: "Sarah Jenkins", date: "Dec 12" },
-    { id: "09", category: "Design", title: "Minimalism in Modern Design", img: Assets.imgPlaceholderImage1, slug: "minimalism-design", author: "Sarah Jenkins", date: "Dec 11" },
-    { id: "10", category: "Tech", title: "Blockchain and the Future", img: Assets.imgPlaceholderImage2, slug: "blockchain-future", author: "David Miller", date: "Dec 10" },
-    { id: "11", category: "Science", title: "Climate Change Solutions", img: Assets.imgStoryCulture, slug: "climate-solutions", author: "Emily Rose", date: "Dec 9" },
-    { id: "12", category: "Culture", title: "The Art of Storytelling", img: Assets.imgStoryHistory, slug: "art-storytelling", author: "John Smith", date: "Dec 8" },
-];
+import { Article, breakingNews } from "@/lib/mock-data";
 
 // Desktop Horizontal Slider Component
-function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof breakingNews; direction?: "left" | "right" }) {
+function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Article[]; direction?: "left" | "right" }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const [isPaused, setIsPaused] = useState(false);
