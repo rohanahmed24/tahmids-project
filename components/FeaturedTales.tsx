@@ -44,8 +44,11 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof
 
     const cardWidth = 350;
     const gap = 24;
+    const cardsPerView = 4; // Maximum 4 cards visible at once
+    const visibleCards = Math.min(items.length, cardsPerView);
+    const containerMaxWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
     const totalWidth = items.length * (cardWidth + gap);
-    const maxDrag = -(totalWidth - containerWidth);
+    const maxDrag = -(totalWidth - (visibleCards * cardWidth + (visibleCards - 1) * gap));
 
     // Scroll to specific index
     const scrollToIndex = useCallback((index: number) => {
@@ -96,7 +99,7 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof
     };
 
     return (
-        <div className="relative group">
+        <div className="relative group mx-auto" style={{ maxWidth: `${containerMaxWidth}px` }}>
             <div
                 ref={containerRef}
                 className="overflow-hidden"
