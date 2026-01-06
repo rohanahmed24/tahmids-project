@@ -55,13 +55,20 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
         return () => window.removeEventListener("resize", updateWidth);
     }, []);
 
-    const cardWidth = 350;
-    const gap = 32;
-    const cardsPerView = 4; // Maximum 4 cards visible at once
-    const visibleCards = Math.min(articles.length, cardsPerView);
-    const containerMaxWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
+    // STRICT 4-CARDS-PER-VIEW CONFIGURATION
+    const cardWidth = 350; // Fixed card width in pixels
+    const gap = 32; // Gap between cards in pixels
+    const cardsPerView = 4; // MAXIMUM 4 cards visible at once - STRICTLY ENFORCED
+    const visibleCards = Math.min(articles.length, cardsPerView); // Never exceed 4
+
+    // Calculate exact container width for 4 cards: (4 × 350px) + (3 × 32px gaps) = 1496px
+    const containerWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
+
+    // Total width of all cards in the slider
     const totalWidth = articles.length * (cardWidth + gap);
-    const maxDrag = -(totalWidth - (visibleCards * cardWidth + (visibleCards - 1) * gap));
+
+    // Maximum drag distance to show only visible cards
+    const maxDrag = -(totalWidth - containerWidth);
 
     // Scroll to specific index
     const scrollToIndex = useCallback((index: number) => {
@@ -96,8 +103,8 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
         <div
             key={article.id}
             onClick={() => router.push(`/article/${article.slug}`)}
-            className="group flex flex-col gap-5 cursor-pointer text-text-primary"
-            style={{ width: cardWidth }}
+            className="group flex flex-col gap-5 cursor-pointer text-text-primary flex-shrink-0"
+            style={{ width: `${cardWidth}px`, minWidth: `${cardWidth}px`, maxWidth: `${cardWidth}px` }}
         >
             <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-bg-card shadow-sm transition-shadow group-hover:shadow-md">
                 <Image
@@ -160,10 +167,17 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
     };
 
     return (
-        <div className="relative group mx-auto" style={{ width: `${containerMaxWidth}px`, maxWidth: '100%' }}>
+        <div
+            className="relative group mx-auto"
+            style={{
+                width: `${containerWidth}px`,
+                minWidth: `${containerWidth}px`,
+                maxWidth: '100%'
+            }}
+        >
             <div
                 ref={containerRef}
-                className="overflow-hidden"
+                className="overflow-hidden w-full"
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
             >
