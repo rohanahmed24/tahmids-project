@@ -6,6 +6,7 @@ import { MotionWrapper } from "@/components/ui/MotionWrapper";
 import { ArrowRight, ShieldCheck, Star, Zap, Eye, EyeOff, AlertCircle, Loader2, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { hashPassword } from "@/lib/crypto";
 
 export default function SignInPage() {
     const router = useRouter();
@@ -39,12 +40,25 @@ export default function SignInPage() {
         try {
             // Check credentials against localStorage
             const users = JSON.parse(localStorage.getItem("wisdomia_users") || "[]");
-            const user = users.find((u: { email: string; password: string }) =>
-                u.email.toLowerCase() === formData.email.toLowerCase() &&
-                u.password === formData.password
+
+            // Find user by email first
+            const user = users.find((u: { email: string }) =>
+                u.email.toLowerCase() === formData.email.toLowerCase()
             );
 
-            if (!user) {
+            let isValid = false;
+            if (user) {
+                if (user.salt) {
+                    // Verify hashed password
+                    const { hash } = await hashPassword(formData.password, user.salt);
+                    isValid = hash === user.password;
+                } else {
+                    // Fallback for legacy plain text passwords (optional, but good for transition)
+                    isValid = user.password === formData.password;
+                }
+            }
+
+            if (!isValid) {
                 setError("Invalid email or password. Please try again.");
                 setIsLoading(false);
                 return;

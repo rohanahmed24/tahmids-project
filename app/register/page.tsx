@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight, Sparkles, Mail, Lock, User, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { hashPassword } from "@/lib/crypto";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -63,11 +64,13 @@ export default function RegisterPage() {
             }
 
             // Create new user
+            const { hash, salt } = await hashPassword(formData.password);
             const newUser = {
                 id: Date.now().toString(),
                 name: formData.name.trim(),
                 email: formData.email.toLowerCase().trim(),
-                password: formData.password, // In production, this should be hashed!
+                password: hash,
+                salt: salt,
                 createdAt: new Date().toISOString(),
             };
 
