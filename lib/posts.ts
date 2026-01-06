@@ -10,6 +10,7 @@ export type Post = {
     content: string;
     coverImage?: string;
     videoUrl?: string;
+    views?: number;
 };
 
 export async function getAllPosts(): Promise<Post[]> {
