@@ -170,18 +170,6 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     };
 
     const confirmDelete = async () => {
-<<<<<<< HEAD
-        if (deleteTarget && deleteTarget.type === "article") {
-            try {
-                await deletePost(deleteTarget.name); // passing slug which I put in name for article
-                // Optimistically update the UI or let revalidatePath handle it?
-                // RevalidatePath in server action handles server side, but client state 'articles' needs update
-                // Since this is a client component with initialArticles passed as prop, we might need to refresh or filter.
-                setArticles(articles.filter(a => a.slug !== deleteTarget.name));
-            } catch (error) {
-                console.error("Failed to delete", error);
-                alert("Failed to delete article");
-=======
         if (deleteTarget) {
             try {
                 if (deleteTarget.type === "article") {
@@ -196,7 +184,6 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
             } catch (error) {
                 console.error("Failed to delete", error);
                 alert(`Failed to delete ${deleteTarget.type}`);
->>>>>>> origin/cms-features-8736145947038865530
             }
         }
         setShowDeleteModal(false);
