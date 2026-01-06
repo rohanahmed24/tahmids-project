@@ -173,7 +173,9 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
         if (deleteTarget) {
             try {
                 if (deleteTarget.type === "article") {
-                    await deletePost(deleteTarget.name); // slug
+                    await deletePost(deleteTarget.name); // passing slug
+                    // Optimistically update the UI. RevalidatePath in server action handles server side,
+                    // but client state 'articles' needs update since this is a client component.
                     setArticles(articles.filter(a => a.slug !== deleteTarget.name));
                 } else if (deleteTarget.type === "user") {
                     await deleteUser(deleteTarget.id);
