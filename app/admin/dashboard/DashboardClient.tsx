@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Assets } from "@/lib/assets";
 import { logoutAdmin } from "@/actions/admin-auth";
+import { deletePost } from "@/actions/posts";
 import {
     LayoutDashboard,
     Users,
@@ -131,8 +132,19 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
         setShowDeleteModal(true);
     };
 
-    const confirmDelete = () => {
-        // Handle delete logic here
+    const confirmDelete = async () => {
+        if (deleteTarget && deleteTarget.type === "article") {
+            try {
+                await deletePost(deleteTarget.name); // passing slug which I put in name for article
+                // Optimistically update the UI or let revalidatePath handle it?
+                // RevalidatePath in server action handles server side, but client state 'articles' needs update
+                // Since this is a client component with initialArticles passed as prop, we might need to refresh or filter.
+                setArticles(articles.filter(a => a.slug !== deleteTarget.name));
+            } catch (error) {
+                console.error("Failed to delete", error);
+                alert("Failed to delete article");
+            }
+        }
         setShowDeleteModal(false);
         setDeleteTarget(null);
     };
@@ -473,10 +485,10 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                         <h1 className="text-2xl font-bold mb-1">Content Management</h1>
                                         <p className="text-gray-400 text-sm">Manage all articles and content</p>
                                     </div>
-                                    <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-xl font-medium text-sm hover:opacity-90 transition-opacity">
+                                    <Link href="/admin/write" className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-xl font-medium text-sm hover:opacity-90 transition-opacity">
                                         <Plus className="w-4 h-4" />
                                         New Article
-                                    </button>
+                                    </Link>
                                 </div>
 
                                 <motion.div
@@ -526,7 +538,7 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                                     <Edit className="w-4 h-4" />
                                                 </Link>
                                                 <button
-                                                    onClick={() => handleDelete("article", article.id, article.title)}
+                                                    onClick={() => handleDelete("article", article.id, article.slug)}
                                                     className="p-2.5 bg-gray-800 hover:bg-red-500/20 rounded-xl transition-colors"
                                                 >
                                                     <Trash2 className="w-4 h-4 text-red-400" />
