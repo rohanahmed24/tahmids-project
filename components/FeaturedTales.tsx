@@ -99,7 +99,7 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: typeof
     };
 
     return (
-        <div className="relative group mx-auto" style={{ maxWidth: `${containerMaxWidth}px` }}>
+        <div className="relative group mx-auto" style={{ width: `${containerMaxWidth}px`, maxWidth: '100%' }}>
             <div
                 ref={containerRef}
                 className="overflow-hidden"
