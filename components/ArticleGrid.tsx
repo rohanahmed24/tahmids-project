@@ -62,13 +62,13 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
     const visibleCards = Math.min(articles.length, cardsPerView); // Never exceed 4
 
     // Calculate exact container width for 4 cards: (4 × 350px) + (3 × 32px gaps) = 1496px
-    const containerWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
+    const sliderWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
 
     // Total width of all cards in the slider
     const totalWidth = articles.length * (cardWidth + gap);
 
     // Maximum drag distance to show only visible cards
-    const maxDrag = -(totalWidth - containerWidth);
+    const maxDrag = -(totalWidth - sliderWidth);
 
     // Scroll to specific index
     const scrollToIndex = useCallback((index: number) => {
@@ -170,8 +170,8 @@ function HorizontalSlider({ articles, direction = "left" }: { articles: Article[
         <div
             className="relative group mx-auto"
             style={{
-                width: `${containerWidth}px`,
-                minWidth: `${containerWidth}px`,
+                width: `${sliderWidth}px`,
+                minWidth: `${sliderWidth}px`,
                 maxWidth: '100%'
             }}
         >
