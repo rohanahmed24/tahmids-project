@@ -5,9 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Assets } from "@/lib/assets";
 import { logoutAdmin } from "@/actions/admin-auth";
 import { deletePost } from "@/actions/posts";
+import { deleteUser, updateUserPlan } from "@/actions/users";
+import { updateSettings } from "@/actions/settings";
+import { getApplications, updateApplicationStatus } from "@/actions/careers";
+import { getImages, uploadImage, deleteImage } from "@/actions/media";
+import { RowDataPacket } from "mysql2";
 import {
     LayoutDashboard,
     Users,
@@ -22,45 +26,28 @@ import {
     Eye,
     TrendingUp,
     TrendingDown,
-    Clock,
-    BookOpen,
-    Bookmark,
     DollarSign,
     Check,
     Shield,
     Bell,
     Moon,
-    Sun
+    Sun,
+    X,
+    UserPlus,
+    Briefcase,
+    ImageIcon,
+    Upload,
+    Loader2,
+    type LucideIcon
 } from "lucide-react";
 import { useTheme } from "next-themes";
-
-// Mock data for stats and users (kept for decorative/layout purposes)
-const stats = [
-    { id: 1, label: "Total Users", value: "2,847", change: "+12.5%", trend: "up", icon: Users, color: "text-blue-500", bgColor: "bg-blue-500/10" },
-    { id: 2, label: "Articles", value: "156", change: "+8.2%", trend: "up", icon: FileText, color: "text-purple-500", bgColor: "bg-purple-500/10" },
-    { id: 3, label: "Page Views", value: "45.2K", change: "+23.1%", trend: "up", icon: Eye, color: "text-green-500", bgColor: "bg-green-500/10" },
-    { id: 4, label: "Revenue", value: "$12,450", change: "-2.4%", trend: "down", icon: DollarSign, color: "text-amber-500", bgColor: "bg-amber-500/10" },
-];
-
-const recentUsers = [
-    { id: 1, name: "Sarah Johnson", email: "sarah@example.com", avatar: Assets.imgPlaceholderImage1, plan: "Explorer", joinedAt: "2 hours ago" },
-    { id: 2, name: "Michael Chen", email: "michael@example.com", avatar: Assets.imgPlaceholderImage2, plan: "Reader", joinedAt: "5 hours ago" },
-    { id: 3, name: "Emily Davis", email: "emily@example.com", avatar: Assets.imgPlaceholderImage3, plan: "Visionary", joinedAt: "1 day ago" },
-    { id: 4, name: "James Wilson", email: "james@example.com", avatar: Assets.imgPlaceholderImage4, plan: "Explorer", joinedAt: "2 days ago" },
-];
-
-const allUsers = [
-    { id: 1, name: "Sarah Johnson", email: "sarah@example.com", avatar: Assets.imgPlaceholderImage1, plan: "Explorer", status: "active", articles: 12, joined: "Dec 15, 2024" },
-    { id: 2, name: "Michael Chen", email: "michael@example.com", avatar: Assets.imgPlaceholderImage2, plan: "Reader", status: "active", articles: 0, joined: "Dec 14, 2024" },
-    { id: 3, name: "Emily Davis", email: "emily@example.com", avatar: Assets.imgPlaceholderImage3, plan: "Visionary", status: "active", articles: 28, joined: "Dec 10, 2024" },
-    { id: 4, name: "James Wilson", email: "james@example.com", avatar: Assets.imgPlaceholderImage4, plan: "Explorer", status: "suspended", articles: 5, joined: "Dec 5, 2024" },
-    { id: 5, name: "Anna Smith", email: "anna@example.com", avatar: Assets.imgPlaceholderImage1, plan: "Reader", status: "active", articles: 0, joined: "Dec 1, 2024" },
-];
 
 const navItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "users", label: "Users", icon: Users },
     { id: "articles", label: "Articles", icon: FileText },
+    { id: "careers", label: "Careers", icon: Briefcase },
+    { id: "media", label: "Media", icon: ImageIcon },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -94,59 +81,206 @@ interface Article {
     slug: string;
 }
 
-interface DashboardClientProps {
-    initialArticles: Article[];
+interface User {
+    id: number;
+    name: string;
+    email: string;
+    avatar: string;
+    plan: string;
+    status: string;
+    articles: number;
+    joined: string;
 }
 
-export default function DashboardClient({ initialArticles }: DashboardClientProps) {
+interface Stat {
+    id: number;
+    label: string;
+    value: string;
+    change: string;
+    trend: string;
+    iconName: string;
+    color: string;
+    bgColor: string;
+}
+
+interface SiteSettings {
+    siteName: string;
+    siteDescription: string;
+}
+
+interface DashboardClientProps {
+    initialArticles: Article[];
+    initialUsers: User[];
+    initialStats: Stat[];
+    initialSettings: SiteSettings;
+}
+
+const icons: Record<string, LucideIcon> = {
+    Users,
+    FileText,
+    Eye,
+    DollarSign
+};
+
+export default function DashboardClient({ initialArticles, initialUsers, initialStats, initialSettings }: DashboardClientProps) {
     const [activeTab, setActiveTab] = useState("overview");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+
+    // Modal states
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: number; name: string } | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: number; name: string; extra?: string } | null>(null);
+    const [showEditUserModal, setShowEditUserModal] = useState(false);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [showAddUserModal, setShowAddUserModal] = useState(false);
+
+    // Data states
     const [articles, setArticles] = useState(initialArticles);
+    const [users, setUsers] = useState(initialUsers);
+    const [stats] = useState(initialStats);
+    const [settings] = useState(initialSettings);
+
+    // New Data States
+    const [applications, setApplications] = useState<RowDataPacket[]>([]);
+    const [mediaItems, setMediaItems] = useState<RowDataPacket[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
+
+    // Filtered Data
+    const filteredArticles = articles.filter(article =>
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const filteredUsers = users.filter(user =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.plan.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const router = useRouter();
     const { theme, setTheme } = useTheme();
 
     useEffect(() => {
-        // Check admin authentication
-        // We still check sessionStorage for fast UI feedback, but cookie handles real security
         const auth = sessionStorage.getItem("adminAuth");
         if (auth !== "true") {
-             // If no session storage, we could redirect, but let's let the server component handle redirect if cookie is missing
-             // However, for client-side navigation, this check is still useful
              router.push("/admin");
         } else {
             setIsAuthenticated(true);
         }
     }, [router]);
 
+    // Fetch new data when tab changes
+    useEffect(() => {
+        if (activeTab === "careers") {
+            getApplications().then(setApplications);
+        } else if (activeTab === "media") {
+            getImages().then(setMediaItems);
+        }
+    }, [activeTab]);
+
     const handleLogout = async () => {
         sessionStorage.removeItem("adminAuth");
-        await logoutAdmin(); // Clears cookie and redirects
+        await logoutAdmin();
     };
 
-    const handleDelete = (type: string, id: number, name: string) => {
-        setDeleteTarget({ type, id, name });
+    const handleDelete = (type: string, id: number, name: string, extra?: string) => {
+        setDeleteTarget({ type, id, name, extra });
         setShowDeleteModal(true);
     };
 
     const confirmDelete = async () => {
-        if (deleteTarget && deleteTarget.type === "article") {
+        if (deleteTarget) {
             try {
-                await deletePost(deleteTarget.name); // passing slug which I put in name for article
-                // Optimistically update the UI or let revalidatePath handle it?
-                // RevalidatePath in server action handles server side, but client state 'articles' needs update
-                // Since this is a client component with initialArticles passed as prop, we might need to refresh or filter.
-                setArticles(articles.filter(a => a.slug !== deleteTarget.name));
+                if (deleteTarget.type === "article") {
+                    await deletePost(deleteTarget.name); // passing slug
+                    setArticles(articles.filter(a => a.slug !== deleteTarget.name));
+                } else if (deleteTarget.type === "user") {
+                    await deleteUser(deleteTarget.id);
+                    setUsers(users.filter(u => u.id !== deleteTarget.id));
+                } else if (deleteTarget.type === "media") {
+                    if (deleteTarget.extra) {
+                         await deleteImage(deleteTarget.id, deleteTarget.extra);
+                         setMediaItems(mediaItems.filter(m => m.id !== deleteTarget.id));
+                    }
+                }
             } catch (error) {
                 console.error("Failed to delete", error);
-                alert("Failed to delete article");
+                alert(`Failed to delete ${deleteTarget.type}`);
             }
         }
         setShowDeleteModal(false);
         setDeleteTarget(null);
+    };
+
+    const handleEditUser = (user: User) => {
+        setEditingUser(user);
+        setShowEditUserModal(true);
+    };
+
+    const saveUserChanges = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (editingUser) {
+            try {
+                const form = e.target as HTMLFormElement;
+                const newPlan = (form.elements.namedItem("plan") as HTMLSelectElement).value;
+
+                await updateUserPlan(editingUser.id, newPlan);
+
+                setUsers(users.map(u => u.id === editingUser.id ? { ...u, plan: newPlan } : u));
+                setShowEditUserModal(false);
+                setEditingUser(null);
+            } catch (error) {
+                console.error("Failed to update user", error);
+                alert("Failed to update user plan");
+            }
+        }
+    };
+
+    const handleAddUser = (e: React.FormEvent) => {
+        e.preventDefault();
+        alert("User creation is not fully implemented yet (requires Auth integration).");
+        setShowAddUserModal(false);
+    };
+
+    const handleSaveSettings = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+        try {
+            await updateSettings(formData);
+            alert("Settings saved successfully!");
+        } catch (error) {
+             console.error("Failed to save settings", error);
+             alert("Failed to save settings");
+        }
+    };
+
+    const handleStatusUpdate = async (id: number, newStatus: string) => {
+        await updateApplicationStatus(id, newStatus);
+        setApplications(applications.map(app => app.id === id ? { ...app, status: newStatus } : app));
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setIsUploading(true);
+            const formData = new FormData();
+            formData.append("file", e.target.files[0]);
+
+            try {
+                const result = await uploadImage(formData);
+                if (result.success) {
+                    getImages().then(setMediaItems); // Refresh
+                } else {
+                    alert("Upload failed");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Upload failed");
+            } finally {
+                setIsUploading(false);
+            }
+        }
     };
 
     if (!isAuthenticated) {
@@ -177,13 +311,13 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                         </div>
                         <div>
                             <h1 className="font-bold text-lg">Admin Panel</h1>
-                            <p className="text-xs text-gray-500">Wisdomia</p>
+                            <p className="text-xs text-gray-500">{settings.siteName}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-1">
+                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {navItems.map((item) => (
                         <motion.button
                             key={item.id}
@@ -280,29 +414,32 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                     animate="visible"
                                     className="grid grid-cols-4 gap-6 mb-8"
                                 >
-                                    {stats.map((stat) => (
-                                        <motion.div
-                                            key={stat.id}
-                                            variants={itemVariants}
-                                            whileHover={{ y: -5 }}
-                                            className="bg-gray-900 border border-gray-800 rounded-2xl p-6"
-                                        >
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className={`w-12 h-12 ${stat.bgColor} rounded-xl flex items-center justify-center`}>
-                                                    <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                                    {stats.map((stat) => {
+                                        const Icon = icons[stat.iconName] || Users;
+                                        return (
+                                            <motion.div
+                                                key={stat.id}
+                                                variants={itemVariants}
+                                                whileHover={{ y: -5 }}
+                                                className="bg-gray-900 border border-gray-800 rounded-2xl p-6"
+                                            >
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className={`w-12 h-12 ${stat.bgColor} rounded-xl flex items-center justify-center`}>
+                                                        <Icon className={`w-6 h-6 ${stat.color}`} />
+                                                    </div>
+                                                    <div className={`flex items-center gap-1 text-sm ${stat.trend === "up" ? "text-green-500" : "text-red-500"}`}>
+                                                        {stat.trend === "up" ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                                                        {stat.change}
+                                                    </div>
                                                 </div>
-                                                <div className={`flex items-center gap-1 text-sm ${stat.trend === "up" ? "text-green-500" : "text-red-500"}`}>
-                                                    {stat.trend === "up" ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                                                    {stat.change}
-                                                </div>
-                                            </div>
-                                            <p className="text-3xl font-bold mb-1">{stat.value}</p>
-                                            <p className="text-gray-400 text-sm">{stat.label}</p>
-                                        </motion.div>
-                                    ))}
+                                                <p className="text-3xl font-bold mb-1">{stat.value}</p>
+                                                <p className="text-gray-400 text-sm">{stat.label}</p>
+                                            </motion.div>
+                                        );
+                                    })}
                                 </motion.div>
 
-                                {/* Recent Activity */}
+                                {/* Recent Activity - Still using slice(0,4) of full lists for overview */}
                                 <div className="grid grid-cols-2 gap-8">
                                     {/* Recent Users */}
                                     <motion.div
@@ -321,7 +458,7 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                             </button>
                                         </div>
                                         <div className="space-y-4">
-                                            {recentUsers.map((user) => (
+                                            {users.slice(0, 4).map((user) => (
                                                 <div key={user.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-800 transition-colors">
                                                     <div className="relative w-10 h-10 rounded-full overflow-hidden">
                                                         <Image src={user.avatar} alt={user.name} fill sizes="40px" className="object-cover" />
@@ -338,6 +475,7 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                                     </span>
                                                 </div>
                                             ))}
+                                            {users.length === 0 && <p className="text-gray-500 text-sm">No users found.</p>}
                                         </div>
                                     </motion.div>
 
@@ -375,13 +513,14 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                                     </span>
                                                 </div>
                                             ))}
+                                            {articles.length === 0 && <p className="text-gray-500 text-sm">No articles found.</p>}
                                         </div>
                                     </motion.div>
                                 </div>
                             </motion.div>
                         )}
 
-                        {/* Users Tab - Keep mock data for now as requested */}
+                        {/* Users Tab */}
                         {activeTab === "users" && (
                             <motion.div
                                 key="users"
@@ -394,7 +533,10 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                         <h1 className="text-2xl font-bold mb-1">User Management</h1>
                                         <p className="text-gray-400 text-sm">Manage all registered users</p>
                                     </div>
-                                    <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-xl font-medium text-sm hover:opacity-90 transition-opacity">
+                                    <button
+                                        onClick={() => setShowAddUserModal(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-xl font-medium text-sm hover:opacity-90 transition-opacity"
+                                    >
                                         <Plus className="w-4 h-4" />
                                         Add User
                                     </button>
@@ -418,7 +560,7 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {allUsers.map((user) => (
+                                            {filteredUsers.map((user) => (
                                                 <motion.tr
                                                     key={user.id}
                                                     variants={itemVariants}
@@ -453,7 +595,10 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                                     <td className="px-6 py-4 text-sm text-gray-400">{user.joined}</td>
                                                     <td className="px-6 py-4">
                                                         <div className="flex justify-end gap-2">
-                                                            <button className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+                                                            <button
+                                                                onClick={() => handleEditUser(user)}
+                                                                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                                                            >
                                                                 <Edit className="w-4 h-4 text-gray-400" />
                                                             </button>
                                                             <button
@@ -466,13 +611,20 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                                     </td>
                                                 </motion.tr>
                                             ))}
+                                            {filteredUsers.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                                        No users found matching "{searchQuery}".
+                                                    </td>
+                                                </tr>
+                                            )}
                                         </tbody>
                                     </table>
                                 </motion.div>
                             </motion.div>
                         )}
 
-                        {/* Articles Tab - NOW DYNAMIC */}
+                        {/* Articles Tab */}
                         {activeTab === "articles" && (
                             <motion.div
                                 key="articles"
@@ -497,7 +649,7 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                     animate="visible"
                                     className="grid gap-4"
                                 >
-                                    {articles.map((article) => (
+                                    {filteredArticles.map((article) => (
                                         <motion.div
                                             key={article.id}
                                             variants={itemVariants}
@@ -546,11 +698,175 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                             </div>
                                         </motion.div>
                                     ))}
+                                    {filteredArticles.length === 0 && (
+                                         <p className="text-gray-500 text-sm p-4 text-center">No articles found matching "{searchQuery}".</p>
+                                    )}
                                 </motion.div>
                             </motion.div>
                         )}
-                        {/* Analytics and Settings tabs remain unchanged */}
-                         {/* Analytics Tab */}
+
+                        {/* Careers Tab */}
+                        {activeTab === "careers" && (
+                            <motion.div
+                                key="careers"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                            >
+                                <div className="mb-8">
+                                    <h1 className="text-2xl font-bold mb-1">Job Applications</h1>
+                                    <p className="text-gray-400 text-sm">Manage recruitment pipeline</p>
+                                </div>
+
+                                <motion.div
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden"
+                                >
+                                    <table className="w-full">
+                                        <thead className="bg-gray-800/50">
+                                            <tr>
+                                                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Applicant</th>
+                                                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Role</th>
+                                                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Status</th>
+                                                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Date</th>
+                                                <th className="text-right px-6 py-4 text-sm font-medium text-gray-400">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {applications.map((app) => (
+                                                <motion.tr
+                                                    key={app.id}
+                                                    variants={itemVariants}
+                                                    className="border-t border-gray-800 hover:bg-gray-800/50 transition-colors"
+                                                >
+                                                    <td className="px-6 py-4">
+                                                        <div>
+                                                            <p className="font-medium text-sm">{app.applicant_name}</p>
+                                                            <p className="text-xs text-gray-500">{app.email}</p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-300">{app.job_title}</td>
+                                                    <td className="px-6 py-4">
+                                                        <select
+                                                            value={app.status}
+                                                            onChange={(e) => handleStatusUpdate(app.id, e.target.value)}
+                                                            className="bg-gray-800 border border-gray-700 text-xs rounded-lg px-2 py-1 focus:outline-none"
+                                                        >
+                                                            <option value="pending">Pending</option>
+                                                            <option value="reviewing">Reviewing</option>
+                                                            <option value="accepted">Accepted</option>
+                                                            <option value="rejected">Rejected</option>
+                                                        </select>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                                        {new Date(app.created_at).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <a
+                                                            href={app.resume_path}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-purple-400 hover:underline text-sm"
+                                                        >
+                                                            View Resume
+                                                        </a>
+                                                    </td>
+                                                </motion.tr>
+                                            ))}
+                                            {applications.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                                        No applications found.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </motion.div>
+                            </motion.div>
+                        )}
+
+                        {/* Media Tab */}
+                        {activeTab === "media" && (
+                             <motion.div
+                                key="media"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                            >
+                                <div className="flex justify-between items-center mb-8">
+                                    <div>
+                                        <h1 className="text-2xl font-bold mb-1">Media Library</h1>
+                                        <p className="text-gray-400 text-sm">Manage uploaded assets</p>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            id="media-upload"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleFileUpload}
+                                            disabled={isUploading}
+                                        />
+                                        <label
+                                            htmlFor="media-upload"
+                                            className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-xl font-medium text-sm hover:opacity-90 transition-opacity cursor-pointer ${isUploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                        >
+                                            {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                            Upload Image
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <motion.div
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                                >
+                                    {mediaItems.map((item) => (
+                                        <motion.div
+                                            key={item.id}
+                                            variants={itemVariants}
+                                            className="group relative bg-gray-900 border border-gray-800 rounded-xl overflow-hidden aspect-square"
+                                        >
+                                            <Image
+                                                src={item.url}
+                                                alt={item.name}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                 <button
+                                                    onClick={() => window.open(item.url, '_blank')}
+                                                    className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white"
+                                                    title="View"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete("media", item.id, item.name, item.url)}
+                                                    className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg text-red-400"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/60 text-xs truncate text-gray-300">
+                                                {item.name}
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                    {mediaItems.length === 0 && (
+                                         <p className="col-span-full text-gray-500 text-sm py-8 text-center">No media found.</p>
+                                    )}
+                                </motion.div>
+                            </motion.div>
+                        )}
+
+                        {/* Analytics Tab */}
                         {activeTab === "analytics" && (
                             <motion.div
                                 key="analytics"
@@ -610,28 +926,6 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                         </div>
                                     </motion.div>
                                 </div>
-
-                                {/* More Stats */}
-                                <div className="grid grid-cols-4 gap-6">
-                                    {[
-                                        { label: "Avg. Read Time", value: "4m 23s", icon: Clock },
-                                        { label: "Articles Read", value: "12.4K", icon: BookOpen },
-                                        { label: "Bookmarks", value: "3.2K", icon: Bookmark },
-                                        { label: "Bounce Rate", value: "32%", icon: TrendingDown },
-                                    ].map((stat, i) => (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.2 + i * 0.05 }}
-                                            className="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center"
-                                        >
-                                            <stat.icon className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-                                            <p className="text-2xl font-bold">{stat.value}</p>
-                                            <p className="text-sm text-gray-400">{stat.label}</p>
-                                        </motion.div>
-                                    ))}
-                                </div>
                             </motion.div>
                         )}
 
@@ -649,7 +943,8 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                     <p className="text-gray-400 text-sm">Manage admin panel settings</p>
                                 </div>
 
-                                <motion.div
+                                <motion.form
+                                    onSubmit={handleSaveSettings}
                                     variants={containerVariants}
                                     initial="hidden"
                                     animate="visible"
@@ -663,14 +958,16 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                                 <label className="text-sm text-gray-400 block mb-2">Site Name</label>
                                                 <input
                                                     type="text"
-                                                    defaultValue="Wisdomia"
+                                                    name="siteName"
+                                                    defaultValue={settings.siteName}
                                                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
                                                 />
                                             </div>
                                             <div>
                                                 <label className="text-sm text-gray-400 block mb-2">Site Description</label>
                                                 <textarea
-                                                    defaultValue="A digital sanctuary for stories that matter."
+                                                    name="siteDescription"
+                                                    defaultValue={settings.siteDescription}
                                                     rows={3}
                                                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors resize-none"
                                                 />
@@ -678,7 +975,7 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                         </div>
                                     </motion.div>
 
-                                    {/* Security */}
+                                    {/* Security - Mock for now */}
                                     <motion.div variants={itemVariants} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
                                         <h3 className="font-bold mb-4">Security</h3>
                                         <div className="space-y-4">
@@ -703,6 +1000,7 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
 
                                     {/* Save Button */}
                                     <motion.button
+                                        type="submit"
                                         variants={itemVariants}
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
@@ -711,7 +1009,7 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                         <Check className="w-4 h-4" />
                                         Save Settings
                                     </motion.button>
-                                </motion.div>
+                                </motion.form>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -756,6 +1054,142 @@ export default function DashboardClient({ initialArticles }: DashboardClientProp
                                     Delete
                                 </button>
                             </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+             {/* Edit User Modal */}
+            <AnimatePresence>
+                {showEditUserModal && editingUser && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
+                        onClick={() => setShowEditUserModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full"
+                        >
+                             <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold">Edit User</h3>
+                                <button onClick={() => setShowEditUserModal(false)} className="text-gray-400 hover:text-white">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={saveUserChanges} className="space-y-4">
+                                <div>
+                                    <label className="text-sm text-gray-400 block mb-2">Name</label>
+                                    <input
+                                        type="text"
+                                        defaultValue={editingUser.name}
+                                        disabled
+                                        className="w-full px-4 py-3 bg-gray-800/50 border border-gray-800 rounded-xl text-gray-500 cursor-not-allowed"
+                                    />
+                                </div>
+                                 <div>
+                                    <label className="text-sm text-gray-400 block mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        defaultValue={editingUser.email}
+                                        disabled
+                                        className="w-full px-4 py-3 bg-gray-800/50 border border-gray-800 rounded-xl text-gray-500 cursor-not-allowed"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-400 block mb-2">Plan / Role</label>
+                                    <select
+                                        name="plan"
+                                        defaultValue={editingUser.plan}
+                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                                    >
+                                        <option value="Explorer">Explorer</option>
+                                        <option value="Reader">Reader</option>
+                                        <option value="Visionary">Visionary</option>
+                                    </select>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity mt-4"
+                                >
+                                    Save Changes
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+             {/* Add User Modal */}
+            <AnimatePresence>
+                {showAddUserModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
+                        onClick={() => setShowAddUserModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full"
+                        >
+                             <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold">Add New User</h3>
+                                <button onClick={() => setShowAddUserModal(false)} className="text-gray-400 hover:text-white">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleAddUser} className="space-y-4">
+                                <div>
+                                    <label className="text-sm text-gray-400 block mb-2">Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Full Name"
+                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                                        required
+                                    />
+                                </div>
+                                 <div>
+                                    <label className="text-sm text-gray-400 block mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        placeholder="user@example.com"
+                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-gray-400 block mb-2">Plan</label>
+                                    <select
+                                        name="plan"
+                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                                    >
+                                        <option value="Explorer">Explorer</option>
+                                        <option value="Reader">Reader</option>
+                                        <option value="Visionary">Visionary</option>
+                                    </select>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity mt-4 flex items-center justify-center gap-2"
+                                >
+                                    <UserPlus className="w-4 h-4" />
+                                    Create User
+                                </button>
+                            </form>
                         </motion.div>
                     </motion.div>
                 )}
