@@ -75,19 +75,12 @@ export default function SignInPage() {
     const handleSocialLogin = async (provider: string) => {
         setError("");
         setIsLoading(true);
-<<<<<<< HEAD
 
-        try {
-            await signIn(provider.toLowerCase(), { callbackUrl: "/" });
-        } catch {
-             setError(`Could not sign in with ${provider}`);
-=======
         try {
             await signIn(provider.toLowerCase(), { callbackUrl: "/" });
         } catch (err) {
              console.error(err);
-             setError("Something went wrong");
->>>>>>> origin/social-login-implementation-18241815583428777302
+             setError(`Could not sign in with ${provider}`);
              setIsLoading(false);
         }
     };
