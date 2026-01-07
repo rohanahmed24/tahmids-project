@@ -13,8 +13,10 @@ import {
     Heart,
     Zap,
     Globe,
-    X
+    X,
+    Upload
 } from "lucide-react";
+import { submitJobApplication } from "@/actions/careers";
 
 const departments = ["All", "Engineering", "Design", "Content", "Marketing", "Operations"];
 
@@ -166,13 +168,9 @@ export default function CareersPage() {
     const [expandedJob, setExpandedJob] = useState<number | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedJob, setSelectedJob] = useState<typeof jobs[0] | null>(null);
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        linkedin: "",
-        message: "",
-    });
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const filteredJobs = selectedDepartment === "All"
         ? jobs
@@ -182,14 +180,35 @@ export default function CareersPage() {
         setSelectedJob(job);
         setIsModalOpen(true);
         setIsSubmitted(false);
+        setError(null);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Simulate submission
-        setTimeout(() => {
-            setIsSubmitted(true);
-        }, 1000);
+        setIsLoading(true);
+        setError(null);
+
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+
+        if (selectedJob) {
+            formData.append("jobId", selectedJob.id.toString());
+            formData.append("jobTitle", selectedJob.title);
+        }
+
+        try {
+            const result = await submitJobApplication(null, formData);
+            if (result.success) {
+                setIsSubmitted(true);
+                form.reset();
+            } else {
+                setError(result.message);
+            }
+        } catch (e) {
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -479,14 +498,19 @@ export default function CareersPage() {
                                         </button>
                                     </div>
 
+                                    {error && (
+                                        <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-xl text-sm">
+                                            {error}
+                                        </div>
+                                    )}
+
                                     <form onSubmit={handleSubmit} className="space-y-5">
                                         <div>
                                             <label className="block text-sm font-medium mb-2">Full Name</label>
                                             <input
+                                                name="name"
                                                 type="text"
                                                 required
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                                 className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl focus:border-accent focus:outline-none transition-colors"
                                                 placeholder="John Doe"
                                             />
@@ -495,10 +519,9 @@ export default function CareersPage() {
                                         <div>
                                             <label className="block text-sm font-medium mb-2">Email</label>
                                             <input
+                                                name="email"
                                                 type="email"
                                                 required
-                                                value={formData.email}
-                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                                 className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl focus:border-accent focus:outline-none transition-colors"
                                                 placeholder="john@example.com"
                                             />
@@ -507,20 +530,32 @@ export default function CareersPage() {
                                         <div>
                                             <label className="block text-sm font-medium mb-2">LinkedIn Profile</label>
                                             <input
+                                                name="linkedin"
                                                 type="url"
-                                                value={formData.linkedin}
-                                                onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
                                                 className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl focus:border-accent focus:outline-none transition-colors"
                                                 placeholder="https://linkedin.com/in/johndoe"
                                             />
                                         </div>
 
                                         <div>
+                                            <label className="block text-sm font-medium mb-2">Resume / CV</label>
+                                            <div className="relative">
+                                                <input
+                                                    name="resume"
+                                                    type="file"
+                                                    accept=".pdf,.doc,.docx"
+                                                    required
+                                                    className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl focus:border-accent focus:outline-none transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20"
+                                                />
+                                            </div>
+                                            <p className="text-xs text-text-secondary mt-1">PDF or Word documents (Max 5MB)</p>
+                                        </div>
+
+                                        <div>
                                             <label className="block text-sm font-medium mb-2">Why do you want to join?</label>
                                             <textarea
+                                                name="message"
                                                 required
-                                                value={formData.message}
-                                                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                                 rows={4}
                                                 className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl focus:border-accent focus:outline-none transition-colors resize-none"
                                                 placeholder="Tell us about yourself..."
@@ -529,11 +564,12 @@ export default function CareersPage() {
 
                                         <motion.button
                                             type="submit"
+                                            disabled={isLoading}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
-                                            className="w-full py-4 bg-accent text-white font-bold text-sm uppercase tracking-widest rounded-full hover:shadow-lg hover:shadow-accent/30 transition-all"
+                                            className="w-full py-4 bg-accent text-white font-bold text-sm uppercase tracking-widest rounded-full hover:shadow-lg hover:shadow-accent/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            Submit Application
+                                            {isLoading ? "Submitting..." : "Submit Application"}
                                         </motion.button>
                                     </form>
                                 </>
