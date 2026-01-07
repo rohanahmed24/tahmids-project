@@ -5,6 +5,8 @@
    ▲ Next.js 16.0.10 (Turbopack)
    - Local:         http://localhost:3000
    - Network:       http://192.168.0.2:3000
+   - Experiments (use with caution):
+     ✓ turbopackUseSystemTlsCerts
 
  ✓ Starting...
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
@@ -12,7 +14,8 @@ This information is used to shape Next.js' roadmap and prioritize features.
 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
 https://nextjs.org/telemetry
 
- ✓ Ready in 1151ms
+ ✓ Ready in 1550ms
  ○ Compiling /register ...
- GET /register 200 in 6.4s (compile: 5.8s, render: 529ms)
- GET /signin 200 in 1135ms (compile: 1101ms, render: 34ms)
+ GET /register 200 in 7.1s (compile: 6.5s, render: 570ms)
+[next-auth][warn][NEXTAUTH_URL]
+https://next-auth.js.org/warnings#nextauth_url

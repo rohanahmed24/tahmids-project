@@ -7,6 +7,7 @@ import { ArrowRight, ShieldCheck, Star, Zap, Eye, EyeOff, AlertCircle, Loader2, 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { hashPassword } from "@/lib/crypto";
+import { signIn } from "next-auth/react";
 
 export default function SignInPage() {
     const router = useRouter();
@@ -85,28 +86,16 @@ export default function SignInPage() {
         }
     };
 
-    const handleSocialLogin = (provider: string) => {
+    const handleSocialLogin = async (provider: string) => {
         setError("");
         setIsLoading(true);
-
-        // Simulate social login
-        setTimeout(() => {
-            const socialUser = {
-                id: Date.now().toString(),
-                name: `${provider} User`,
-                email: `user@${provider.toLowerCase()}.com`,
-                provider,
-            };
-
-            localStorage.setItem("wisdomia_current_user", JSON.stringify(socialUser));
-
-            setSuccess(true);
-            setIsLoading(false);
-
-            setTimeout(() => {
-                router.push("/");
-            }, 1500);
-        }, 1500);
+        try {
+            await signIn(provider.toLowerCase(), { callbackUrl: "/" });
+        } catch (err) {
+             console.error(err);
+             setError("Something went wrong");
+             setIsLoading(false);
+        }
     };
 
     if (success) {
