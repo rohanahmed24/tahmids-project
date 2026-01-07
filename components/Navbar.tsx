@@ -5,11 +5,12 @@ import { Search, Menu, X, Globe, User, LogOut, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
-import { useAuth } from "@/components/providers/AuthProvider";
-import { logoutUser } from "@/actions/auth";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Navbar() {
-    const { user, isLoading } = useAuth();
+    const { data: session, status } = useSession();
+    const user = session?.user;
+    const isLoading = status === "loading";
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -27,11 +28,9 @@ export default function Navbar() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    const { logout } = useAuth(); // Destructure logout from useAuth
-
     const handleLogout = async () => {
-        await logout(); // Use the logout function from context
-        setIsUserMenuOpen(false); // Close the menu
+        await signOut({ callbackUrl: "/" });
+        setIsUserMenuOpen(false);
     };
 
     return (
@@ -76,7 +75,7 @@ export default function Navbar() {
                                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                                     className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
                                 >
-                                    {user.name.split(' ')[0]}
+                                    {user?.name?.split(' ')[0] || 'User'}
                                     <User className="w-4 h-4" />
                                 </button>
                                 <AnimatePresence>
