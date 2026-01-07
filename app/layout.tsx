@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import AuthProvider from "@/components/providers/AuthProvider";
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { DevToolsBlocker } from "@/components/DevToolsBlocker";
@@ -21,17 +22,19 @@ export default function RootLayout({
         suppressHydrationWarning
         className="antialiased bg-base text-main transition-colors duration-300"
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <DevToolsBlocker />
-          {children}
-          <Navbar />
-          <Footer />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <DevToolsBlocker />
+            {children}
+            <Navbar />
+            <Footer />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
