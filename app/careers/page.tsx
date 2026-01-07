@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Briefcase,
@@ -13,8 +13,12 @@ import {
     Heart,
     Zap,
     Globe,
-    X
+    X,
+    Upload,
+    Paperclip,
+    Loader2
 } from "lucide-react";
+import { submitApplication } from "@/actions/careers";
 
 const departments = ["All", "Engineering", "Design", "Content", "Marketing", "Operations"];
 
@@ -172,7 +176,10 @@ export default function CareersPage() {
         linkedin: "",
         message: "",
     });
+    const [resume, setResume] = useState<File | null>(null);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const filteredJobs = selectedDepartment === "All"
         ? jobs
@@ -182,14 +189,43 @@ export default function CareersPage() {
         setSelectedJob(job);
         setIsModalOpen(true);
         setIsSubmitted(false);
+        setError("");
+        setResume(null);
+        setFormData({ name: "", email: "", linkedin: "", message: "" });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Simulate submission
-        setTimeout(() => {
-            setIsSubmitted(true);
-        }, 1000);
+        setError("");
+
+        if (!resume) {
+            setError("Please upload your resume.");
+            return;
+        }
+
+        setIsLoading(true);
+
+        const formDataToSend = new FormData();
+        formDataToSend.append("jobId", selectedJob!.id.toString());
+        formDataToSend.append("jobTitle", selectedJob!.title);
+        formDataToSend.append("name", formData.name);
+        formDataToSend.append("email", formData.email);
+        formDataToSend.append("linkedin", formData.linkedin);
+        formDataToSend.append("message", formData.message);
+        formDataToSend.append("resume", resume);
+
+        try {
+            const result = await submitApplication(formDataToSend);
+            if (result.success) {
+                setIsSubmitted(true);
+            } else {
+                setError(result.message || "Failed to submit application.");
+            }
+        } catch (err) {
+            setError("Something went wrong. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -479,6 +515,12 @@ export default function CareersPage() {
                                         </button>
                                     </div>
 
+                                    {error && (
+                                        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-sm rounded-lg">
+                                            {error}
+                                        </div>
+                                    )}
+
                                     <form onSubmit={handleSubmit} className="space-y-5">
                                         <div>
                                             <label className="block text-sm font-medium mb-2">Full Name</label>
@@ -489,6 +531,7 @@ export default function CareersPage() {
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                                 className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl focus:border-accent focus:outline-none transition-colors"
                                                 placeholder="John Doe"
+                                                disabled={isLoading}
                                             />
                                         </div>
 
@@ -501,6 +544,7 @@ export default function CareersPage() {
                                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                                 className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl focus:border-accent focus:outline-none transition-colors"
                                                 placeholder="john@example.com"
+                                                disabled={isLoading}
                                             />
                                         </div>
 
@@ -512,7 +556,32 @@ export default function CareersPage() {
                                                 onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
                                                 className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl focus:border-accent focus:outline-none transition-colors"
                                                 placeholder="https://linkedin.com/in/johndoe"
+                                                disabled={isLoading}
                                             />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-2">Resume (PDF/Word)</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="file"
+                                                    required
+                                                    accept=".pdf,.doc,.docx"
+                                                    onChange={(e) => setResume(e.target.files ? e.target.files[0] : null)}
+                                                    className="hidden"
+                                                    id="resume-upload"
+                                                    disabled={isLoading}
+                                                />
+                                                <label
+                                                    htmlFor="resume-upload"
+                                                    className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl flex items-center justify-between cursor-pointer hover:border-accent transition-colors"
+                                                >
+                                                    <span className="text-sm text-text-secondary truncate">
+                                                        {resume ? resume.name : "Upload Resume"}
+                                                    </span>
+                                                    <Paperclip className="w-4 h-4 text-text-muted" />
+                                                </label>
+                                            </div>
                                         </div>
 
                                         <div>
@@ -524,16 +593,25 @@ export default function CareersPage() {
                                                 rows={4}
                                                 className="w-full px-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl focus:border-accent focus:outline-none transition-colors resize-none"
                                                 placeholder="Tell us about yourself..."
+                                                disabled={isLoading}
                                             />
                                         </div>
 
                                         <motion.button
                                             type="submit"
+                                            disabled={isLoading}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
-                                            className="w-full py-4 bg-accent text-white font-bold text-sm uppercase tracking-widest rounded-full hover:shadow-lg hover:shadow-accent/30 transition-all"
+                                            className="w-full py-4 bg-accent text-white font-bold text-sm uppercase tracking-widest rounded-full hover:shadow-lg hover:shadow-accent/30 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                                         >
-                                            Submit Application
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    Submitting...
+                                                </>
+                                            ) : (
+                                                "Submit Application"
+                                            )}
                                         </motion.button>
                                     </form>
                                 </>
