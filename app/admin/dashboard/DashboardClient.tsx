@@ -11,6 +11,7 @@ import { deleteUser, updateUserPlan } from "@/actions/users";
 import { updateSettings } from "@/actions/settings";
 import { getApplications, updateApplicationStatus } from "@/actions/careers";
 import { getImages, uploadImage, deleteImage } from "@/actions/media";
+import { RowDataPacket } from "mysql2";
 import {
     LayoutDashboard,
     Users,
@@ -140,8 +141,8 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     const [settings] = useState(initialSettings);
 
     // New Data States
-    const [applications, setApplications] = useState<any[]>([]);
-    const [mediaItems, setMediaItems] = useState<any[]>([]);
+    const [applications, setApplications] = useState<RowDataPacket[]>([]);
+    const [mediaItems, setMediaItems] = useState<RowDataPacket[]>([]);
     const [isUploading, setIsUploading] = useState(false);
 
     // Filtered Data

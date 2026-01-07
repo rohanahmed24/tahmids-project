@@ -2,7 +2,7 @@
 
 import { pool } from "@/lib/db";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
-import { writeFile, unlink } from "fs/promises";
+import { writeFile, unlink, mkdir } from "fs/promises";
 import path from "path";
 import { revalidatePath } from "next/cache";
 import { verifyAdmin } from "@/actions/admin-auth";
@@ -36,9 +36,10 @@ export async function uploadImage(formData: FormData) {
         const uploadDir = path.join(process.cwd(), "public/imgs/uploads");
 
         // Ensure dir exists
-        const fs = require('fs');
-        if (!fs.existsSync(uploadDir)){
-            fs.mkdirSync(uploadDir, { recursive: true });
+        try {
+            await mkdir(uploadDir, { recursive: true });
+        } catch {
+            // Directory already exists
         }
 
         await writeFile(path.join(uploadDir, filename), buffer);
@@ -67,7 +68,7 @@ export async function getImages() {
     try {
         await checkAuth();
         const [rows] = await pool.query<RowDataPacket[]>("SELECT * FROM assets ORDER BY id DESC");
-        return rows as any[];
+        return rows;
     } catch (error) {
         console.error("Fetch images error:", error);
         return [];
