@@ -69,7 +69,7 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Articl
         const newIndex = Math.round(-currentX / (cardWidth + gap));
         const clampedIndex = Math.max(0, Math.min(items.length - 1, newIndex));
         scrollToIndex(clampedIndex);
-        setIsPaused(false);
+        // Don't resume autoplay here - let onMouseLeave handle it
     };
 
     const goToPrevious = () => {
@@ -182,6 +182,7 @@ export function FeaturedTales() {
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const [containerWidth, setContainerWidth] = useState(0);
+    const [isPausedMobile, setIsPausedMobile] = useState(false);
 
     const cardsPerPage = 2;
     const gap = 12;
@@ -230,7 +231,7 @@ export function FeaturedTales() {
 
     // Autoslide every 2 seconds
     useEffect(() => {
-        if (containerWidth === 0) return;
+        if (containerWidth === 0 || isPausedMobile) return;
 
         const timer = setInterval(() => {
             setCurrentPage(prev => {
@@ -242,7 +243,7 @@ export function FeaturedTales() {
         }, 2000);
 
         return () => clearInterval(timer);
-    }, [containerWidth, slideWidth, totalPages, x]);
+    }, [containerWidth, slideWidth, totalPages, x, isPausedMobile]);
 
     return (
         <section className="relative w-full pt-8 pb-4 md:py-24 bg-bg-primary overflow-hidden">
@@ -261,7 +262,13 @@ export function FeaturedTales() {
 
                 {/* Mobile: 2 Cards Side by Side Draggable Slider */}
                 <div className="md:hidden relative" ref={containerRef}>
-                    <div className="overflow-hidden">
+                    <div
+                        className="overflow-hidden"
+                        onMouseEnter={() => setIsPausedMobile(true)}
+                        onMouseLeave={() => setIsPausedMobile(false)}
+                        onTouchStart={() => setIsPausedMobile(true)}
+                        onTouchEnd={() => setIsPausedMobile(false)}
+                    >
                         <motion.div
                             className="flex"
                             style={{ x, gap: `${gap}px` }}
