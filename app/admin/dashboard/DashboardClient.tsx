@@ -9,6 +9,8 @@ import { logoutAdmin } from "@/actions/admin-auth";
 import { deletePost } from "@/actions/posts";
 import { deleteUser, updateUserPlan } from "@/actions/users";
 import { updateSettings } from "@/actions/settings";
+import { getApplications, updateApplicationStatus } from "@/actions/careers";
+import { getImages, uploadImage, deleteImage } from "@/actions/media";
 import {
     LayoutDashboard,
     Users,
@@ -31,6 +33,10 @@ import {
     Sun,
     X,
     UserPlus,
+    Briefcase,
+    ImageIcon,
+    Upload,
+    Loader2,
     type LucideIcon
 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -39,6 +45,8 @@ const navItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "users", label: "Users", icon: Users },
     { id: "articles", label: "Articles", icon: FileText },
+    { id: "careers", label: "Careers", icon: Briefcase },
+    { id: "media", label: "Media", icon: ImageIcon },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -120,7 +128,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
 
     // Modal states
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: number; name: string } | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: number; name: string; extra?: string } | null>(null);
     const [showEditUserModal, setShowEditUserModal] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -130,6 +138,11 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     const [users, setUsers] = useState(initialUsers);
     const [stats] = useState(initialStats);
     const [settings] = useState(initialSettings);
+
+    // New Data States
+    const [applications, setApplications] = useState<any[]>([]);
+    const [mediaItems, setMediaItems] = useState<any[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
 
     // Filtered Data
     const filteredArticles = articles.filter(article =>
@@ -156,13 +169,22 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
         }
     }, [router]);
 
+    // Fetch new data when tab changes
+    useEffect(() => {
+        if (activeTab === "careers") {
+            getApplications().then(setApplications);
+        } else if (activeTab === "media") {
+            getImages().then(setMediaItems);
+        }
+    }, [activeTab]);
+
     const handleLogout = async () => {
         sessionStorage.removeItem("adminAuth");
         await logoutAdmin();
     };
 
-    const handleDelete = (type: string, id: number, name: string) => {
-        setDeleteTarget({ type, id, name });
+    const handleDelete = (type: string, id: number, name: string, extra?: string) => {
+        setDeleteTarget({ type, id, name, extra });
         setShowDeleteModal(true);
     };
 
@@ -171,12 +193,15 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
             try {
                 if (deleteTarget.type === "article") {
                     await deletePost(deleteTarget.name); // passing slug
-                    // Optimistically update the UI. RevalidatePath in server action handles server side,
-                    // but client state 'articles' needs update since this is a client component.
                     setArticles(articles.filter(a => a.slug !== deleteTarget.name));
                 } else if (deleteTarget.type === "user") {
                     await deleteUser(deleteTarget.id);
                     setUsers(users.filter(u => u.id !== deleteTarget.id));
+                } else if (deleteTarget.type === "media") {
+                    if (deleteTarget.extra) {
+                         await deleteImage(deleteTarget.id, deleteTarget.extra);
+                         setMediaItems(mediaItems.filter(m => m.id !== deleteTarget.id));
+                    }
                 }
             } catch (error) {
                 console.error("Failed to delete", error);
@@ -230,6 +255,33 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
         }
     };
 
+    const handleStatusUpdate = async (id: number, newStatus: string) => {
+        await updateApplicationStatus(id, newStatus);
+        setApplications(applications.map(app => app.id === id ? { ...app, status: newStatus } : app));
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setIsUploading(true);
+            const formData = new FormData();
+            formData.append("file", e.target.files[0]);
+
+            try {
+                const result = await uploadImage(formData);
+                if (result.success) {
+                    getImages().then(setMediaItems); // Refresh
+                } else {
+                    alert("Upload failed");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Upload failed");
+            } finally {
+                setIsUploading(false);
+            }
+        }
+    };
+
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
@@ -264,7 +316,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-1">
+                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {navItems.map((item) => (
                         <motion.button
                             key={item.id}
@@ -467,7 +519,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                             </motion.div>
                         )}
 
-                        {/* Users Tab - NOW DYNAMIC & FILTERED */}
+                        {/* Users Tab */}
                         {activeTab === "users" && (
                             <motion.div
                                 key="users"
@@ -571,7 +623,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                             </motion.div>
                         )}
 
-                        {/* Articles Tab - FILTERED */}
+                        {/* Articles Tab */}
                         {activeTab === "articles" && (
                             <motion.div
                                 key="articles"
@@ -652,8 +704,168 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                             </motion.div>
                         )}
 
-                        {/* Analytics Tab (Mock for now, hard to verify without data) */}
-                         {/* Analytics Tab */}
+                        {/* Careers Tab */}
+                        {activeTab === "careers" && (
+                            <motion.div
+                                key="careers"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                            >
+                                <div className="mb-8">
+                                    <h1 className="text-2xl font-bold mb-1">Job Applications</h1>
+                                    <p className="text-gray-400 text-sm">Manage recruitment pipeline</p>
+                                </div>
+
+                                <motion.div
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden"
+                                >
+                                    <table className="w-full">
+                                        <thead className="bg-gray-800/50">
+                                            <tr>
+                                                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Applicant</th>
+                                                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Role</th>
+                                                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Status</th>
+                                                <th className="text-left px-6 py-4 text-sm font-medium text-gray-400">Date</th>
+                                                <th className="text-right px-6 py-4 text-sm font-medium text-gray-400">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {applications.map((app) => (
+                                                <motion.tr
+                                                    key={app.id}
+                                                    variants={itemVariants}
+                                                    className="border-t border-gray-800 hover:bg-gray-800/50 transition-colors"
+                                                >
+                                                    <td className="px-6 py-4">
+                                                        <div>
+                                                            <p className="font-medium text-sm">{app.applicant_name}</p>
+                                                            <p className="text-xs text-gray-500">{app.email}</p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-300">{app.job_title}</td>
+                                                    <td className="px-6 py-4">
+                                                        <select
+                                                            value={app.status}
+                                                            onChange={(e) => handleStatusUpdate(app.id, e.target.value)}
+                                                            className="bg-gray-800 border border-gray-700 text-xs rounded-lg px-2 py-1 focus:outline-none"
+                                                        >
+                                                            <option value="pending">Pending</option>
+                                                            <option value="reviewing">Reviewing</option>
+                                                            <option value="accepted">Accepted</option>
+                                                            <option value="rejected">Rejected</option>
+                                                        </select>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                                        {new Date(app.created_at).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <a
+                                                            href={app.resume_path}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-purple-400 hover:underline text-sm"
+                                                        >
+                                                            View Resume
+                                                        </a>
+                                                    </td>
+                                                </motion.tr>
+                                            ))}
+                                            {applications.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                                        No applications found.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </motion.div>
+                            </motion.div>
+                        )}
+
+                        {/* Media Tab */}
+                        {activeTab === "media" && (
+                             <motion.div
+                                key="media"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                            >
+                                <div className="flex justify-between items-center mb-8">
+                                    <div>
+                                        <h1 className="text-2xl font-bold mb-1">Media Library</h1>
+                                        <p className="text-gray-400 text-sm">Manage uploaded assets</p>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            id="media-upload"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleFileUpload}
+                                            disabled={isUploading}
+                                        />
+                                        <label
+                                            htmlFor="media-upload"
+                                            className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-xl font-medium text-sm hover:opacity-90 transition-opacity cursor-pointer ${isUploading ? "opacity-50 cursor-not-allowed" : ""}`}
+                                        >
+                                            {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                            Upload Image
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <motion.div
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                                >
+                                    {mediaItems.map((item) => (
+                                        <motion.div
+                                            key={item.id}
+                                            variants={itemVariants}
+                                            className="group relative bg-gray-900 border border-gray-800 rounded-xl overflow-hidden aspect-square"
+                                        >
+                                            <Image
+                                                src={item.url}
+                                                alt={item.name}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                 <button
+                                                    onClick={() => window.open(item.url, '_blank')}
+                                                    className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white"
+                                                    title="View"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete("media", item.id, item.name, item.url)}
+                                                    className="p-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg text-red-400"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/60 text-xs truncate text-gray-300">
+                                                {item.name}
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                    {mediaItems.length === 0 && (
+                                         <p className="col-span-full text-gray-500 text-sm py-8 text-center">No media found.</p>
+                                    )}
+                                </motion.div>
+                            </motion.div>
+                        )}
+
+                        {/* Analytics Tab */}
                         {activeTab === "analytics" && (
                             <motion.div
                                 key="analytics"
@@ -716,7 +928,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                             </motion.div>
                         )}
 
-                        {/* Settings Tab - NOW DYNAMIC */}
+                        {/* Settings Tab */}
                         {activeTab === "settings" && (
                             <motion.div
                                 key="settings"
