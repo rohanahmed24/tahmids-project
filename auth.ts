@@ -91,8 +91,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                                 ]
                             );
                             user.id = result.insertId.toString();
-                        } catch (insertError: any) {
-                             if (insertError.code === 'ER_BAD_FIELD_ERROR') {
+                        } catch (insertError) {
+                             if ((insertError as { code?: string }).code === 'ER_BAD_FIELD_ERROR') {
                                  console.warn("Extended columns missing, falling back to basic schema");
                                  const [result] = await connection.query<ResultSetHeader>(
                                     "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",

@@ -6,7 +6,7 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 
-export async function submitJobApplication(prevState: any, formData: FormData) {
+export async function submitJobApplication(prevState: unknown, formData: FormData) {
     try {
         const jobId = formData.get("jobId");
         const jobTitle = formData.get("jobTitle");
@@ -52,7 +52,7 @@ export async function submitJobApplication(prevState: any, formData: FormData) {
         // Ensure directory exists
         try {
              await mkdir(uploadDir, { recursive: true });
-        } catch (e) {
+        } catch {
             // Ignore if exists
         }
 

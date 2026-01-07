@@ -33,8 +33,8 @@ async function updateSchema() {
                 ALTER TABLE users ADD COLUMN auth_provider VARCHAR(50) DEFAULT 'credentials'
             `);
             console.log("Added auth_provider column.");
-        } catch (e: any) {
-            if (e.code === 'ER_DUP_FIELDNAME') {
+        } catch (e) {
+            if ((e as { code?: string }).code === 'ER_DUP_FIELDNAME') {
                 console.log("auth_provider column already exists.");
             } else {
                 throw e;
@@ -47,8 +47,8 @@ async function updateSchema() {
                 ALTER TABLE users ADD COLUMN image VARCHAR(255)
             `);
             console.log("Added image column.");
-        } catch (e: any) {
-             if (e.code === 'ER_DUP_FIELDNAME') {
+        } catch (e) {
+             if ((e as { code?: string }).code === 'ER_DUP_FIELDNAME') {
                 console.log("image column already exists.");
             } else {
                 throw e;

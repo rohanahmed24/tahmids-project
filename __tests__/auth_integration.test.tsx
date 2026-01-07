@@ -1,10 +1,9 @@
 
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import RegisterPage from "@/app/register/page";
 import SignInPage from "@/app/signin/page";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 // Mock next-auth/react
 vi.mock("next-auth/react", () => ({
@@ -26,11 +25,11 @@ vi.mock("framer-motion", async (importOriginal) => {
   return {
     ...actual,
     motion: {
-      div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-      button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
-      p: ({ children, ...props }: any) => <p {...props}>{children}</p>,
+      div: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <div {...props}>{children}</div>,
+      button: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <button {...props}>{children}</button>,
+      p: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <p {...props}>{children}</p>,
     },
-    AnimatePresence: ({ children }: any) => <>{children}</>,
+    AnimatePresence: ({ children }: React.PropsWithChildren) => <>{children}</>,
   };
 });
 
