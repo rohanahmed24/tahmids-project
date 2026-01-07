@@ -78,7 +78,8 @@ export default function SignInPage() {
 
         try {
             await signIn(provider.toLowerCase(), { callbackUrl: "/" });
-        } catch {
+        } catch (err) {
+             console.error(err);
              setError(`Could not sign in with ${provider}`);
              setIsLoading(false);
         }
