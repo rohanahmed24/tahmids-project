@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight, Sparkles, Mail, Lock, User, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { registerUser } from "@/actions/auth";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -46,34 +48,19 @@ export default function RegisterPage() {
 
         setIsLoading(true);
 
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
         try {
-            // Check if user already exists
-            const existingUsers = JSON.parse(localStorage.getItem("wisdomia_users") || "[]");
-            const userExists = existingUsers.some((user: { email: string }) =>
-                user.email.toLowerCase() === formData.email.toLowerCase()
-            );
+            const formDataToSend = new FormData();
+            formDataToSend.append("name", formData.name.trim());
+            formDataToSend.append("email", formData.email.toLowerCase().trim());
+            formDataToSend.append("password", formData.password);
 
-            if (userExists) {
-                setError("An account with this email already exists. Please sign in instead.");
+            const result = await registerUser(formDataToSend);
+
+            if (!result.success) {
+                setError(result.message);
                 setIsLoading(false);
                 return;
             }
-
-            // Create new user
-            const newUser = {
-                id: Date.now().toString(),
-                name: formData.name.trim(),
-                email: formData.email.toLowerCase().trim(),
-                password: formData.password, // In production, this should be hashed!
-                createdAt: new Date().toISOString(),
-            };
-
-            // Save to localStorage
-            existingUsers.push(newUser);
-            localStorage.setItem("wisdomia_users", JSON.stringify(existingUsers));
 
             setSuccess(true);
             setIsLoading(false);
@@ -89,31 +76,21 @@ export default function RegisterPage() {
         }
     };
 
-    const handleSocialLogin = (provider: string) => {
+    const handleSocialLogin = async (provider: string) => {
         setError("");
         setIsLoading(true);
 
-        // Simulate social login
-        setTimeout(() => {
-            // Create a demo user for social login
-            const socialUser = {
-                id: Date.now().toString(),
-                name: `${provider} User`,
-                email: `user@${provider.toLowerCase()}.com`,
-                provider,
-                createdAt: new Date().toISOString(),
-            };
-
-            // Save current user session
-            localStorage.setItem("wisdomia_current_user", JSON.stringify(socialUser));
-
-            setSuccess(true);
+        try {
+            // We use redirect: true (default) so it sends user to provider
+            await signIn(provider.toLowerCase(), {
+                callbackUrl: "/",
+            });
+            // Code here might not execute if redirect happens immediately
+        } catch (err) {
+            console.error(err);
+            setError("Something went wrong");
             setIsLoading(false);
-
-            setTimeout(() => {
-                router.push("/");
-            }, 1500);
-        }, 1500);
+        }
     };
 
     if (success) {

@@ -5,9 +5,7 @@ import { motion } from "framer-motion";
 import { Shield, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-// Admin credentials (in production, use proper authentication)
-const ADMIN_PASSWORD = "wisdomia2024";
+import { loginAdmin } from "@/actions/admin-auth";
 
 export default function AdminLoginPage() {
     const [password, setPassword] = useState("");
@@ -16,21 +14,26 @@ export default function AdminLoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
 
-        setTimeout(() => {
-            if (password === ADMIN_PASSWORD) {
-                // Store admin session
+        try {
+            const result = await loginAdmin(password);
+
+            if (result.success) {
+                // Also keep sessionStorage for Client UI state if needed, but cookie is main source of truth
                 sessionStorage.setItem("adminAuth", "true");
                 router.push("/admin/dashboard");
             } else {
-                setError("Invalid password. Access denied.");
-                setIsLoading(false);
+                setError(result.error || "Access denied.");
             }
-        }, 1000);
+        } catch {
+            setError("An error occurred. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

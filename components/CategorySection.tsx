@@ -103,7 +103,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                                     className="flex-shrink-0"
                                     style={{ width: cardWidth }}
                                 >
-                                    <div className="relative aspect-[3/4] overflow-hidden rounded-lg mb-2">
+                                    <div className="relative aspect-[16/9] overflow-hidden rounded-lg mb-2">
                                         <Image
                                             src={item.img}
                                             fill
@@ -157,7 +157,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                             className="group cursor-pointer"
                         >
                             <Link href={`/article/${item.slug}`}>
-                                <div className="relative aspect-[3/4] overflow-hidden mb-4 transition-all duration-700">
+                                <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700">
                                     <Image
                                         src={item.img}
                                         fill

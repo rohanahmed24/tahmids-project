@@ -1,22 +1,11 @@
 import type { Metadata } from "next";
-import { Fraunces, Merriweather_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { DevToolsBlocker } from "@/components/DevToolsBlocker";
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  display: "swap",
-});
-
-const merriweatherSans = Merriweather_Sans({
-  subsets: ["latin"],
-  variable: "--font-merriweather-sans",
-  display: "swap",
-});
+import { SessionProvider } from "next-auth/react";
+import { SessionSync } from "@/components/SessionSync";
 
 export const metadata: Metadata = {
   title: "Wisdomia",
@@ -32,19 +21,22 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${fraunces.variable} ${merriweatherSans.variable} antialiased bg-base text-main transition-colors duration-300`}
+        className="antialiased bg-base text-main transition-colors duration-300"
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <DevToolsBlocker />
-          {children}
-          <Navbar />
-          <Footer />
-        </ThemeProvider>
+        <SessionProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <DevToolsBlocker />
+              <SessionSync />
+              {children}
+              <Navbar />
+              <Footer />
+            </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

@@ -196,7 +196,7 @@ export function HeroSlider() {
             </div>
 
             {/* Slide Indicators */}
-            <div className="absolute bottom-3 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 md:gap-3">
+            <div className="absolute bottom-3 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex lg:hidden items-center gap-2 md:gap-3">
                 {hotTopics.map((topic, index) => (
                     <button
                         key={topic.id}
@@ -239,7 +239,7 @@ export function HeroSlider() {
             </div>
 
             {/* Thumbnail Preview - Desktop Only */}
-            <div className="hidden lg:flex absolute bottom-24 right-12 z-20 gap-3">
+            <div className="hidden lg:flex absolute bottom-12 left-0 right-0 justify-center z-20 gap-3">
                 {hotTopics.map((topic, index) => (
                     <motion.button
                         key={topic.id}
