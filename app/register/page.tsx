@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, ArrowRight, Sparkles, Mail, Lock, User, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { registerUser } from "@/actions/auth";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -46,34 +47,19 @@ export default function RegisterPage() {
 
         setIsLoading(true);
 
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
         try {
-            // Check if user already exists
-            const existingUsers = JSON.parse(localStorage.getItem("wisdomia_users") || "[]");
-            const userExists = existingUsers.some((user: { email: string }) =>
-                user.email.toLowerCase() === formData.email.toLowerCase()
-            );
+            const formDataToSend = new FormData();
+            formDataToSend.append("name", formData.name.trim());
+            formDataToSend.append("email", formData.email.toLowerCase().trim());
+            formDataToSend.append("password", formData.password);
 
-            if (userExists) {
-                setError("An account with this email already exists. Please sign in instead.");
+            const result = await registerUser(formDataToSend);
+
+            if (!result.success) {
+                setError(result.message);
                 setIsLoading(false);
                 return;
             }
-
-            // Create new user
-            const newUser = {
-                id: Date.now().toString(),
-                name: formData.name.trim(),
-                email: formData.email.toLowerCase().trim(),
-                password: formData.password, // In production, this should be hashed!
-                createdAt: new Date().toISOString(),
-            };
-
-            // Save to localStorage
-            existingUsers.push(newUser);
-            localStorage.setItem("wisdomia_users", JSON.stringify(existingUsers));
 
             setSuccess(true);
             setIsLoading(false);

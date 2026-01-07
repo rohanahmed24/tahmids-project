@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Menu, X, Globe } from "lucide-react";
+import { Search, Menu, X, Globe, User, LogOut, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { logoutUser } from "@/actions/auth";
 
 export default function Navbar() {
+    const { user, isLoading } = useAuth();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
     // Text color logic: 
     // Uses semantic primary text (Charcoal in Light, White in Dark)
@@ -22,6 +26,13 @@ export default function Navbar() {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    const { logout } = useAuth(); // Destructure logout from useAuth
+
+    const handleLogout = async () => {
+        await logout(); // Use the logout function from context
+        setIsUserMenuOpen(false); // Close the menu
+    };
 
     return (
         <>
@@ -57,9 +68,46 @@ export default function Navbar() {
 
                     {/* Right: Actions */}
                     <div className={`flex items-center justify-end gap-5 md:gap-8 w-24 md:w-40 ${textColorClass}`}>
-                        <Link href="/signin" className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity">
-                            Sign In
-                        </Link>
+                        {isLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin opacity-50" />
+                        ) : user ? (
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                    className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
+                                >
+                                    {user.name.split(' ')[0]}
+                                    <User className="w-4 h-4" />
+                                </button>
+                                <AnimatePresence>
+                                    {isUserMenuOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute right-0 top-full mt-4 w-48 bg-bg-secondary border border-border rounded-xl shadow-xl overflow-hidden"
+                                        >
+                                            <div className="p-4 border-b border-border">
+                                                <p className="font-bold text-sm truncate">{user.name}</p>
+                                                <p className="text-xs text-text-muted truncate">{user.email}</p>
+                                            </div>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full text-left px-4 py-3 text-sm hover:bg-bg-primary transition-colors flex items-center gap-2 text-red-500"
+                                            >
+                                                <LogOut className="w-4 h-4" />
+                                                Sign Out
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        ) : (
+                            <Link href="/signin" className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity">
+                                Sign In
+                            </Link>
+                        )}
+
                         <div className="hidden md:flex">
                             <ThemeToggle />
                         </div>

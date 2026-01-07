@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Merriweather_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 import Navbar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { DevToolsBlocker } from "@/components/DevToolsBlocker";
@@ -40,10 +41,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <DevToolsBlocker />
-          {children}
-          <Navbar />
-          <Footer />
+          <AuthProvider>
+            <DevToolsBlocker />
+            {children}
+            <Navbar />
+            <Footer />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

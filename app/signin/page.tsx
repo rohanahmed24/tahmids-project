@@ -6,9 +6,12 @@ import { MotionWrapper } from "@/components/ui/MotionWrapper";
 import { ArrowRight, ShieldCheck, Star, Zap, Eye, EyeOff, AlertCircle, Loader2, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { loginUser } from "@/actions/auth";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function SignInPage() {
     const router = useRouter();
+    const { setUser } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -33,37 +36,24 @@ export default function SignInPage() {
 
         setIsLoading(true);
 
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
         try {
-            // Check credentials against localStorage
-            const users = JSON.parse(localStorage.getItem("wisdomia_users") || "[]");
-            const user = users.find((u: { email: string; password: string }) =>
-                u.email.toLowerCase() === formData.email.toLowerCase() &&
-                u.password === formData.password
-            );
+            const formDataToSend = new FormData();
+            formDataToSend.append("email", formData.email.toLowerCase().trim());
+            formDataToSend.append("password", formData.password);
 
-            if (!user) {
-                setError("Invalid email or password. Please try again.");
+            const result = await loginUser(formDataToSend);
+
+            if (!result.success) {
+                setError(result.message);
                 setIsLoading(false);
                 return;
             }
 
-            // Save current user session
-            localStorage.setItem("wisdomia_current_user", JSON.stringify({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-            }));
-
             setSuccess(true);
             setIsLoading(false);
 
-            // Redirect to home after 1.5 seconds
-            setTimeout(() => {
-                router.push("/");
-            }, 1500);
+            // Force a hard refresh to ensure the AuthProvider and server components update
+            window.location.href = "/";
 
         } catch {
             setError("Something went wrong. Please try again.");
@@ -75,24 +65,11 @@ export default function SignInPage() {
         setError("");
         setIsLoading(true);
 
-        // Simulate social login
+        // Simulate social login for now (or implement real OAuth later)
         setTimeout(() => {
-            const socialUser = {
-                id: Date.now().toString(),
-                name: `${provider} User`,
-                email: `user@${provider.toLowerCase()}.com`,
-                provider,
-            };
-
-            localStorage.setItem("wisdomia_current_user", JSON.stringify(socialUser));
-
-            setSuccess(true);
+            setError("Social login is not implemented yet.");
             setIsLoading(false);
-
-            setTimeout(() => {
-                router.push("/");
-            }, 1500);
-        }, 1500);
+        }, 1000);
     };
 
     if (success) {
