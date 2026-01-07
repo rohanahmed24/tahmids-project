@@ -6,6 +6,7 @@ import { Eye, EyeOff, ArrowRight, Sparkles, Mail, Lock, User, CheckCircle, Alert
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/actions/auth";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -75,31 +76,21 @@ export default function RegisterPage() {
         }
     };
 
-    const handleSocialLogin = (provider: string) => {
+    const handleSocialLogin = async (provider: string) => {
         setError("");
         setIsLoading(true);
 
-        // Simulate social login
-        setTimeout(() => {
-            // Create a demo user for social login
-            const socialUser = {
-                id: Date.now().toString(),
-                name: `${provider} User`,
-                email: `user@${provider.toLowerCase()}.com`,
-                provider,
-                createdAt: new Date().toISOString(),
-            };
-
-            // Save current user session
-            localStorage.setItem("wisdomia_current_user", JSON.stringify(socialUser));
-
-            setSuccess(true);
+        try {
+            // We use redirect: true (default) so it sends user to provider
+            await signIn(provider.toLowerCase(), {
+                callbackUrl: "/",
+            });
+            // Code here might not execute if redirect happens immediately
+        } catch (err) {
+            console.error(err);
+            setError("Something went wrong");
             setIsLoading(false);
-
-            setTimeout(() => {
-                router.push("/");
-            }, 1500);
-        }, 1500);
+        }
     };
 
     if (success) {
