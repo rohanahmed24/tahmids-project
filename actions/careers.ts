@@ -5,6 +5,10 @@ import { getDb } from "@/lib/db";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { revalidatePath } from "next/cache";
+import { verifyAdmin } from "@/actions/admin-auth";
+import { auth } from "@/auth";
 
 export async function submitJobApplication(prevState: unknown, formData: FormData) {
     try {
@@ -88,5 +92,49 @@ export async function submitJobApplication(prevState: unknown, formData: FormDat
             success: false,
             message: "Something went wrong. Please try again."
         };
+    }
+}
+
+export async function getApplications() {
+    try {
+        const isAdmin = await verifyAdmin();
+        const session = await auth();
+        const isNextAuthAdmin = session?.user?.role === "admin";
+
+        if (!isAdmin && !isNextAuthAdmin) {
+            throw new Error("Unauthorized");
+        }
+
+        const db = getDb();
+        const [rows] = await db.query<RowDataPacket[]>(
+            "SELECT * FROM job_applications ORDER BY applied_at DESC"
+        );
+        return rows;
+    } catch (error) {
+        console.error("Get applications error:", error);
+        return [];
+    }
+}
+
+export async function updateApplicationStatus(id: number, status: string) {
+    try {
+        const isAdmin = await verifyAdmin();
+        const session = await auth();
+        const isNextAuthAdmin = session?.user?.role === "admin";
+
+        if (!isAdmin && !isNextAuthAdmin) {
+            throw new Error("Unauthorized");
+        }
+
+        const db = getDb();
+        await db.query<ResultSetHeader>(
+            "UPDATE job_applications SET status = ? WHERE id = ?",
+            [status, id]
+        );
+        revalidatePath("/admin/dashboard");
+        return { success: true };
+    } catch (error) {
+        console.error("Update application status error:", error);
+        return { success: false };
     }
 }
