@@ -2,7 +2,7 @@
 "use server";
 
 import { getDb } from "@/lib/db";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, readFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
@@ -48,10 +48,10 @@ export async function submitJobApplication(prevState: unknown, formData: FormDat
             };
         }
 
-        // Save the file
+        // Save the file to a private directory (not in public/)
         const buffer = Buffer.from(await resume.arrayBuffer());
         const fileName = `${randomUUID()}${fileExtension}`;
-        const uploadDir = path.join(process.cwd(), "public/imgs/uploads/resumes");
+        const uploadDir = path.join(process.cwd(), "uploads/resumes");
 
         // Ensure directory exists
         try {
@@ -63,7 +63,8 @@ export async function submitJobApplication(prevState: unknown, formData: FormDat
         const filePath = path.join(uploadDir, fileName);
         await writeFile(filePath, buffer);
 
-        const resumePath = `/imgs/uploads/resumes/${fileName}`;
+        // We store the filename, the API route will handle serving it securely
+        const resumePath = `/api/admin/resumes/${fileName}`;
 
         // Save to database
         const db = getDb();

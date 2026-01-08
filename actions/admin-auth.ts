@@ -3,8 +3,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-// In a real app, use environment variables for secrets
-const ADMIN_PASSWORD = "wisdomia2024";
+// Use environment variable for secret, fallback for dev
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "wisdomia2024";
 const ADMIN_COOKIE_NAME = "admin_session";
 
 export async function loginAdmin(password: string) {
