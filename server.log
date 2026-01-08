@@ -1,14 +1,76 @@
 
-> project-1@0.1.0 start
-> next start
+> project-1@0.1.0 dev
+> next dev
 
- ⨯ Failed to start server
-Error: listen EADDRINUSE: address already in use :::3000
-    at <unknown> (Error: listen EADDRINUSE: address already in use :::3000)
-    at new Promise (<anonymous>) {
-  code: 'EADDRINUSE',
-  errno: -98,
-  syscall: 'listen',
-  address: '::',
-  port: 3000
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://192.168.0.2:3000
+   - Experiments (use with caution):
+     ✓ turbopackUseSystemTlsCerts
+
+ ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 2.4s
+ ○ Compiling /signin ...
+ GET /signin 200 in 9.3s (compile: 8.4s, render: 879ms)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/node_modules_@auth_core_ff0d7596._.js:513:16)
+    at Auth (/app/.next/dev/server/chunks/node_modules_@auth_core_ff0d7596._.js:5330:204)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async AppRouteRouteModule.do (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+[31m[auth][error][0m MissingSecret: Please define a `secret`. Read more at https://errors.authjs.dev#missingsecret
+    at assertConfig (/app/.next/dev/server/chunks/node_modules_@auth_core_ff0d7596._.js:513:16)
+    at Auth (/app/.next/dev/server/chunks/node_modules_@auth_core_ff0d7596._.js:5330:204)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async AppRouteRouteModule.do (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+   Reload env: .env
+ GET /signin 200 in 303ms (compile: 99ms, render: 204ms)
+ GET /api/auth/session 200 in 140ms (compile: 120ms, render: 20ms)
+ GET /api/auth/session 200 in 19ms (compile: 9ms, render: 11ms)
+ GET /api/auth/providers 200 in 23ms (compile: 8ms, render: 16ms)
+ GET /api/auth/csrf 200 in 38ms (compile: 10ms, render: 28ms)
+Auth error: Error:
+    at Object.authorize (auth.ts:32:44)
+  30 |
+  31 |              try {
+> 32 |                  const [rows] = await pool.query<RowDataPacket[]>(
+     |                                            ^
+  33 |                     "SELECT * FROM users WHERE email = ?",
+  34 |                     [credentials.email]
+  35 |                  ); {
+  code: 'ECONNREFUSED',
+  errno: undefined,
+  sql: undefined,
+  sqlState: undefined,
+  sqlMessage: undefined
 }
+[31m[auth][error][0m CredentialsSignin: Read more at https://errors.authjs.dev#credentialssignin
+    at Module.callback (/app/.next/dev/server/chunks/node_modules_@auth_core_ff0d7596._.js:4314:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async AuthInternal (/app/.next/dev/server/chunks/node_modules_@auth_core_ff0d7596._.js:5148:24)
+    at async Auth (/app/.next/dev/server/chunks/node_modules_@auth_core_ff0d7596._.js:5370:34)
+    at async AppRouteRouteModule.do (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37789)
+    at async AppRouteRouteModule.handle (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45045)
+    at async responseGenerator (/app/.next/dev/server/chunks/node_modules_next_830cf173._.js:16104:38)
+    at async AppRouteRouteModule.handleResponse (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:187851)
+    at async handleResponse (/app/.next/dev/server/chunks/node_modules_next_830cf173._.js:16166:32)
+    at async handler (/app/.next/dev/server/chunks/node_modules_next_830cf173._.js:16219:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1413:9)
+    at async DevServer.renderPageComponent (/app/node_modules/next/dist/server/base-server.js:1465:24)
+    at async DevServer.renderToResponseImpl (/app/node_modules/next/dist/server/base-server.js:1515:32)
+    at async DevServer.pipeImpl (/app/node_modules/next/dist/server/base-server.js:1021:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/app/node_modules/next/dist/server/next-server.js:394:17)
+    at async DevServer.handleRequestImpl (/app/node_modules/next/dist/server/base-server.js:912:17)
+    at async /app/node_modules/next/dist/server/dev/next-dev-server.js:382:20
+    at async Span.traceAsyncFn (/app/node_modules/next/dist/trace/trace.js:157:20)
+    at async DevServer.handleRequest (/app/node_modules/next/dist/server/dev/next-dev-server.js:378:24)
+    at async invokeRender (/app/node_modules/next/dist/server/lib/router-server.js:240:21)
+    at async handleRequest (/app/node_modules/next/dist/server/lib/router-server.js:436:24)
+    at async requestHandlerImpl (/app/node_modules/next/dist/server/lib/router-server.js:484:13)
+    at async Server.requestListener (/app/node_modules/next/dist/server/lib/start-server.js:226:13)
+ POST /api/auth/callback/credentials? 200 in 602ms (compile: 11ms, render: 592ms)
+ GET /api/auth/session 200 in 45ms (compile: 24ms, render: 21ms)
