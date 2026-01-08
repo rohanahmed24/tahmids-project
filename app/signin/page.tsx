@@ -60,12 +60,7 @@ export default function SignInPage() {
 
             setSuccess(true);
             setIsLoading(false);
-
-            // Redirect to home after 1.5 seconds
-            setTimeout(() => {
-                router.push("/");
-            }, 1500);
-
+            router.push("/");
         } catch {
             setError("Something went wrong. Please try again.");
             setIsLoading(false);
