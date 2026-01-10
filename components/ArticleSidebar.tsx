@@ -3,22 +3,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-export function ArticleSidebar() {
+import { getAuthorByName } from "@/lib/authors";
+
+interface ArticleSidebarProps {
+    authorName: string;
+}
+
+export function ArticleSidebar({ authorName }: ArticleSidebarProps) {
+    const author = getAuthorByName(authorName);
+
     return (
         <aside className="space-y-12 shrink-0">
             {/* Author Card - Bento Style */}
             <div className="bg-[#f4f1ea] dark:bg-[#1a1a1a] text-[#1a1a1a] dark:text-white p-8 rounded-none border border-black/5 dark:border-white/5 space-y-6">
                 <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden relative">
-                        <Image src={Assets.imgAuthorSarah} alt="Author" fill sizes="64px" className="object-cover" />
+                        <Image src={author.img} alt={author.name} fill sizes="64px" className="object-cover" />
                     </div>
                     <div>
-                        <h3 className="font-serif text-xl font-bold leading-none">Sarah Jenkins</h3>
-                        <p className="text-[10px] uppercase tracking-widest opacity-70 mt-1">Design Anthropologist</p>
+                        <h3 className="font-serif text-xl font-bold leading-none">{author.name}</h3>
+                        <p className="text-[10px] uppercase tracking-widest opacity-70 mt-1">{author.role}</p>
                     </div>
                 </div>
                 <p className="text-sm opacity-90 leading-relaxed font-sans">
-                    Exploring the intersection of human behavior and digital interfaces. Writing about silence, minimalism, and focus.
+                    {author.bio}
                 </p>
                 <div className="flex gap-2">
                     <button className="flex-1 py-3 border border-black/10 dark:border-white/10 font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">

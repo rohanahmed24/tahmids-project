@@ -213,6 +213,59 @@ export default function Editor({ initialData, action }: EditorProps) {
         }
     };
 
+    const handleDocImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const id = toast.loading("Importing document...");
+
+        try {
+            let text = "";
+
+            if (file.name.endsWith(".docx")) {
+                const arrayBuffer = await file.arrayBuffer();
+                // We need to dynamically import mammoth to avoid SSR issues if any, though it's client comp
+                const mammoth = (await import("mammoth")).default;
+                const result = await mammoth.convertToHtml({ arrayBuffer });
+                const html = result.value;
+
+                // Convert HTML to Markdown
+                const TurndownService = (await import("turndown")).default;
+                const turndownService = new TurndownService();
+                text = turndownService.turndown(html);
+
+                if (result.messages.length > 0) {
+                    console.log("Mammoth messages:", result.messages);
+                }
+            } else {
+                // markdown or text
+                text = await file.text();
+            }
+
+            if (text) {
+                // If content is empty, just set it. If not, maybe append or ask? 
+                // For now, let's append if not empty, or replace? 
+                // Let's replace for "Import", maybe confirmation would be nice but let's stick to simple first.
+                // Actually, plan said "populating". I'll insert at cursor or replace if empty.
+                if (!content) {
+                    setContent(text);
+                } else {
+                    insertAtCursor(text);
+                }
+                toast.success("Document imported!", { id });
+            } else {
+                toast.error("No text found in document", { id });
+            }
+
+        } catch (error) {
+            console.error("Import failed:", error);
+            toast.error("Failed to import document", { id });
+        }
+
+        // Reset input
+        if (e.target) e.target.value = "";
+    };
+
     const handleSubmit = async (formData: FormData) => {
         setIsSubmitting(true);
         const id = toast.loading("Publishing article...");
@@ -330,6 +383,23 @@ export default function Editor({ initialData, action }: EditorProps) {
                                 <div className="w-px h-4 bg-gray-800 mx-2" />
                                 <button
                                     type="button"
+                                    onClick={() => document.getElementById('docImport')?.click()}
+                                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2"
+                                    title="Import Document (.docx, .md, .txt)"
+                                >
+                                    <UploadCloud className="w-4 h-4" />
+                                    <span className="text-xs font-bold hidden xl:block">Import</span>
+                                </button>
+                                <input
+                                    type="file"
+                                    id="docImport"
+                                    className="hidden"
+                                    accept=".docx,.md,.txt"
+                                    onChange={handleDocImport}
+                                />
+                                <div className="w-px h-4 bg-gray-800 mx-2" />
+                                <button
+                                    type="button"
                                     onClick={() => fileInputRef.current?.click()}
                                     className="p-2 text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 rounded-lg flex items-center gap-2 transition-colors"
                                     title="Insert Image"
@@ -357,7 +427,7 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     onPaste={handlePaste}
                                     onDrop={handleDrop}
                                     placeholder="Tell your story... (Drag & Drop images enabled)"
-                                    className="w-full h-full bg-transparent p-6 resize-none focus:outline-none font-mono text-base leading-relaxed text-gray-300 placeholder:text-gray-700"
+                                    className="w-full min-h-[70vh] bg-transparent p-6 resize-y focus:outline-none font-mono text-base leading-relaxed text-gray-300 placeholder:text-gray-700"
                                     spellCheck={false}
                                 />
                                 {/* Bottom Status Bar */}

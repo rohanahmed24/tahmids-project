@@ -1,6 +1,5 @@
 
 import mysql, { RowDataPacket } from 'mysql2/promise';
-
 import { Assets } from './lib/assets';
 
 // Connect without database first
@@ -12,8 +11,6 @@ const poolConfig = {
     connectionLimit: 10,
     queueLimit: 0
 };
-
-
 
 async function setup() {
     let connection;
@@ -36,10 +33,58 @@ async function setup() {
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password_hash VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'user',
+                plan VARCHAR(50) DEFAULT 'Explorer',
+                status VARCHAR(50) DEFAULT 'active',
+                bio TEXT,
+                avatar VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
         console.log("Table 'users' ready.");
+
+        // Migration: Add plan column if it doesn't exist
+        try {
+            await connection.query("ALTER TABLE users ADD COLUMN plan VARCHAR(50) DEFAULT 'Explorer'");
+            console.log("Added 'plan' column to users table.");
+        } catch (e: unknown) {
+            const err = e as { code?: string; message: string };
+            if (err.code !== 'ER_DUP_FIELDNAME') {
+                console.log("Column 'plan' already exists or other error:", err.message);
+            }
+        }
+
+        // Migration: Add status column if it doesn't exist
+        try {
+            await connection.query("ALTER TABLE users ADD COLUMN status VARCHAR(50) DEFAULT 'active'");
+            console.log("Added 'status' column to users table.");
+        } catch (e: unknown) {
+            const err = e as { code?: string; message: string };
+            if (err.code !== 'ER_DUP_FIELDNAME') {
+                console.log("Column 'status' already exists or other error:", err.message);
+            }
+        }
+
+        // Migration: Add bio column if it doesn't exist
+        try {
+            await connection.query("ALTER TABLE users ADD COLUMN bio TEXT");
+            console.log("Added 'bio' column to users table.");
+        } catch (e: unknown) {
+            const err = e as { code?: string; message: string };
+            if (err.code !== 'ER_DUP_FIELDNAME') {
+                console.log("Column 'bio' already exists or other error:", err.message);
+            }
+        }
+
+        // Migration: Add avatar column if it doesn't exist
+        try {
+            await connection.query("ALTER TABLE users ADD COLUMN avatar VARCHAR(255)");
+            console.log("Added 'avatar' column to users table.");
+        } catch (e: unknown) {
+            const err = e as { code?: string; message: string };
+            if (err.code !== 'ER_DUP_FIELDNAME') {
+                console.log("Column 'avatar' already exists or other error:", err.message);
+            }
+        }
 
         // Create Posts Table
         await connection.query(`
@@ -74,6 +119,32 @@ async function setup() {
             )
         `);
         console.log("Table 'assets' ready.");
+
+        // Create Settings Table
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS settings (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                key_name VARCHAR(255) NOT NULL UNIQUE,
+                value TEXT
+            )
+        `);
+        console.log("Table 'settings' ready.");
+
+        // Seed Settings
+        const defaultSettings = {
+            site_name: "Wisdomia",
+            site_description: "Where every tale comes alive",
+            contact_email: "contact@wisdomia.com",
+            maintenance_mode: "false"
+        };
+
+        for (const [key, value] of Object.entries(defaultSettings)) {
+            await connection.query(
+                "INSERT IGNORE INTO settings (key_name, value) VALUES (?, ?)",
+                [key, value]
+            );
+        }
+        console.log("Settings seeded.");
 
         // Seed Assets
         console.log("Seeding assets...");
@@ -183,8 +254,8 @@ async function setup() {
             } else {
                 // Update existing to ensure new fields are populated if they were missing or null
                 await connection.query(
-                    "UPDATE posts SET subtitle = ?, featured = ?, views = ?, accent_color = ? WHERE slug = ?",
-                    [post.subtitle || '', post.featured || false, post.views || 0, post.accent_color || null, post.slug]
+                    "UPDATE posts SET subtitle = ?, featured = ?, views = ?, accent_color = ?, coverImage = ? WHERE slug = ?",
+                    [post.subtitle || '', post.featured || false, post.views || 0, post.accent_color || null, post.coverImage, post.slug]
                 );
                 console.log(`Updated post: ${post.slug}`);
             }

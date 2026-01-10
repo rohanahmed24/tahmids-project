@@ -8,13 +8,29 @@ export type User = {
     role: string;
     created_at: string;
     plan?: string;
+    status?: string;
+    article_count?: number;
+    avatar?: string;
+    bio?: string;
 };
 
 export async function getAllUsers(): Promise<User[]> {
     const db = getDb();
     try {
         const [rows] = await db.query<RowDataPacket[]>(
-            "SELECT id, name, email, role, created_at, plan FROM users ORDER BY created_at DESC"
+            `SELECT 
+                u.id, 
+                u.name, 
+                u.email, 
+                u.role, 
+                u.created_at, 
+                u.plan,
+                u.status,
+                u.avatar,
+                u.bio,
+                (SELECT COUNT(*) FROM posts p WHERE p.author = u.name) as article_count
+             FROM users u 
+             ORDER BY u.created_at DESC`
         );
         return rows as User[];
     } catch (error) {
@@ -31,8 +47,8 @@ export async function getUserStats() {
 
         let totalViews = 0;
         try {
-             const [viewRows] = await db.query<RowDataPacket[]>("SELECT SUM(views) as total FROM posts");
-             totalViews = viewRows[0].total || 0;
+            const [viewRows] = await db.query<RowDataPacket[]>("SELECT SUM(views) as total FROM posts");
+            totalViews = viewRows[0].total || 0;
         } catch {
             // views column might not exist yet
             console.warn("Could not fetch views sum, defaulting to 0");

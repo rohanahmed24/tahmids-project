@@ -41,9 +41,9 @@ export default function Navbar() {
                     : 'border-transparent py-4 md:py-6'
                     }`}
             >
-                <div className="max-w-[1800px] mx-auto px-6 md:px-12 grid grid-cols-3 items-center">
+                <div className="max-w-[1800px] mx-auto px-6 md:px-12 flex justify-between items-center gap-4">
                     {/* Left: Menu & Search */}
-                    <div className={`flex items-center gap-4 md:gap-6 justify-self-start ${textColorClass}`}>
+                    <div className={`flex items-center gap-4 md:gap-6 ${textColorClass}`}>
                         <button
                             onClick={() => setIsMenuOpen(true)}
                             className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
@@ -51,23 +51,34 @@ export default function Navbar() {
                             <Menu className="w-5 h-5" />
                             <span className="hidden md:block">Menu</span>
                         </button>
-                        <button className="hidden md:block hover:opacity-60 transition-opacity">
-                            <Search className="w-5 h-5" />
-                        </button>
+
+                        <div className="relative group hidden md:block">
+                            <form action="/search" className="relative flex items-center">
+                                <label htmlFor="search-input" className="sr-only">Search</label>
+                                <Search className="w-5 h-5 absolute left-0 pointer-events-none group-focus-within:text-purple-400 transition-colors" />
+                                <input
+                                    id="search-input"
+                                    name="q"
+                                    type="text"
+                                    placeholder="Search..."
+                                    className="bg-transparent border-b border-transparent focus:border-purple-400 pl-8 pr-4 py-1 outline-none w-24 focus:w-48 transition-all duration-300 placeholder:text-transparent focus:placeholder:text-gray-500/50"
+                                />
+                            </form>
+                        </div>
                     </div>
 
                     {/* Center: Logo */}
-                    <div className={`flex items-center justify-center justify-self-center ${textColorClass}`}>
+                    <div className={`flex items-center justify-center ${textColorClass} absolute left-1/2 -translate-x-1/2`}>
                         <Link href="/" className="block">
-                            <h1 className="font-serif text-2xl md:text-3xl font-black tracking-tighter transition-colors flex items-center gap-1">
-                                <span className="text-sm md:text-base font-medium tracking-normal opacity-80">The</span>
+                            <h1 className="font-serif text-2xl md:text-3xl font-black tracking-tighter transition-colors flex items-center gap-2">
+                                <span className="text-sm font-medium tracking-normal opacity-80">The</span>
                                 WISDOMIA
                             </h1>
                         </Link>
                     </div>
 
                     {/* Right: Actions */}
-                    <div className={`flex items-center justify-end gap-5 md:gap-8 w-24 md:w-40 ${textColorClass}`}>
+                    <div className={`flex items-center justify-end gap-3 md:gap-8 w-auto ${textColorClass}`}>
                         {isLoading ? (
                             <Loader2 className="w-4 h-4 animate-spin opacity-50" />
                         ) : user ? (
@@ -79,6 +90,14 @@ export default function Navbar() {
                                     {user?.name?.split(' ')[0] || 'User'}
                                     <User className="w-4 h-4" />
                                 </button>
+                                {/* Mobile User Icon only if needed, but keeping hidden md:flex layout for consistency with previous buttons, though user might want access. Leaving user menu behavior as is for now unless requested, focusing on theme bar. */}
+                                <button
+                                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                    className="md:hidden flex items-center hover:opacity-60 transition-opacity"
+                                >
+                                    <User className="w-5 h-5" />
+                                </button>
+
                                 <AnimatePresence>
                                     {isUserMenuOpen && (
                                         <motion.div
@@ -103,13 +122,13 @@ export default function Navbar() {
                                 </AnimatePresence>
                             </div>
                         ) : (
-                            <Link href="/signin" className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity">
+                            <Link href="/signin" className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity whitespace-nowrap">
                                 Sign In
                             </Link>
                         )}
 
 
-                        <div className="hidden md:flex">
+                        <div className="flex">
                             <ThemeToggle />
                         </div>
                         {/* Language/Region Selector */}
@@ -158,10 +177,10 @@ export default function Navbar() {
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 md:p-12 flex flex-col md:flex-row gap-12 md:gap-24">
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8 xl:p-12 flex flex-col md:flex-row gap-8 md:gap-12 xl:gap-24">
                             {/* Navigation Links */}
-                            <div className="flex flex-col gap-6">
-                                <span className="text-xs font-bold uppercase tracking-widest text-muted mb-4">Navigation</span>
+                            <div className="flex flex-col gap-4 md:gap-6">
+                                <span className="text-xs font-bold uppercase tracking-widest text-muted mb-2 md:mb-4">Navigation</span>
                                 {[
                                     { name: "Home", href: "/" },
                                     { name: "Stories", href: "/stories" },
@@ -174,7 +193,7 @@ export default function Navbar() {
                                         key={item.name}
                                         href={item.href}
                                         onClick={() => setIsMenuOpen(false)}
-                                        className="text-4xl md:text-6xl font-serif font-medium text-main hover:italic transition-all duration-300 w-fit"
+                                        className="text-3xl md:text-5xl xl:text-6xl font-serif font-medium text-main hover:italic transition-all duration-300 w-fit"
                                     >
                                         {item.name}
                                     </Link>
@@ -182,8 +201,8 @@ export default function Navbar() {
                             </div>
 
                             {/* Featured / Secondary */}
-                            <div className="flex flex-col gap-6 pt-4 md:pt-14">
-                                <span className="text-xs font-bold uppercase tracking-widest text-muted mb-4">Featured Topics</span>
+                            <div className="flex flex-col gap-4 md:gap-6 pt-4 md:pt-10 xl:pt-14">
+                                <span className="text-xs font-bold uppercase tracking-widest text-muted mb-2 md:mb-4">Featured Topics</span>
                                 {[
                                     { name: "Technology & AI", slug: "technology-ai" },
                                     { name: "Design Culture", slug: "design-culture" },
@@ -191,14 +210,14 @@ export default function Navbar() {
                                     { name: "Future Tech", slug: "future-tech" },
                                     { name: "Psychology", slug: "psychology" },
                                 ].map(topic => (
-                                    <Link key={topic.slug} href={`/topics/${topic.slug}`} onClick={() => setIsMenuOpen(false)} className="text-lg md:text-xl font-sans font-medium text-secondary hover:text-main transition-colors">
+                                    <Link key={topic.slug} href={`/topics/${topic.slug}`} onClick={() => setIsMenuOpen(false)} className="text-base md:text-lg xl:text-xl font-sans font-medium text-secondary hover:text-main transition-colors">
                                         {topic.name}
                                     </Link>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="p-6 md:p-12 border-t border-border flex justify-between items-center text-main">
+                        <div className="p-6 md:p-8 xl:p-12 border-t border-border flex justify-between items-center text-main">
                             <div className="flex gap-6">
                                 <a href="#" className="opacity-50 hover:opacity-100 transition-opacity">Twitter</a>
                                 <a href="#" className="opacity-50 hover:opacity-100 transition-opacity">Instagram</a>
@@ -211,7 +230,9 @@ export default function Navbar() {
                                     <span className="opacity-40">|</span>
                                     <button className="px-2 py-1 text-xs font-bold hover:bg-main/10 rounded transition-colors">বাংলা</button>
                                 </div>
-                                <ThemeToggle />
+                                <div className="hidden md:block">
+                                    <ThemeToggle />
+                                </div>
                             </div>
                         </div>
                     </motion.div>

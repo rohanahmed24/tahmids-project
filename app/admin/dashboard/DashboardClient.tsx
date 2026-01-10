@@ -34,6 +34,7 @@ import {
     Sun,
     X,
     UserPlus,
+    User as UserIcon,
     Briefcase,
     ImageIcon,
     Upload,
@@ -50,6 +51,7 @@ const navItems = [
     { id: "media", label: "Media", icon: ImageIcon },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
     { id: "settings", label: "Settings", icon: Settings },
+    { id: "profile", label: "Profile", icon: UserIcon },
 ];
 
 const containerVariants = {
@@ -113,6 +115,8 @@ interface DashboardClientProps {
     initialUsers: User[];
     initialStats: Stat[];
     initialSettings: SiteSettings;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    currentUser: any;
 }
 
 const icons: Record<string, LucideIcon> = {
@@ -122,7 +126,9 @@ const icons: Record<string, LucideIcon> = {
     DollarSign
 };
 
-export default function DashboardClient({ initialArticles, initialUsers, initialStats, initialSettings }: DashboardClientProps) {
+import { updateProfile } from "@/actions/profile";
+
+export default function DashboardClient({ initialArticles, initialUsers, initialStats, initialSettings, currentUser }: DashboardClientProps) {
     const [activeTab, setActiveTab] = useState("overview");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -139,6 +145,21 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     const [users, setUsers] = useState(initialUsers);
     const [stats] = useState(initialStats);
     const [settings] = useState(initialSettings);
+
+    // Profile State
+    const [profileName, setProfileName] = useState(currentUser?.name || "");
+    const [profileBio, setProfileBio] = useState(currentUser?.bio || "");
+
+    const handleUpdateProfile = async (formData: FormData) => {
+        try {
+            await updateProfile(formData);
+            alert("Profile updated successfully");
+            window.location.reload();
+        } catch (error) {
+            console.error(error);
+            alert("Failed to update profile");
+        }
+    };
 
     // New Data States
     const [applications, setApplications] = useState<RowDataPacket[]>([]);
@@ -1008,6 +1029,91 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                     >
                                         <Check className="w-4 h-4" />
                                         Save Settings
+                                    </motion.button>
+                                </motion.form>
+                            </motion.div>
+                        )}
+
+                        {/* Profile Tab */}
+                        {activeTab === "profile" && (
+                            <motion.div
+                                key="profile"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="max-w-2xl"
+                            >
+                                <div className="mb-8">
+                                    <h1 className="text-2xl font-bold mb-1">My Profile</h1>
+                                    <p className="text-gray-400 text-sm">Manage your personal details</p>
+                                </div>
+
+                                <motion.form
+                                    action={handleUpdateProfile}
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    className="space-y-6"
+                                >
+                                    <motion.div variants={itemVariants} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                                        <div className="flex items-center gap-6 mb-8">
+                                            <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-purple-500/50">
+                                                <Image
+                                                    src={currentUser?.image || currentUser?.avatar || "/imgs/Alaxandria.jpeg"}
+                                                    alt="Profile"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="avatar-upload" className="cursor-pointer px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-medium transition-colors">
+                                                    Change Avatar
+                                                </label>
+                                                <input
+                                                    id="avatar-upload"
+                                                    name="avatar"
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                />
+                                                <p className="text-xs text-gray-500 mt-2">Recommended: 400x400px</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="text-sm text-gray-400 block mb-2">Display Name</label>
+                                                <input
+                                                    type="text"
+                                                    name="name"
+                                                    value={profileName}
+                                                    onChange={(e) => setProfileName(e.target.value)}
+                                                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-sm text-gray-400 block mb-2">Bio</label>
+                                                <textarea
+                                                    name="bio"
+                                                    value={profileBio}
+                                                    onChange={(e) => setProfileBio(e.target.value)}
+                                                    rows={4}
+                                                    placeholder="Tell us about yourself..."
+                                                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors resize-none"
+                                                />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+
+                                    <motion.button
+                                        type="submit"
+                                        variants={itemVariants}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="w-full py-4 bg-gradient-to-r from-red-500 to-purple-600 font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                                    >
+                                        <Check className="w-4 h-4" />
+                                        Save Profile
                                     </motion.button>
                                 </motion.form>
                             </motion.div>

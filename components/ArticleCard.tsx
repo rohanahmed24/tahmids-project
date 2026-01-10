@@ -9,17 +9,19 @@ import { Post } from "@/lib/posts";
 
 interface ArticleCardProps {
     article: Post;
-    width: number;
+    width?: number;
 }
 
 export function ArticleCard({ article, width }: ArticleCardProps) {
     const router = useRouter();
 
+    const style = width ? { width: `${width}px`, minWidth: `${width}px`, maxWidth: `${width}px` } : { width: '100%' };
+
     return (
         <div
             onClick={() => router.push(`/article/${article.slug}`)}
             className="group flex flex-col gap-5 cursor-pointer text-text-primary flex-shrink-0"
-            style={{ width: `${width}px`, minWidth: `${width}px`, maxWidth: `${width}px` }}
+            style={style}
         >
             <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-bg-card shadow-sm transition-shadow group-hover:shadow-md">
                 <Image

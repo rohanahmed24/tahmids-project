@@ -71,7 +71,7 @@ export default async function ArticlePage({
 
                     <aside className="w-full lg:w-[350px] 2xl:w-[400px] flex-shrink-0">
                         <div className="sticky top-32">
-                            <ArticleSidebar />
+                            <ArticleSidebar authorName={post.author} />
                         </div>
                     </aside>
                 </div>

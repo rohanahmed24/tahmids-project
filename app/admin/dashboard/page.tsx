@@ -1,11 +1,16 @@
+import { auth } from "@/auth";
+import DashboardClient from "./DashboardClient";
+import { verifyAdmin } from "@/actions/admin-auth";
+
 import { getAllPosts } from "@/lib/posts";
 import { getAllUsers, getUserStats } from "@/lib/users";
 import { getSettings } from "@/lib/settings";
-import DashboardClient from "./DashboardClient";
-import { verifyAdmin } from "@/actions/admin-auth";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
+    const session = await auth();
+    const currentUser = session?.user;
+
     const isAdmin = await verifyAdmin();
     if (!isAdmin) {
         redirect("/admin");
@@ -29,13 +34,13 @@ export default async function DashboardPage() {
     }));
 
     const mappedUsers = users.map(user => ({
-        id: user.id,
+        id: user.id || 0,
         name: user.name,
         email: user.email,
-        avatar: "/imgs/Alaxandria.jpeg", // Placeholder for now
+        avatar: user.avatar || "/imgs/Alaxandria.jpeg", // Placeholder for now
         plan: user.plan || "Explorer",
-        status: "active", // Hardcoded for now
-        articles: 0, // Need to join posts to get this, keeping 0 for now
+        status: user.status || "active",
+        articles: user.article_count || 0,
         joined: new Date(user.created_at).toLocaleDateString()
     }));
 
@@ -51,5 +56,6 @@ export default async function DashboardPage() {
         initialUsers={mappedUsers}
         initialStats={dashboardStats}
         initialSettings={settings}
+        currentUser={currentUser}
     />;
 }

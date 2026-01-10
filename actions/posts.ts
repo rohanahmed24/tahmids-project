@@ -28,8 +28,19 @@ function generateSlug(title: string): string {
         .replace(/(^-|-$)+/g, '');
 }
 
+import { auth } from "@/auth";
+
+// ... existing imports
+
 export async function createPost(formData: FormData) {
-    const isAdmin = await verifyAdmin();
+    const session = await auth();
+    const isAdmin = await verifyAdmin(); // Keep admin verification for now if this is an admin-only feature, or just check session
+
+    // Fallback if strict admin check passes but session is missing (unlikely)
+    if (!session?.user?.name) {
+        throw new Error("User not authenticated");
+    }
+
     if (!isAdmin) {
         throw new Error("Unauthorized");
     }
@@ -37,7 +48,7 @@ export async function createPost(formData: FormData) {
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
     const category = formData.get("category") as string;
-    const author = "Admin";
+    const author = session.user.name; // Use real user name
     const videoUrl = formData.get("videoUrl") as string;
 
     // New fields
@@ -56,7 +67,7 @@ export async function createPost(formData: FormData) {
     const uploadedImagePath = await handleFileUpload(coverImageFile);
     const coverImage = uploadedImagePath || (formData.get("coverImage") as string) || "";
 
-    const date = new Date().toISOString(); // Full timestamp for created_at, string for date column if it's varchar
+    const date = new Date().toISOString();
 
     const db = getDb();
     try {
@@ -64,8 +75,15 @@ export async function createPost(formData: FormData) {
             "INSERT INTO posts (slug, title, date, author, category, content, coverImage, videoUrl, subtitle, topic_slug, accent_color, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [slug, title, date, author, category, content, coverImage, videoUrl, subtitle, topic_slug, accent_color, featured]
         );
-    } catch (error) {
+    } catch (error: unknown) {
         console.error("Failed to create post:", error);
+        const err = error as { code?: string; };
+        if (err.code === 'ER_DUP_ENTRY') {
+            // Simple retry logic or error for now - appending random string to make unique if auto-generated, 
+            // but if user manually set it, we should probably error. 
+            // For now, let's throw a clear error string the UI can maybe catch, or just fail safely.
+            throw new Error("A story with this title/slug already exists. Please change the title.");
+        }
         throw new Error("Failed to create post");
     }
 
