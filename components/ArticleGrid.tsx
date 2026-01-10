@@ -61,7 +61,7 @@ export function ArticleGrid() {
                                         <span>•</span>
                                         <span>{article.date}</span>
                                     </div>
-                                    <h3 className="text-base font-serif font-semibold leading-tight text-text-primary line-clamp-2">
+                                    <h3 className="text-base font-serif font-semibold leading-tight text-text-primary line-clamp-3">
                                         {article.title}
                                     </h3>
                                     <div className="flex items-center gap-2 pt-2">

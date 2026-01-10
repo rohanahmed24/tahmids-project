@@ -46,7 +46,7 @@ export function ArticleCard({ article, width }: ArticleCardProps) {
                     <span>•</span>
                     <span>{article.date}</span>
                 </div>
-                <h3 className="text-lg md:text-xl font-serif font-semibold leading-tight group-hover:text-accent transition-colors">
+                <h3 className="text-lg md:text-xl font-serif font-semibold leading-tight group-hover:text-accent transition-colors line-clamp-3">
                     {article.title}
                 </h3>
                 <div className="flex items-center justify-between pt-2 border-t border-border-subtle">

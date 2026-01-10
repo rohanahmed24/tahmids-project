@@ -131,7 +131,7 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Articl
                                     <span className="text-text-muted">•</span>
                                     <span className="text-text-muted">{item.date}</span>
                                 </div>
-                                <h3 className="font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2 text-base">
+                                <h3 className="font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-3 text-base">
                                     {item.title}
                                 </h3>
                                 <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
@@ -164,11 +164,10 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Articl
                     <button
                         key={index}
                         onClick={() => scrollToIndex(index)}
-                        className={`h-2 rounded-full transition-all ${
-                            index === currentIndex
+                        className={`h-2 rounded-full transition-all ${index === currentIndex
                                 ? "bg-accent w-8"
                                 : "bg-text-muted/30 w-2 hover:bg-text-muted/50"
-                        }`}
+                            }`}
                         aria-label={`Go to slide ${index + 1}`}
                     />
                 ))}
