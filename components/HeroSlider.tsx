@@ -5,7 +5,7 @@ import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
-import { hotTopics } from "@/lib/mock-data";
+import { Post } from "@/lib/posts";
 
 // Move variants outside component to avoid recreation
 const slideVariants = {
@@ -34,21 +34,32 @@ const textVariants = {
     exit: { y: -50, opacity: 0 },
 };
 
-export function HeroSlider() {
+interface HeroSliderProps {
+    items: Post[];
+}
+
+export function HeroSlider({ items }: HeroSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
     const [direction, setDirection] = useState(1);
     const [isDragging, setIsDragging] = useState(false);
 
+    // Filter mainly ensuring we have items, fallback to empty array if undefined
+    const validItems = items || [];
+
     const nextSlide = useCallback(() => {
+        if (validItems.length === 0) return;
         setDirection(1);
-        setCurrentIndex((prev) => (prev + 1) % hotTopics.length);
-    }, []);
+        setCurrentIndex((prev) => (prev + 1) % validItems.length);
+    }, [validItems.length]);
 
     const prevSlide = useCallback(() => {
+        if (validItems.length === 0) return;
         setDirection(-1);
-        setCurrentIndex((prev) => (prev - 1 + hotTopics.length) % hotTopics.length);
-    }, []);
+        setCurrentIndex((prev) => (prev - 1 + validItems.length) % validItems.length);
+    }, [validItems.length]);
+
+
 
     const goToSlide = (index: number) => {
         setDirection(index > currentIndex ? 1 : -1);
@@ -72,12 +83,16 @@ export function HeroSlider() {
 
     // Auto-slide
     useEffect(() => {
-        if (!isAutoPlaying || isDragging) return;
+        if (!isAutoPlaying || isDragging || validItems.length === 0) return;
         const interval = setInterval(nextSlide, 5000);
         return () => clearInterval(interval);
-    }, [isAutoPlaying, isDragging, nextSlide]);
+    }, [isAutoPlaying, isDragging, nextSlide, validItems.length]);
 
-    const currentTopic = hotTopics[currentIndex];
+    if (validItems.length === 0) {
+        return null; // Or return a loading skeleton / nothing if no items
+    }
+
+    const currentTopic = validItems[currentIndex];
 
     return (
         <section
@@ -98,7 +113,7 @@ export function HeroSlider() {
                     className="absolute inset-0"
                 >
                     <Image
-                        src={currentTopic.img}
+                        src={currentTopic.coverImage || '/placeholder.jpg'}
                         alt={currentTopic.title}
                         fill
                         sizes="100vw"
@@ -107,7 +122,7 @@ export function HeroSlider() {
                     />
                     {/* Gradient Overlays */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                    <div className={`absolute inset-0 bg-gradient-to-r ${currentTopic.accent} mix-blend-multiply opacity-60`} />
+                    <div className={`absolute inset-0 bg-gradient-to-r ${currentTopic.accent_color || 'from-blue-600/80 to-purple-600/80'} mix-blend-multiply opacity-60`} />
                 </motion.div>
             </AnimatePresence>
 
@@ -197,9 +212,9 @@ export function HeroSlider() {
 
             {/* Slide Indicators */}
             <div className="absolute bottom-3 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex lg:hidden items-center gap-2 md:gap-3">
-                {hotTopics.map((topic, index) => (
+                {validItems.map((topic, index) => (
                     <button
-                        key={topic.id}
+                        key={topic.slug} // Use slug as key
                         onClick={() => goToSlide(index)}
                         className="group relative flex items-center"
                         aria-label={`Go to slide ${index + 1}`}
@@ -222,7 +237,7 @@ export function HeroSlider() {
                     </span>
                     <span className="text-white/40">/</span>
                     <span className="text-sm text-white/40">
-                        {String(hotTopics.length).padStart(2, "0")}
+                        {String(validItems.length).padStart(2, "0")}
                     </span>
                 </div>
             </div>
@@ -240,9 +255,9 @@ export function HeroSlider() {
 
             {/* Thumbnail Preview - Desktop Only */}
             <div className="hidden lg:flex absolute bottom-12 left-0 right-0 justify-center z-20 gap-3">
-                {hotTopics.map((topic, index) => (
+                {validItems.map((topic, index) => (
                     <motion.button
-                        key={topic.id}
+                        key={topic.slug}
                         onClick={() => goToSlide(index)}
                         whileHover={{ scale: 1.05, y: -5 }}
                         className={`relative w-20 h-14 rounded-lg overflow-hidden transition-all ${index === currentIndex
@@ -251,7 +266,7 @@ export function HeroSlider() {
                             }`}
                     >
                         <Image
-                            src={topic.img}
+                            src={topic.coverImage || '/placeholder.jpg'}
                             alt={topic.title}
                             fill
                             sizes="120px"

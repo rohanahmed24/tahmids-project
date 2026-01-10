@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: "Where every tale comes alive",
 };
 
+import { Toaster } from 'sonner';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,18 +26,19 @@ export default function RootLayout({
         className="antialiased bg-base text-main transition-colors duration-300"
       >
         <SessionProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <DevToolsBlocker />
-              <SessionSync />
-              {children}
-              <Navbar />
-              <Footer />
-            </ThemeProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <DevToolsBlocker />
+            <SessionSync />
+            {children}
+            <Navbar />
+            <Footer />
+            <Toaster richColors position="top-center" />
+          </ThemeProvider>
         </SessionProvider>
       </body>
     </html>

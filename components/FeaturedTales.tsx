@@ -6,10 +6,11 @@ import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { DecorativeBackgrounds } from "@/components/ui/DecorativeBackgrounds";
 import { MediaOptions } from "@/components/ui/MediaOptions";
-import { Article, breakingNews } from "@/lib/mock-data";
+
+import { Post } from "@/lib/posts";
 
 // Desktop Horizontal Slider Component
-function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Article[]; direction?: "left" | "right" }) {
+function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Post[]; direction?: "left" | "right" }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const [isPaused, setIsPaused] = useState(false);
@@ -109,14 +110,14 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Articl
                 >
                     {items.map((item) => (
                         <Link
-                            key={item.id}
+                            key={item.slug}
                             href={`/article/${item.slug}`}
                             className="flex-shrink-0 group"
                             style={{ width: `${cardWidth}px`, minWidth: `${cardWidth}px`, maxWidth: `${cardWidth}px` }}
                         >
                             <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700 rounded-lg">
                                 <Image
-                                    src={item.img}
+                                    src={item.coverImage || '/placeholder.jpg'}
                                     fill
                                     sizes="300px"
                                     alt={item.title}
@@ -165,8 +166,8 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Articl
                         key={index}
                         onClick={() => scrollToIndex(index)}
                         className={`h-2 rounded-full transition-all ${index === currentIndex
-                                ? "bg-accent w-8"
-                                : "bg-text-muted/30 w-2 hover:bg-text-muted/50"
+                            ? "bg-accent w-8"
+                            : "bg-text-muted/30 w-2 hover:bg-text-muted/50"
                             }`}
                         aria-label={`Go to slide ${index + 1}`}
                     />
@@ -176,7 +177,11 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Articl
     );
 }
 
-export function FeaturedTales() {
+interface FeaturedTalesProps {
+    articles: Post[];
+}
+
+export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
     const [currentPage, setCurrentPage] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
@@ -185,11 +190,12 @@ export function FeaturedTales() {
 
     const cardsPerPage = 2;
     const gap = 12;
-    const totalPages = Math.ceil(breakingNews.length / cardsPerPage);
+    const totalPages = Math.ceil(articles.length / cardsPerPage);
 
     // Split breakingNews into top 6 and bottom 6 for desktop sliders
-    const topRowItems = breakingNews.slice(0, 6);
-    const bottomRowItems = breakingNews.slice(6, 12);
+    const half = Math.ceil(articles.length / 2);
+    const topRowItems = articles.slice(0, half);
+    const bottomRowItems = articles.slice(half, articles.length);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -276,9 +282,9 @@ export function FeaturedTales() {
                             dragElastic={0.1}
                             onDragEnd={handleDragEnd}
                         >
-                            {breakingNews.map((item) => (
+                            {articles.map((item) => (
                                 <Link
-                                    key={item.id}
+                                    key={item.slug}
                                     href={`/article/${item.slug}`}
                                     className="flex-shrink-0"
                                     style={{ width: cardWidth }}
@@ -288,7 +294,7 @@ export function FeaturedTales() {
                                             {item.category}
                                         </span>
                                         <Image
-                                            src={item.img}
+                                            src={item.coverImage || '/placeholder.jpg'}
                                             fill
                                             sizes="(max-width: 768px) 50vw, 25vw"
                                             alt={item.title}

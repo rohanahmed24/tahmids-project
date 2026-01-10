@@ -21,11 +21,11 @@ export default async function DashboardPage() {
         title: post.title,
         author: post.author,
         category: post.category,
-        status: "published", // Assuming all in DB are published for now
-        views: post.views || 0, // Use views if available
+        status: post.featured ? "Featured" : "Published",
+        views: post.views || 0,
         date: post.date,
         img: post.coverImage || "/imgs/Chernobyl.png",
-        slug: post.slug // Needed for edit link
+        slug: post.slug
     }));
 
     const mappedUsers = users.map(user => ({

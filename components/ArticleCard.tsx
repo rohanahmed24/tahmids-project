@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { Assets } from "@/lib/assets";
-import { Article } from "@/lib/mock-data";
+import { Post } from "@/lib/posts";
 
 interface ArticleCardProps {
-    article: Article;
+    article: Post;
     width: number;
 }
 
@@ -23,7 +23,7 @@ export function ArticleCard({ article, width }: ArticleCardProps) {
         >
             <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-bg-card shadow-sm transition-shadow group-hover:shadow-md">
                 <Image
-                    src={article.img}
+                    src={article.coverImage || '/placeholder.jpg'}
                     alt={article.title}
                     fill
                     sizes="300px"
@@ -32,9 +32,9 @@ export function ArticleCard({ article, width }: ArticleCardProps) {
             </div>
             <div className="space-y-3">
                 <div className="flex items-center gap-3 text-xs font-bold text-text-muted uppercase tracking-wider">
-                    {article.topicSlug ? (
+                    {article.topic_slug ? (
                         <Link
-                            href={`/topics/${article.topicSlug}`}
+                            href={`/topics/${article.topic_slug}`}
                             onClick={(e) => e.stopPropagation()}
                             className="text-accent hover:underline"
                         >

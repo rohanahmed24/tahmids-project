@@ -1,21 +1,19 @@
 
 import mysql, { RowDataPacket } from 'mysql2/promise';
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
+
 import { Assets } from './lib/assets';
 
 // Connect without database first
 const poolConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 };
 
-const postsDirectory = path.join(process.cwd(), 'content/posts');
+
 
 async function setup() {
     let connection;
@@ -49,12 +47,17 @@ async function setup() {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 slug VARCHAR(255) NOT NULL UNIQUE,
                 title VARCHAR(255) NOT NULL,
+                subtitle VARCHAR(255),
                 date VARCHAR(255),
                 author VARCHAR(255),
                 category VARCHAR(255),
                 content LONGTEXT,
                 coverImage VARCHAR(255),
                 videoUrl VARCHAR(255),
+                views INT DEFAULT 0,
+                featured BOOLEAN DEFAULT FALSE,
+                topic_slug VARCHAR(255),
+                accent_color VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
@@ -82,35 +85,108 @@ async function setup() {
         }
         console.log("Assets seeded.");
 
-        // Seed Posts from MDX
-        console.log("Seeding posts from MDX...");
-        if (fs.existsSync(postsDirectory)) {
-            const fileNames = fs.readdirSync(postsDirectory);
-            for (const fileName of fileNames) {
-                if (!fileName.endsWith('.mdx')) continue;
+        // Seed Posts from MDX (Optional, but prioritizing seeded data from mock-data.ts logic for now to ensure consistency)
+        // We will seed the specific hot topics and articles from mock-data structure manually here to ensure the site looks correct immediately.
+        console.log("Seeding initial data...");
 
-                const slug = fileName.replace(/\.mdx$/, '');
-                const fullPath = path.join(postsDirectory, fileName);
-                const fileContents = fs.readFileSync(fullPath, 'utf8');
-                const { data, content } = matter(fileContents);
+        const initialPosts = [
+            {
+                slug: "slow-interfaces",
+                title: "The Art of Digital Silence",
+                subtitle: "Exploring minimalism in the age of noise",
+                category: "Technology",
+                coverImage: Assets.imgPlaceholderImage7,
+                accent_color: "from-purple-600/80 to-blue-600/80",
+                author: "Sarah Jenkins",
+                date: "Dec 24",
+                featured: true,
+                views: 1205
+            },
+            {
+                slug: "digital-garden",
+                title: "Building a Digital Garden",
+                subtitle: "Creating spaces for thought to grow",
+                category: "Philosophy",
+                coverImage: Assets.imgPlaceholderImage5,
+                accent_color: "from-emerald-600/80 to-teal-600/80",
+                author: "John Smith",
+                date: "Dec 23",
+                featured: true,
+                views: 980
+            },
+            {
+                slug: "ai-ethics",
+                title: "The Ethics of AI",
+                subtitle: "Navigating the moral landscape of intelligence",
+                category: "AI & Future",
+                coverImage: Assets.imgArticleAiEthics,
+                accent_color: "from-red-600/80 to-orange-600/80",
+                author: "David Miller",
+                date: "Dec 15",
+                featured: true,
+                views: 1540
+            },
+            {
+                slug: "future-cities",
+                title: "Cities of Tomorrow",
+                subtitle: "Architecture reimagined for the future",
+                category: "Future Tech",
+                coverImage: Assets.imgArticleFutureCities,
+                accent_color: "from-cyan-600/80 to-blue-600/80",
+                author: "James L.",
+                date: "Dec 14",
+                featured: true,
+                views: 890
+            },
+            {
+                slug: "mindful-living",
+                title: "Mindful Living",
+                subtitle: "The psychology of presence",
+                category: "Psychology",
+                coverImage: Assets.imgStoryScience,
+                accent_color: "from-amber-600/80 to-yellow-600/80",
+                author: "Emily Rose",
+                date: "Dec 13",
+                featured: true,
+                views: 750
+            },
+            // Additional Articles from mock-data 'articles' array
+            { slug: "less-information", title: "Why we need less information, not more", author: "David Miller", date: "Dec 23", coverImage: Assets.imgStoryHistory, category: "Tech", subtitle: "Information overload is a real problem.", featured: false, views: 450 },
+            { slug: "creative-process", title: "The Creative Process Unveiled", author: "Sarah Jenkins", date: "Dec 12", coverImage: Assets.imgStoryArt, category: "Design", subtitle: "Unlocking your inner creative.", featured: false, views: 320 },
+            { slug: "remote-work", title: "The Remote Work Revolution", author: "David Miller", date: "Dec 11", coverImage: Assets.imgStoryCulture, category: "Culture", subtitle: "How work is changing.", featured: false, views: 560 },
+            { slug: "modern-architecture", title: "Understanding Modern Architecture", author: "Sarah Jenkins", date: "Dec 10", coverImage: Assets.imgArticleBreakout, category: "Design", subtitle: "A look at modern structures.", featured: false, views: 290 },
+            { slug: "future-work", title: "The Future of Work and Automation", author: "David Miller", date: "Dec 9", coverImage: Assets.imgStoryHistory, category: "Tech", subtitle: "Will robots take our jobs?", featured: false, views: 670 },
+            { slug: "meditation", title: "Meditation and Mental Health", author: "Emily Rose", date: "Dec 8", coverImage: Assets.imgStoryScience, category: "Psychology", subtitle: "Benefits of silence.", featured: false, views: 410 },
+            { slug: "sustainable-living", title: "Sustainable Living in Urban Spaces", author: "James L.", date: "Dec 7", coverImage: Assets.imgArticleFutureCities, category: "Lifestyle", subtitle: "Green living in the city.", featured: false, views: 340 }
+        ];
 
-                const [rows] = await connection.query<RowDataPacket[]>("SELECT id FROM posts WHERE slug = ?", [slug]);
-                if (rows.length === 0) {
-                    await connection.query(
-                        "INSERT INTO posts (slug, title, date, author, category, content, coverImage, videoUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                        [
-                            slug,
-                            data.title || 'Untitled',
-                            data.date || '',
-                            data.author || 'Unknown',
-                            data.category || 'General',
-                            content,
-                            data.coverImage || '',
-                            data.videoUrl || ''
-                        ]
-                    );
-                    console.log(`Seeded post: ${slug}`);
-                }
+        for (const post of initialPosts) {
+            const [rows] = await connection.query<RowDataPacket[]>("SELECT id FROM posts WHERE slug = ?", [post.slug]);
+            if (rows.length === 0) {
+                await connection.query(
+                    "INSERT INTO posts (slug, title, subtitle, date, author, category, coverImage, accent_color, featured, views, content) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    [
+                        post.slug,
+                        post.title,
+                        post.subtitle || '',
+                        post.date,
+                        post.author,
+                        post.category,
+                        post.coverImage,
+                        post.accent_color || null,
+                        post.featured || false,
+                        post.views || 0,
+                        "Lorem ipsum dolor sit amet..." // Default content
+                    ]
+                );
+                console.log(`Seeded post: ${post.slug}`);
+            } else {
+                // Update existing to ensure new fields are populated if they were missing or null
+                await connection.query(
+                    "UPDATE posts SET subtitle = ?, featured = ?, views = ?, accent_color = ? WHERE slug = ?",
+                    [post.subtitle || '', post.featured || false, post.views || 0, post.accent_color || null, post.slug]
+                );
+                console.log(`Updated post: ${post.slug}`);
             }
         }
         console.log("Setup complete.");

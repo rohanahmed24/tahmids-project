@@ -5,12 +5,12 @@ import { motion, useMotionValue, animate, PanInfo } from "framer-motion";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
-import { Article } from "@/lib/mock-data";
+import { Post } from "@/lib/posts";
 
 interface CategorySectionProps {
     title: string;
     slug: string;
-    articles: Article[];
+    articles: Post[];
 }
 
 export function CategorySection({ title, slug, articles = [] }: CategorySectionProps) {
@@ -98,14 +98,14 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                         >
                             {safeArticles.map((item) => (
                                 <Link
-                                    key={item.id}
+                                    key={item.slug}
                                     href={`/article/${item.slug}`}
                                     className="flex-shrink-0"
                                     style={{ width: cardWidth }}
                                 >
                                     <div className="relative aspect-[16/9] overflow-hidden rounded-lg mb-2">
                                         <Image
-                                            src={item.img}
+                                            src={item.coverImage || '/placeholder.jpg'}
                                             fill
                                             sizes="(max-width: 768px) 50vw, 25vw"
                                             alt={item.title}
@@ -149,7 +149,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                 <div className="hidden md:grid grid-cols-4 gap-6">
                     {safeArticles.slice(0, 4).map((item) => (
                         <motion.div
-                            key={item.id}
+                            key={item.slug}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -159,7 +159,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                             <Link href={`/article/${item.slug}`}>
                                 <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700">
                                     <Image
-                                        src={item.img}
+                                        src={item.coverImage || '/placeholder.jpg'}
                                         fill
                                         sizes="(max-width: 1200px) 25vw, 300px"
                                         alt={item.title}

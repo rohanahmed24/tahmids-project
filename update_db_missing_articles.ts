@@ -1,5 +1,6 @@
 
 import { getDb } from "./lib/db";
+import { RowDataPacket } from "mysql2/promise";
 import { Assets } from "./lib/assets";
 
 const missingArticles = [
@@ -85,7 +86,7 @@ async function fix() {
 
     for (const article of missingArticles) {
         // Check if exists
-        const [rows] = await db.query<any[]>("SELECT id FROM posts WHERE slug = ?", [article.slug]);
+        const [rows] = await db.query<RowDataPacket[]>("SELECT id FROM posts WHERE slug = ?", [article.slug]);
         if (rows.length === 0) {
             console.log(`Inserting missing article: ${article.slug}`);
             // Note: coverImage in DB is string path, usually. Assets object gives path string.

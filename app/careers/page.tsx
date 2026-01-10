@@ -13,8 +13,7 @@ import {
     Heart,
     Zap,
     Globe,
-    X,
-    Upload
+    X
 } from "lucide-react";
 import { submitJobApplication } from "@/actions/careers";
 
@@ -204,7 +203,7 @@ export default function CareersPage() {
             } else {
                 setError(result.message);
             }
-        } catch (e) {
+        } catch {
             setError("Something went wrong. Please try again.");
         } finally {
             setIsLoading(false);

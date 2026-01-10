@@ -37,23 +37,32 @@ export async function createPost(formData: FormData) {
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
     const category = formData.get("category") as string;
-    const author = "Admin"; // Hardcoded for now
+    const author = "Admin";
     const videoUrl = formData.get("videoUrl") as string;
+
+    // New fields
+    const subtitle = formData.get("subtitle") as string;
+    const topic_slug = formData.get("topic_slug") as string || null;
+    const accent_color = formData.get("accent_color") as string || null;
+    const featured = formData.get("featured") === "true";
+
+    // Check for manual slug or generate one
+    let slug = formData.get("slug") as string;
+    if (!slug) {
+        slug = generateSlug(title);
+    }
 
     const coverImageFile = formData.get("coverImageFile") as File;
     const uploadedImagePath = await handleFileUpload(coverImageFile);
-
-    // Fallback to URL input if no file uploaded
     const coverImage = uploadedImagePath || (formData.get("coverImage") as string) || "";
 
-    const slug = generateSlug(title);
-    const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const date = new Date().toISOString(); // Full timestamp for created_at, string for date column if it's varchar
 
     const db = getDb();
     try {
         await db.query(
-            "INSERT INTO posts (slug, title, date, author, category, content, coverImage, videoUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            [slug, title, date, author, category, content, coverImage, videoUrl]
+            "INSERT INTO posts (slug, title, date, author, category, content, coverImage, videoUrl, subtitle, topic_slug, accent_color, featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [slug, title, date, author, category, content, coverImage, videoUrl, subtitle, topic_slug, accent_color, featured]
         );
     } catch (error) {
         console.error("Failed to create post:", error);
@@ -61,6 +70,7 @@ export async function createPost(formData: FormData) {
     }
 
     revalidatePath("/admin/dashboard");
+    revalidatePath("/");
     redirect("/admin/dashboard");
 }
 
@@ -80,8 +90,7 @@ export async function deletePost(slug: string) {
     }
 }
 
-export async function updatePost(slug: string, formData: FormData) {
-    // Security check
+export async function updatePost(originalSlug: string, formData: FormData) {
     const isAdmin = await verifyAdmin();
     if (!isAdmin) {
         throw new Error("Unauthorized");
@@ -89,7 +98,14 @@ export async function updatePost(slug: string, formData: FormData) {
 
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
+    const category = formData.get("category") as string;
     const videoUrl = formData.get("videoUrl") as string;
+
+    // New fields
+    const subtitle = formData.get("subtitle") as string;
+    const topic_slug = formData.get("topic_slug") as string || null;
+    const accent_color = formData.get("accent_color") as string || null;
+    const featured = formData.get("featured") === "true";
 
     const coverImageFile = formData.get("coverImageFile") as File;
     const uploadedImagePath = await handleFileUpload(coverImageFile);
@@ -103,17 +119,18 @@ export async function updatePost(slug: string, formData: FormData) {
 
     try {
         await db.query(
-            "UPDATE posts SET title = ?, content = ?, coverImage = ?, videoUrl = ? WHERE slug = ?",
-            [title, content, coverImage, videoUrl, slug]
+            "UPDATE posts SET title = ?, category = ?, content = ?, coverImage = ?, videoUrl = ?, subtitle = ?, topic_slug = ?, accent_color = ?, featured = ? WHERE slug = ?",
+            [title, category, content, coverImage, videoUrl, subtitle, topic_slug, accent_color, featured, originalSlug]
         );
 
-        revalidatePath(`/article/${slug}`);
-        revalidatePath(`/admin/edit/${slug}`);
+        revalidatePath(`/article/${originalSlug}`);
+        revalidatePath(`/admin/edit/${originalSlug}`);
         revalidatePath("/admin/dashboard");
+        revalidatePath("/");
     } catch (error) {
         console.error("Failed to update post:", error);
         throw new Error("Failed to update post");
     }
 
-    redirect(`/article/${slug}`);
+    redirect("/admin/dashboard");
 }

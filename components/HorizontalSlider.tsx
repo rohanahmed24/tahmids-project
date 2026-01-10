@@ -2,11 +2,11 @@
 
 import { motion, useMotionValue, animate } from "framer-motion";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Article } from "@/lib/mock-data";
+import { Post } from "@/lib/posts";
 import { ArticleCard } from "@/components/ArticleCard";
 
 interface HorizontalSliderProps {
-    articles: Article[];
+    articles: Post[];
     direction?: "left" | "right";
 }
 
@@ -109,7 +109,7 @@ export function HorizontalSlider({ articles, direction = "left" }: HorizontalSli
                     onDragEnd={handleDragEnd}
                 >
                     {articles.map((article) => (
-                        <ArticleCard key={article.id} article={article} width={cardWidth} />
+                        <ArticleCard key={article.slug} article={article} width={cardWidth} />
                     ))}
                 </motion.div>
             </div>
@@ -138,8 +138,8 @@ export function HorizontalSlider({ articles, direction = "left" }: HorizontalSli
                         key={index}
                         onClick={() => scrollToIndex(index)}
                         className={`h-2 rounded-full transition-all ${index === currentIndex
-                                ? "bg-accent w-8"
-                                : "bg-text-muted/30 w-2 hover:bg-text-muted/50"
+                            ? "bg-accent w-8"
+                            : "bg-text-muted/30 w-2 hover:bg-text-muted/50"
                             }`}
                         aria-label={`Go to slide ${index + 1}`}
                     />

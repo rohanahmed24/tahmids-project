@@ -1,4 +1,6 @@
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authorizeUser } from '@/lib/auth-service';
 import { pool } from '@/lib/db';
@@ -13,7 +15,7 @@ vi.mock('@/lib/db', () => ({
 
 vi.mock('bcryptjs', () => ({
   default: {
-      compare: vi.fn(),
+    compare: vi.fn(),
   },
   compare: vi.fn(),
 }));
@@ -39,11 +41,11 @@ describe('authorizeUser', () => {
 
   it('returns null if password invalid', async () => {
     const mockUser = {
-        id: 1,
-        name: 'Test User',
-        email: 'test@example.com',
-        password_hash: 'hashed_password',
-        role: 'user'
+      id: 1,
+      name: 'Test User',
+      email: 'test@example.com',
+      password_hash: 'hashed_password',
+      role: 'user'
     };
     (pool.query as any).mockResolvedValue([[mockUser]]);
     (bcrypt.compare as any).mockResolvedValue(false);
@@ -54,12 +56,12 @@ describe('authorizeUser', () => {
 
   it('returns user object if password is valid', async () => {
     const mockUser = {
-        id: 1,
-        name: 'Test User',
-        email: 'test@example.com',
-        password_hash: 'hashed_password',
-        role: 'user',
-        image: 'http://example.com/avatar.jpg'
+      id: 1,
+      name: 'Test User',
+      email: 'test@example.com',
+      password_hash: 'hashed_password',
+      role: 'user',
+      image: 'http://example.com/avatar.jpg'
     };
     (pool.query as any).mockResolvedValue([[mockUser]]);
     (bcrypt.compare as any).mockResolvedValue(true);
@@ -67,22 +69,22 @@ describe('authorizeUser', () => {
     const result = await authorizeUser({ email: 'test@example.com', password: 'password' });
 
     expect(result).toEqual({
-        id: "1",
-        name: 'Test User',
-        email: 'test@example.com',
-        image: 'http://example.com/avatar.jpg',
-        role: 'user'
+      id: "1",
+      name: 'Test User',
+      email: 'test@example.com',
+      image: 'http://example.com/avatar.jpg',
+      role: 'user'
     });
   });
 
-    it('returns user object if password is valid (no image)', async () => {
+  it('returns user object if password is valid (no image)', async () => {
     const mockUser = {
-        id: 1,
-        name: 'Test User',
-        email: 'test@example.com',
-        password_hash: 'hashed_password',
-        role: 'user',
-        image: null
+      id: 1,
+      name: 'Test User',
+      email: 'test@example.com',
+      password_hash: 'hashed_password',
+      role: 'user',
+      image: null
     };
     (pool.query as any).mockResolvedValue([[mockUser]]);
     (bcrypt.compare as any).mockResolvedValue(true);
@@ -90,18 +92,18 @@ describe('authorizeUser', () => {
     const result = await authorizeUser({ email: 'test@example.com', password: 'password' });
 
     expect(result).toEqual({
-        id: "1",
-        name: 'Test User',
-        email: 'test@example.com',
-        image: null,
-        role: 'user'
+      id: "1",
+      name: 'Test User',
+      email: 'test@example.com',
+      image: null,
+      role: 'user'
     });
   });
 
   it('handles database errors gracefully', async () => {
-      (pool.query as any).mockRejectedValue(new Error('DB Error'));
+    (pool.query as any).mockRejectedValue(new Error('DB Error'));
 
-      const result = await authorizeUser({ email: 'test@example.com', password: 'password' });
-      expect(result).toBeNull();
+    const result = await authorizeUser({ email: 'test@example.com', password: 'password' });
+    expect(result).toBeNull();
   });
 });

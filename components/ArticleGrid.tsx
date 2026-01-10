@@ -6,9 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MobileSlider } from "@/components/ui/MobileSlider";
 import { HorizontalSlider } from "@/components/HorizontalSlider";
-import { articles } from "@/lib/mock-data";
+import { Post } from "@/lib/posts";
 
-export function ArticleGrid() {
+interface ArticleGridProps {
+    articles: Post[];
+}
+
+export function ArticleGrid({ articles = [] }: ArticleGridProps) {
     const router = useRouter();
 
     // Split articles into top 6 and bottom 6 for desktop slider
@@ -42,13 +46,13 @@ export function ArticleGrid() {
                     <MobileSlider autoplayInterval={3000} cardWidthPercent={90} gap={16}>
                         {articles.map((article) => (
                             <div
-                                key={article.id}
+                                key={article.slug}
                                 onClick={() => router.push(`/article/${article.slug}`)}
                                 className="group flex flex-col bg-bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                             >
                                 <div className="relative w-full aspect-[16/9] overflow-hidden">
                                     <Image
-                                        src={article.img}
+                                        src={article.coverImage || '/placeholder.jpg'}
                                         alt={article.title}
                                         fill
                                         sizes="90vw"

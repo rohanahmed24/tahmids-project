@@ -2,7 +2,7 @@
 "use server";
 
 import { getDb } from "@/lib/db";
-import { writeFile, mkdir, readFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
@@ -34,7 +34,7 @@ export async function submitJobApplication(prevState: unknown, formData: FormDat
         const fileExtension = path.extname(resume.name).toLowerCase();
 
         if (!validTypes.includes(resume.type) || !validExtensions.includes(fileExtension)) {
-             return {
+            return {
                 success: false,
                 message: "Invalid file type. Please upload a PDF or Word document."
             };
@@ -42,7 +42,7 @@ export async function submitJobApplication(prevState: unknown, formData: FormDat
 
         // Validate file size (e.g. 5MB)
         if (resume.size > 5 * 1024 * 1024) {
-             return {
+            return {
                 success: false,
                 message: "File size too large. Max 5MB."
             };
@@ -55,7 +55,7 @@ export async function submitJobApplication(prevState: unknown, formData: FormDat
 
         // Ensure directory exists
         try {
-             await mkdir(uploadDir, { recursive: true });
+            await mkdir(uploadDir, { recursive: true });
         } catch {
             // Ignore if exists
         }
@@ -69,13 +69,13 @@ export async function submitJobApplication(prevState: unknown, formData: FormDat
         // Save to database
         const db = getDb();
         try {
-             await db.query(
+            await db.query(
                 "INSERT INTO job_applications (job_id, job_title, name, email, linkedin, resume_path, message) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 [jobId, jobTitle, name, email, linkedin, resumePath, message]
             );
         } catch (error) {
             console.error("Database error:", error);
-             return {
+            return {
                 success: false,
                 message: "Failed to save application. Please try again later."
             };

@@ -164,7 +164,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     useEffect(() => {
         const auth = sessionStorage.getItem("adminAuth");
         if (auth !== "true") {
-             router.push("/admin");
+            router.push("/admin");
         } else {
             setIsAuthenticated(true);
         }
@@ -200,8 +200,8 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                     setUsers(users.filter(u => u.id !== deleteTarget.id));
                 } else if (deleteTarget.type === "media") {
                     if (deleteTarget.extra) {
-                         await deleteImage(deleteTarget.id, deleteTarget.extra);
-                         setMediaItems(mediaItems.filter(m => m.id !== deleteTarget.id));
+                        await deleteImage(deleteTarget.id, deleteTarget.extra);
+                        setMediaItems(mediaItems.filter(m => m.id !== deleteTarget.id));
                     }
                 }
             } catch (error) {
@@ -251,8 +251,8 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
             await updateSettings(formData);
             alert("Settings saved successfully!");
         } catch (error) {
-             console.error("Failed to save settings", error);
-             alert("Failed to save settings");
+            console.error("Failed to save settings", error);
+            alert("Failed to save settings");
         }
     };
 
@@ -664,9 +664,9 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                                     <span className="text-xs font-bold uppercase tracking-widest text-purple-400">
                                                         {article.category}
                                                     </span>
-                                                    <span className={`px-2 py-0.5 rounded-full text-xs ${article.status === "published" ? "bg-green-500/20 text-green-400" :
-                                                        article.status === "draft" ? "bg-gray-700 text-gray-400" :
-                                                            "bg-amber-500/20 text-amber-400"
+                                                    <span className={`px-2 py-0.5 rounded-full text-xs ${article.status === "Featured" ? "bg-purple-500/20 text-purple-400" :
+                                                        article.status === "Published" ? "bg-green-500/20 text-green-400" :
+                                                            "bg-gray-700 text-gray-400"
                                                         }`}>
                                                         {article.status}
                                                     </span>
@@ -699,7 +699,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                         </motion.div>
                                     ))}
                                     {filteredArticles.length === 0 && (
-                                         <p className="text-gray-500 text-sm p-4 text-center">No articles found matching "{searchQuery}".</p>
+                                        <p className="text-gray-500 text-sm p-4 text-center">No articles found matching "{searchQuery}".</p>
                                     )}
                                 </motion.div>
                             </motion.div>
@@ -790,7 +790,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
 
                         {/* Media Tab */}
                         {activeTab === "media" && (
-                             <motion.div
+                            <motion.div
                                 key="media"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -839,7 +839,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                                 className="object-cover"
                                             />
                                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                                 <button
+                                                <button
                                                     onClick={() => window.open(item.url, '_blank')}
                                                     className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white"
                                                     title="View"
@@ -860,7 +860,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                         </motion.div>
                                     ))}
                                     {mediaItems.length === 0 && (
-                                         <p className="col-span-full text-gray-500 text-sm py-8 text-center">No media found.</p>
+                                        <p className="col-span-full text-gray-500 text-sm py-8 text-center">No media found.</p>
                                     )}
                                 </motion.div>
                             </motion.div>
@@ -1059,7 +1059,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                 )}
             </AnimatePresence>
 
-             {/* Edit User Modal */}
+            {/* Edit User Modal */}
             <AnimatePresence>
                 {showEditUserModal && editingUser && (
                     <motion.div
@@ -1076,7 +1076,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                             onClick={(e) => e.stopPropagation()}
                             className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full"
                         >
-                             <div className="flex justify-between items-center mb-6">
+                            <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-bold">Edit User</h3>
                                 <button onClick={() => setShowEditUserModal(false)} className="text-gray-400 hover:text-white">
                                     <X className="w-5 h-5" />
@@ -1093,7 +1093,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                         className="w-full px-4 py-3 bg-gray-800/50 border border-gray-800 rounded-xl text-gray-500 cursor-not-allowed"
                                     />
                                 </div>
-                                 <div>
+                                <div>
                                     <label className="text-sm text-gray-400 block mb-2">Email</label>
                                     <input
                                         type="email"
@@ -1127,7 +1127,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                 )}
             </AnimatePresence>
 
-             {/* Add User Modal */}
+            {/* Add User Modal */}
             <AnimatePresence>
                 {showAddUserModal && (
                     <motion.div
@@ -1144,7 +1144,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                             onClick={(e) => e.stopPropagation()}
                             className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full"
                         >
-                             <div className="flex justify-between items-center mb-6">
+                            <div className="flex justify-between items-center mb-6">
                                 <h3 className="text-xl font-bold">Add New User</h3>
                                 <button onClick={() => setShowAddUserModal(false)} className="text-gray-400 hover:text-white">
                                     <X className="w-5 h-5" />
@@ -1161,7 +1161,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                         required
                                     />
                                 </div>
-                                 <div>
+                                <div>
                                     <label className="text-sm text-gray-400 block mb-2">Email</label>
                                     <input
                                         type="email"

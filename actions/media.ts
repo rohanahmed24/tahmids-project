@@ -82,7 +82,7 @@ export async function deleteImage(id: number, url: string) {
         // Sanitize path to ensure it is within public/imgs/uploads
         // url should be like /imgs/uploads/filename.ext
         if (!url.startsWith("/imgs/uploads/")) {
-             throw new Error("Invalid file path");
+            throw new Error("Invalid file path");
         }
 
         const filename = path.basename(url);
@@ -91,7 +91,7 @@ export async function deleteImage(id: number, url: string) {
         // Ensure the resolved path is actually inside the uploads directory
         const uploadsDir = path.join(process.cwd(), "public/imgs/uploads");
         if (!filepath.startsWith(uploadsDir)) {
-             throw new Error("Path traversal detected");
+            throw new Error("Path traversal detected");
         }
 
         // Delete from DB
@@ -100,7 +100,7 @@ export async function deleteImage(id: number, url: string) {
         // Delete file
         try {
             await unlink(filepath);
-        } catch (e) {
+        } catch {
             console.warn("File not found on disk:", filepath);
         }
 
