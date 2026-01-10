@@ -86,6 +86,19 @@ async function setup() {
             }
         }
 
+        // Feature: Activity Logging
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS activity_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                action VARCHAR(255) NOT NULL,
+                details TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+        console.log("Setup 'activity_logs' table.");
+
         // Create Posts Table
         await connection.query(`
             CREATE TABLE IF NOT EXISTS posts (

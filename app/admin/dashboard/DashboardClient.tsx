@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { logoutAdmin } from "@/actions/admin-auth";
 import { deletePost } from "@/actions/posts";
-import { deleteUser, updateUserPlan } from "@/actions/users";
+import { deleteUser } from "@/actions/users";
 import { updateSettings } from "@/actions/settings";
 import { getApplications, updateApplicationStatus } from "@/actions/careers";
 import { getImages, uploadImage, deleteImage } from "@/actions/media";
@@ -28,12 +28,10 @@ import {
     TrendingDown,
     DollarSign,
     Check,
-    Shield,
-    Bell,
     Moon,
     Sun,
-    X,
-    UserPlus,
+    Shield,
+    Bell,
     User as UserIcon,
     Briefcase,
     ImageIcon,
@@ -71,44 +69,7 @@ const itemVariants = {
     },
 };
 
-interface Article {
-    id: number;
-    title: string;
-    author: string;
-    category: string;
-    status: string;
-    views: number;
-    date: string;
-    img: string;
-    slug: string;
-}
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    avatar: string;
-    plan: string;
-    status: string;
-    articles: number;
-    joined: string;
-}
-
-interface Stat {
-    id: number;
-    label: string;
-    value: string;
-    change: string;
-    trend: string;
-    iconName: string;
-    color: string;
-    bgColor: string;
-}
-
-interface SiteSettings {
-    siteName: string;
-    siteDescription: string;
-}
+import { Article, User, Stat, SiteSettings } from "./types";
 
 interface DashboardClientProps {
     initialArticles: Article[];
@@ -127,6 +88,11 @@ const icons: Record<string, LucideIcon> = {
 };
 
 import { updateProfile } from "@/actions/profile";
+import { getRecentActivity } from "@/actions/log";
+import { AnalyticsChart } from "../components/AnalyticsChart";
+import { AddUserModal } from "../components/AddUserModal";
+import { EditUserModal } from "../components/EditUserModal";
+import { DeleteModal } from "../components/DeleteModal";
 
 export default function DashboardClient({ initialArticles, initialUsers, initialStats, initialSettings, currentUser }: DashboardClientProps) {
     const [activeTab, setActiveTab] = useState("overview");
@@ -137,7 +103,8 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: number; name: string; extra?: string } | null>(null);
     const [showEditUserModal, setShowEditUserModal] = useState(false);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [editingUser, setEditingUser] = useState<any | null>(null);
     const [showAddUserModal, setShowAddUserModal] = useState(false);
 
     // Data states
@@ -165,6 +132,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     const [applications, setApplications] = useState<RowDataPacket[]>([]);
     const [mediaItems, setMediaItems] = useState<RowDataPacket[]>([]);
     const [isUploading, setIsUploading] = useState(false);
+    const [activityLogs, setActivityLogs] = useState<RowDataPacket[]>([]);
 
     // Filtered Data
     const filteredArticles = articles.filter(article =>
@@ -197,6 +165,8 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
             getApplications().then(setApplications);
         } else if (activeTab === "media") {
             getImages().then(setMediaItems);
+        } else if (activeTab === "overview" || activeTab === "analytics") {
+            getRecentActivity().then(setActivityLogs);
         }
     }, [activeTab]);
 
@@ -239,29 +209,12 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
         setShowEditUserModal(true);
     };
 
-    const saveUserChanges = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (editingUser) {
-            try {
-                const form = e.target as HTMLFormElement;
-                const newPlan = (form.elements.namedItem("plan") as HTMLSelectElement).value;
-
-                await updateUserPlan(editingUser.id, newPlan);
-
-                setUsers(users.map(u => u.id === editingUser.id ? { ...u, plan: newPlan } : u));
-                setShowEditUserModal(false);
-                setEditingUser(null);
-            } catch (error) {
-                console.error("Failed to update user", error);
-                alert("Failed to update user plan");
-            }
-        }
+    const handleUserUpdated = (userId: number, newPlan: string) => {
+        setUsers(users.map(u => u.id === userId ? { ...u, plan: newPlan } : u));
     };
 
-    const handleAddUser = (e: React.FormEvent) => {
-        e.preventDefault();
-        alert("User creation is not fully implemented yet (requires Auth integration).");
-        setShowAddUserModal(false);
+    const handleUserAdded = () => {
+        window.location.reload();
     };
 
     const handleSaveSettings = async (e: React.FormEvent) => {
@@ -538,6 +491,34 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                         </div>
                                     </motion.div>
                                 </div>
+
+                                {/* Recent Activity Widget */}
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mt-8"
+                                >
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="font-bold">Recent Activity</h2>
+                                        <button className="text-sm text-purple-400 hover:text-purple-300">View all →</button>
+                                    </div>
+                                    <div className="space-y-4">
+                                        {activityLogs.slice(0, 5).map((log) => (
+                                            <div key={log.id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-800 transition-colors">
+                                                <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0">
+                                                    <FileText className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium">{log.action}</p>
+                                                    <p className="text-xs text-gray-500">{log.details}</p>
+                                                    <p className="text-xs text-gray-600 mt-1">{new Date(log.created_at).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {activityLogs.length === 0 && <p className="text-gray-500 text-sm">No recent activity.</p>}
+                                    </div>
+                                </motion.div>
                             </motion.div>
                         )}
 
@@ -901,25 +882,8 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                 </div>
 
                                 <div className="grid grid-cols-3 gap-6 mb-8">
-                                    {/* Chart Placeholder 1 */}
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        className="col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-6 h-80"
-                                    >
-                                        <h3 className="font-bold mb-4">Page Views Over Time</h3>
-                                        <div className="h-56 flex items-end justify-between gap-2">
-                                            {[65, 45, 80, 55, 90, 70, 85, 60, 75, 95, 80, 70].map((height, i) => (
-                                                <motion.div
-                                                    key={i}
-                                                    initial={{ height: 0 }}
-                                                    animate={{ height: `${height}%` }}
-                                                    transition={{ delay: i * 0.05, duration: 0.5 }}
-                                                    className="flex-1 bg-gradient-to-t from-purple-600 to-purple-400 rounded-t-lg"
-                                                />
-                                            ))}
-                                        </div>
-                                    </motion.div>
+                                    {/* Chart Placeholder 1 REPLACED */}
+                                    <AnalyticsChart data={[]} />
 
                                     {/* Top Articles */}
                                     <motion.div
@@ -1122,184 +1086,27 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                 </div>
             </div>
 
-            {/* Delete Confirmation Modal */}
-            <AnimatePresence>
-                {showDeleteModal && deleteTarget && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
-                        onClick={() => setShowDeleteModal(false)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full text-center"
-                        >
-                            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Trash2 className="w-8 h-8 text-red-500" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-2">Delete {deleteTarget.type}?</h3>
-                            <p className="text-gray-400 mb-6">
-                                Are you sure you want to delete "{deleteTarget.name}"? This action cannot be undone.
-                            </p>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setShowDeleteModal(false)}
-                                    className="flex-1 py-3 border border-gray-700 rounded-xl font-medium hover:bg-gray-800 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={confirmDelete}
-                                    className="flex-1 py-3 bg-red-500 rounded-xl font-medium hover:bg-red-600 transition-colors"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* Modals */}
+            <DeleteModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={confirmDelete}
+                target={deleteTarget}
+            />
 
-            {/* Edit User Modal */}
-            <AnimatePresence>
-                {showEditUserModal && editingUser && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
-                        onClick={() => setShowEditUserModal(false)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full"
-                        >
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold">Edit User</h3>
-                                <button onClick={() => setShowEditUserModal(false)} className="text-gray-400 hover:text-white">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
+            <EditUserModal
+                isOpen={showEditUserModal}
+                onClose={() => setShowEditUserModal(false)}
+                user={editingUser}
+                onUserUpdated={handleUserUpdated}
+            />
 
-                            <form onSubmit={saveUserChanges} className="space-y-4">
-                                <div>
-                                    <label className="text-sm text-gray-400 block mb-2">Name</label>
-                                    <input
-                                        type="text"
-                                        defaultValue={editingUser.name}
-                                        disabled
-                                        className="w-full px-4 py-3 bg-gray-800/50 border border-gray-800 rounded-xl text-gray-500 cursor-not-allowed"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-sm text-gray-400 block mb-2">Email</label>
-                                    <input
-                                        type="email"
-                                        defaultValue={editingUser.email}
-                                        disabled
-                                        className="w-full px-4 py-3 bg-gray-800/50 border border-gray-800 rounded-xl text-gray-500 cursor-not-allowed"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-sm text-gray-400 block mb-2">Plan / Role</label>
-                                    <select
-                                        name="plan"
-                                        defaultValue={editingUser.plan}
-                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
-                                    >
-                                        <option value="Explorer">Explorer</option>
-                                        <option value="Reader">Reader</option>
-                                        <option value="Visionary">Visionary</option>
-                                    </select>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity mt-4"
-                                >
-                                    Save Changes
-                                </button>
-                            </form>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Add User Modal */}
-            <AnimatePresence>
-                {showAddUserModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
-                        onClick={() => setShowAddUserModal(false)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full"
-                        >
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold">Add New User</h3>
-                                <button onClick={() => setShowAddUserModal(false)} className="text-gray-400 hover:text-white">
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-
-                            <form onSubmit={handleAddUser} className="space-y-4">
-                                <div>
-                                    <label className="text-sm text-gray-400 block mb-2">Name</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Full Name"
-                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-sm text-gray-400 block mb-2">Email</label>
-                                    <input
-                                        type="email"
-                                        placeholder="user@example.com"
-                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-sm text-gray-400 block mb-2">Plan</label>
-                                    <select
-                                        name="plan"
-                                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
-                                    >
-                                        <option value="Explorer">Explorer</option>
-                                        <option value="Reader">Reader</option>
-                                        <option value="Visionary">Visionary</option>
-                                    </select>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity mt-4 flex items-center justify-center gap-2"
-                                >
-                                    <UserPlus className="w-4 h-4" />
-                                    Create User
-                                </button>
-                            </form>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            <AddUserModal
+                isOpen={showAddUserModal}
+                onClose={() => setShowAddUserModal(false)}
+                onUserAdded={handleUserAdded}
+            />
         </main>
     );
+
 }
