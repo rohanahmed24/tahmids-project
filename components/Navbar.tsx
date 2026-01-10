@@ -59,7 +59,8 @@ export default function Navbar() {
                     {/* Center: Logo */}
                     <div className={`flex items-center justify-center justify-self-center ${textColorClass}`}>
                         <Link href="/" className="block">
-                            <h1 className="font-serif text-2xl md:text-4xl font-black tracking-tighter transition-colors">
+                            <h1 className="font-serif text-2xl md:text-3xl font-black tracking-tighter transition-colors flex items-center gap-1">
+                                <span className="text-sm md:text-base font-medium tracking-normal opacity-80">The</span>
                                 WISDOMIA
                             </h1>
                         </Link>
@@ -145,7 +146,10 @@ export default function Navbar() {
                         <div className="absolute inset-0 bg-base -z-10" />
 
                         <div className="flex justify-between items-center p-6 md:p-12 border-b border-border">
-                            <span className="text-xl font-serif font-black tracking-tighter text-main">WISDOMIA</span>
+                            <span className="text-xl font-serif font-black tracking-tighter text-main flex items-center gap-1">
+                                <span className="text-sm font-medium tracking-normal opacity-80">The</span>
+                                WISDOMIA
+                            </span>
                             <button
                                 onClick={() => setIsMenuOpen(false)}
                                 className="p-2 hover:bg-main/5 rounded-full transition-colors text-main"
