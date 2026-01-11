@@ -34,8 +34,8 @@ export default function RootLayout({
           >
             <DevToolsBlocker />
             <SessionSync />
-            {children}
             <Navbar />
+            {children}
             <Footer />
             <Toaster richColors position="top-center" />
           </ThemeProvider>

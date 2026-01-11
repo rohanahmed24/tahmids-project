@@ -2,11 +2,18 @@ import Link from "next/link";
 
 export function Footer() {
     return (
-        <footer className="w-full bg-bg-primary border-t border-border-subtle pt-16 md:pt-20 pb-10 px-6 md:px-12 text-text-primary transition-colors duration-500 safe-bottom">
-            <div className="max-w-[1800px] mx-auto grid grid-cols-2 md:grid-cols-12 gap-8 md:gap-24 mb-16 md:mb-20">
+        <footer className="relative w-full bg-bg-primary border-t border-border-subtle pt-16 md:pt-20 pb-10 px-6 md:px-12 text-text-primary transition-colors duration-500 safe-bottom overflow-hidden">
+            {/* Watermark */}
+            <div className="absolute bottom-0 left-0 w-full select-none pointer-events-none opacity-5 overflow-hidden z-0">
+                <h2 className="text-[12rem] md:text-[20rem] font-serif font-black tracking-tighter leading-none text-text-primary whitespace-nowrap -mb-10 md:-mb-24">
+                    WISDOMIA
+                </h2>
+            </div>
+
+            <div className="relative z-10 max-w-[1800px] mx-auto grid grid-cols-2 md:grid-cols-12 gap-8 md:gap-24 mb-16 md:mb-20">
                 {/* Brand */}
                 <div className="col-span-2 md:col-span-4 space-y-4 md:space-y-6">
-                    <h2 className="text-3xl md:text-9xl lg:text-[12rem] font-serif font-black tracking-tighter leading-none opacity-10 select-none">
+                    <h2 className="text-3xl md:text-5xl font-serif font-black tracking-tighter leading-none">
                         WISDOMIA
                     </h2>
                     <p className="text-xs md:text-sm text-text-muted leading-relaxed max-w-sm">
@@ -39,7 +46,7 @@ export function Footer() {
                 </div>
 
                 {/* CTA */}
-                <div className="col-span-2 md:col-span-4 flex flex-col items-center md:items-end justify-start md:justify-between pt-4 md:pt-0">
+                <div className="col-span-2 md:col-span-4 flex flex-col items-center md:items-start justify-start pt-4 md:pt-0">
                     <Link
                         href="/pricing"
                         className="text-xs font-bold uppercase tracking-widest border border-border-subtle px-6 py-4 rounded-full hover:bg-black hover:text-white hover:border-black active:scale-95 transition-all w-full md:w-auto text-center"
@@ -50,7 +57,7 @@ export function Footer() {
             </div>
 
             {/* Bottom Bar */}
-            <div className="max-w-[1800px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-border-subtle text-text-muted">
+            <div className="relative z-10 max-w-[1800px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-border-subtle text-text-muted">
                 <p className="text-[10px] font-bold uppercase tracking-widest">© 2024 Wisdomia Inc.</p>
                 <div className="flex gap-6 text-[10px] font-bold uppercase tracking-widest">
                     <a href="#" className="hover:text-text-primary transition-colors">Twitter</a>

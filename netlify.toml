@@ -1,0 +1,29 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Next.js specific configuration for Netlify
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Redirects for Next.js App Router
+[[redirects]]
+  from = "/_next/static/*"
+  to = "/_next/static/:splat"
+  status = 200
+  headers = {Cache-Control = "public, max-age=31536000, immutable"}
+
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+
+# Environment variables (set these in Netlify dashboard)
+# DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
+# AUTH_SECRET
+# NEXTAUTH_URL
+# GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET  
+# GITHUB_ID, GITHUB_SECRET

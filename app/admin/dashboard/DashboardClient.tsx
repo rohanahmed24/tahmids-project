@@ -145,7 +145,8 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     const filteredUsers = users.filter(user =>
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.plan.toLowerCase().includes(searchQuery.toLowerCase())
+        (user.plan && user.plan.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        user.role.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const router = useRouter();
@@ -163,11 +164,26 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     // Fetch new data when tab changes
     useEffect(() => {
         if (activeTab === "careers") {
-            getApplications().then(setApplications);
+            getApplications().then(result => {
+                if (result.success) {
+                    setApplications(result.applications as RowDataPacket[]);
+                }
+            });
         } else if (activeTab === "media") {
-            getImages().then(setMediaItems);
+            getImages().then(result => {
+                if (result.success) {
+                    setMediaItems(result.media as RowDataPacket[]);
+                }
+            });
         } else if (activeTab === "overview" || activeTab === "analytics") {
-            getRecentActivity().then(setActivityLogs);
+            getRecentActivity().then(result => {
+                if (result.success) {
+                    setActivityLogs(result.logs as RowDataPacket[]);
+                }
+            }).catch(() => {
+                // Fallback for missing getRecentActivity
+                setActivityLogs([]);
+            });
         }
     }, [activeTab]);
 
@@ -245,7 +261,12 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
             try {
                 const result = await uploadImage(formData);
                 if (result.success) {
-                    getImages().then(setMediaItems); // Refresh
+                    // Refresh media items
+                    getImages().then(result => {
+                        if (result.success) {
+                            setMediaItems(result.media as RowDataPacket[]);
+                        }
+                    });
                 } else {
                     alert("Upload failed");
                 }
@@ -435,18 +456,24 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                         <div className="space-y-4">
                                             {users.slice(0, 4).map((user) => (
                                                 <div key={user.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-800 transition-colors">
-                                                    <div className="relative w-10 h-10 rounded-full overflow-hidden">
-                                                        <Image src={user.avatar} alt={user.name} fill sizes="40px" className="object-cover" />
+                                                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+                                                        {user.avatar || user.image ? (
+                                                            <Image src={user.avatar || user.image || ''} alt={user.name} fill sizes="40px" className="object-cover" />
+                                                        ) : (
+                                                            <span className="text-gray-400 text-sm font-medium">
+                                                                {user.name.charAt(0).toUpperCase()}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     <div className="flex-1">
                                                         <p className="font-medium text-sm">{user.name}</p>
                                                         <p className="text-xs text-gray-500">{user.email}</p>
                                                     </div>
-                                                    <span className={`px-2 py-1 rounded-full text-xs ${user.plan === "Visionary" ? "bg-amber-500/20 text-amber-400" :
-                                                        user.plan === "Explorer" ? "bg-blue-500/20 text-blue-400" :
+                                                    <span className={`px-2 py-1 rounded-full text-xs ${(user.plan === "Visionary" || user.role === "admin") ? "bg-amber-500/20 text-amber-400" :
+                                                        (user.plan === "Explorer" || user.role === "user") ? "bg-blue-500/20 text-blue-400" :
                                                             "bg-gray-700 text-gray-400"
                                                         }`}>
-                                                        {user.plan}
+                                                        {user.plan || user.role}
                                                     </span>
                                                 </div>
                                             ))}
@@ -571,8 +598,14 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                                 >
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="relative w-10 h-10 rounded-full overflow-hidden">
-                                                                <Image src={user.avatar} alt={user.name} fill sizes="40px" className="object-cover" />
+                                                            <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+                                                                {user.avatar || user.image ? (
+                                                                    <Image src={user.avatar || user.image || ''} alt={user.name} fill sizes="40px" className="object-cover" />
+                                                                ) : (
+                                                                    <span className="text-gray-400 text-sm font-medium">
+                                                                        {user.name.charAt(0).toUpperCase()}
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                             <div>
                                                                 <p className="font-medium text-sm">{user.name}</p>
@@ -581,17 +614,17 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className={`px-2 py-1 rounded-full text-xs ${user.plan === "Visionary" ? "bg-amber-500/20 text-amber-400" :
-                                                            user.plan === "Explorer" ? "bg-blue-500/20 text-blue-400" :
+                                                        <span className={`px-2 py-1 rounded-full text-xs ${(user.plan === "Visionary" || user.role === "admin") ? "bg-amber-500/20 text-amber-400" :
+                                                            (user.plan === "Explorer" || user.role === "user") ? "bg-blue-500/20 text-blue-400" :
                                                                 "bg-gray-700 text-gray-400"
                                                             }`}>
-                                                            {user.plan}
+                                                            {user.plan || user.role}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className={`px-2 py-1 rounded-full text-xs ${user.status === "active" ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                                                        <span className={`px-2 py-1 rounded-full text-xs ${(user.status === "active" || user.role === "admin") ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
                                                             }`}>
-                                                            {user.status}
+                                                            {user.status || (user.role === "admin" ? "active" : "user")}
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 text-sm text-gray-400">{user.articles}</td>

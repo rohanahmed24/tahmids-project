@@ -30,7 +30,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
                 try {
                     const [rows] = await pool.query<RowDataPacket[]>(
-                        "SELECT * FROM users WHERE email = ?",
+                        "SELECT id, name, email, password, role, image FROM users WHERE email = ?",
                         [credentials.email]
                     );
 
@@ -40,7 +40,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
                     const user = rows[0];
 
-                    const isValid = await bcrypt.compare(credentials.password as string, user.password_hash);
+                    // Check if user has a password (for OAuth users, password might be null)
+                    if (!user.password) {
+                        return null;
+                    }
+
+                    const isValid = await bcrypt.compare(credentials.password as string, user.password);
 
                     if (!isValid) return null;
 
@@ -66,45 +71,61 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 try {
                     const connection = await pool.getConnection();
                     try {
+                        // Check if user exists
                         const [rows] = await connection.query<RowDataPacket[]>(
-                            "SELECT * FROM users WHERE email = ?",
+                            "SELECT id, name, email, role, image FROM users WHERE email = ?",
                             [user.email]
                         );
 
                         if (rows.length === 0) {
-                            // Create new user
-                            const dummyPassword = `oauth:${account.provider}:${account.providerAccountId}:${Date.now()}`;
-                            const salt = await bcrypt.genSalt(10);
-                            const hash = await bcrypt.hash(dummyPassword, salt);
+                            // Create new user for OAuth
+                            const [result] = await connection.query<ResultSetHeader>(
+                                "INSERT INTO users (name, email, role, image) VALUES (?, ?, ?, ?)",
+                                [
+                                    user.name || 'User',
+                                    user.email,
+                                    'user',
+                                    user.image || null
+                                ]
+                            );
+                            user.id = result.insertId.toString();
 
-                            try {
-                                const [result] = await connection.query<ResultSetHeader>(
-                                    "INSERT INTO users (name, email, password_hash, role, image, provider, provider_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                                    [
-                                        user.name || 'User',
-                                        user.email,
-                                        hash,
-                                        'user',
-                                        user.image || null,
-                                        account.provider,
-                                        account.providerAccountId
-                                    ]
-                                );
-                                user.id = result.insertId.toString();
-                            } catch (insertError) {
-                                if ((insertError as { code?: string }).code === 'ER_BAD_FIELD_ERROR') {
-                                    console.warn("Extended columns missing, falling back to basic schema");
-                                    const [result] = await connection.query<ResultSetHeader>(
-                                        "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
-                                        [user.name || 'User', user.email, hash, 'user']
-                                    );
-                                    user.id = result.insertId.toString();
-                                } else {
-                                    throw insertError;
-                                }
-                            }
+                            // Create account record
+                            await connection.query(
+                                `INSERT INTO accounts (user_id, type, provider, provider_account_id, access_token, token_type) 
+                                 VALUES (?, ?, ?, ?, ?, ?)`,
+                                [
+                                    result.insertId,
+                                    account.type,
+                                    account.provider,
+                                    account.providerAccountId,
+                                    account.access_token || null,
+                                    account.token_type || null
+                                ]
+                            );
                         } else {
                             user.id = rows[0].id.toString();
+
+                            // Update existing account or create if not exists
+                            const [accountRows] = await connection.query<RowDataPacket[]>(
+                                "SELECT id FROM accounts WHERE user_id = ? AND provider = ?",
+                                [rows[0].id, account.provider]
+                            );
+
+                            if (accountRows.length === 0) {
+                                await connection.query(
+                                    `INSERT INTO accounts (user_id, type, provider, provider_account_id, access_token, token_type) 
+                                     VALUES (?, ?, ?, ?, ?, ?)`,
+                                    [
+                                        rows[0].id,
+                                        account.type,
+                                        account.provider,
+                                        account.providerAccountId,
+                                        account.access_token || null,
+                                        account.token_type || null
+                                    ]
+                                );
+                            }
                         }
                     } finally {
                         connection.release();
@@ -119,6 +140,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                token.role = (user as any).role;
                 token.picture = user.image;
             }
             return token;
@@ -126,6 +149,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async session({ session, token }) {
             if (session.user) {
                 session.user.id = token.id as string;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (session.user as any).role = token.role;
                 session.user.image = token.picture;
             }
             return session;
@@ -135,5 +160,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         signIn: '/signin',
         error: '/signin',
     },
-    secret: process.env.AUTH_SECRET, // Make sure to set AUTH_SECRET in .env
+    session: {
+        strategy: 'jwt',
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+    },
+    secret: process.env.AUTH_SECRET,
 })

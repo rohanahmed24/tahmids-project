@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "name": "Code Quality Analyzer",
+  "description": "Automatically analyzes modified source code files for potential improvements, code smells, design patterns, and best practices. Provides suggestions for improving code quality, readability, maintainability, and performance while maintaining existing functionality.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.ts",
+      "*.tsx",
+      "*.js",
+      "*.jsx",
+      "*.mjs"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze the code changes in the modified file for potential improvements. Focus on:\n\n1. **Code Smells**: Identify any code smells like long functions, duplicate code, complex conditionals, or poor naming\n2. **Design Patterns**: Suggest appropriate design patterns that could improve the code structure\n3. **Best Practices**: Check adherence to React, TypeScript, and Next.js best practices\n4. **Performance**: Look for potential performance optimizations (memoization, lazy loading, efficient data structures)\n5. **Readability**: Suggest improvements for code clarity and maintainability\n6. **Type Safety**: Ensure proper TypeScript usage and type definitions\n7. **Security**: Check for potential security issues or vulnerabilities\n\nProvide specific, actionable suggestions while maintaining the existing functionality. Include code examples where helpful."
+  },
+  "workspaceFolderName": "project-1",
+  "shortName": "code-quality-review"
+}

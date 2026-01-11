@@ -1,113 +1,131 @@
 "use server";
 
-import { pool } from "@/lib/db";
-import { RowDataPacket, ResultSetHeader } from "mysql2";
-import { writeFile, unlink, mkdir } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { revalidatePath } from "next/cache";
 import { verifyAdmin } from "@/actions/admin-auth";
-import { auth } from "@/auth";
-
-async function checkAuth() {
-    const isAdmin = await verifyAdmin();
-    const session = await auth();
-    const isNextAuthAdmin = session?.user?.role === "admin";
-
-    if (!isAdmin && !isNextAuthAdmin) {
-        throw new Error("Unauthorized");
-    }
-}
+import { getDb } from "@/lib/db";
 
 export async function uploadImage(formData: FormData) {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) {
+        throw new Error("Unauthorized");
+    }
+
+    const file = formData.get("file") as File;
+    if (!file || file.size === 0) {
+        return { success: false, error: "No file provided" };
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+        return { success: false, error: "File must be an image" };
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+        return { success: false, error: "File size must be less than 10MB" };
+    }
+
     try {
-        await checkAuth();
-        const file = formData.get("file") as File;
-
-        if (!file) {
-            return { success: false, message: "No file provided" };
-        }
-
-        if (!file.type.startsWith("image/")) {
-            return { success: false, message: "Invalid file type" };
-        }
-
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        
+        // Generate unique filename
+        const timestamp = Date.now();
+        const originalName = file.name.replace(/[^a-zA-Z0-9.]/g, '');
+        const filename = `${timestamp}-${originalName}`;
+        
+        // Ensure upload directory exists
         const uploadDir = path.join(process.cwd(), "public/imgs/uploads");
-
-        // Ensure dir exists
+        await mkdir(uploadDir, { recursive: true });
+        
+        // Write file
+        const filePath = path.join(uploadDir, filename);
+        await writeFile(filePath, buffer);
+        
+        // Store in database
+        const db = getDb();
         try {
-            await mkdir(uploadDir, { recursive: true });
-        } catch {
-            // Directory already exists
-        }
-
-        await writeFile(path.join(uploadDir, filename), buffer);
-        const url = `/imgs/uploads/${filename}`;
-
-        // Add to assets table
-        const connection = await pool.getConnection();
-        try {
-            await connection.query<ResultSetHeader>(
-                "INSERT INTO assets (name, url, type) VALUES (?, ?, ?)",
-                [file.name, url, 'image']
+            await db.query(
+                `INSERT INTO media (filename, original_name, mime_type, size, path) 
+                 VALUES (?, ?, ?, ?, ?)`,
+                [filename, file.name, file.type, file.size, `/imgs/uploads/${filename}`]
             );
-        } finally {
-            connection.release();
+        } catch (dbError) {
+            console.warn("Failed to store media in database:", dbError);
+            // Continue anyway - file is uploaded
         }
-
-        revalidatePath("/admin/dashboard");
-        return { success: true, url };
+        
+        return { 
+            success: true, 
+            url: `/imgs/uploads/${filename}`,
+            filename 
+        };
     } catch (error) {
-        console.error("Upload error:", error);
-        return { success: false, message: "Upload failed" };
+        console.error("Upload failed:", error);
+        return { success: false, error: "Upload failed" };
     }
 }
 
-export async function getImages() {
-    try {
-        await checkAuth();
-        const [rows] = await pool.query<RowDataPacket[]>("SELECT * FROM assets ORDER BY id DESC");
-        return rows;
-    } catch (error) {
-        console.error("Fetch images error:", error);
-        return [];
+export async function deleteMedia(filename: string) {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) {
+        throw new Error("Unauthorized");
     }
-}
 
-export async function deleteImage(id: number, url: string) {
     try {
-        await checkAuth();
-
-        // Sanitize path to ensure it is within public/imgs/uploads
-        // url should be like /imgs/uploads/filename.ext
-        if (!url.startsWith("/imgs/uploads/")) {
-            throw new Error("Invalid file path");
-        }
-
-        const filename = path.basename(url);
-        const filepath = path.join(process.cwd(), "public/imgs/uploads", filename);
-
-        // Ensure the resolved path is actually inside the uploads directory
-        const uploadsDir = path.join(process.cwd(), "public/imgs/uploads");
-        if (!filepath.startsWith(uploadsDir)) {
-            throw new Error("Path traversal detected");
-        }
-
-        // Delete from DB
-        await pool.query("DELETE FROM assets WHERE id = ?", [id]);
-
-        // Delete file
-        try {
-            await unlink(filepath);
-        } catch {
-            console.warn("File not found on disk:", filepath);
-        }
-
-        revalidatePath("/admin/dashboard");
+        const db = getDb();
+        await db.query("DELETE FROM media WHERE filename = ?", [filename]);
+        
         return { success: true };
     } catch (error) {
-        console.error("Delete image error:", error);
-        return { success: false };
+        console.error("Delete failed:", error);
+        return { success: false, error: "Delete failed" };
     }
 }
+
+export async function deleteMediaById(id: number, filename?: string) {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        const db = getDb();
+        if (filename) {
+            await db.query("DELETE FROM media WHERE id = ? AND filename = ?", [id, filename]);
+        } else {
+            await db.query("DELETE FROM media WHERE id = ?", [id]);
+        }
+        
+        return { success: true };
+    } catch (error) {
+        console.error("Delete failed:", error);
+        return { success: false, error: "Delete failed" };
+    }
+}
+
+export async function getMediaLibrary() {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        const db = getDb();
+        const [rows] = await db.query(`
+            SELECT id, filename, original_name, mime_type, size, path, alt_text, created_at
+            FROM media 
+            ORDER BY created_at DESC
+        `);
+        
+        return { success: true, media: rows };
+    } catch (error) {
+        console.error("Failed to fetch media:", error);
+        return { success: false, error: "Failed to fetch media", media: [] };
+    }
+}
+
+// Export aliases for compatibility
+export { getMediaLibrary as getImages };
+export { deleteMediaById as deleteImage };

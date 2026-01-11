@@ -19,7 +19,7 @@ export const DecorativeBackgrounds = () => {
                     repeat: Infinity,
                     ease: "easeInOut"
                 }}
-                className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-background-blue blur-[120px] rounded-full mix-blend-multiply dark:mix-blend-screen opacity-20"
+                className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-blue-400 blur-[120px] rounded-full mix-blend-multiply dark:mix-blend-screen opacity-20"
             />
 
             {/* Bottom Left Blob */}

@@ -2,16 +2,15 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { updateUserPlan } from "@/actions/users";
+import { updateUserRole } from "@/actions/users";
 import { useState } from "react";
-
-import { User } from "../dashboard/types";
+import { User } from "@/lib/users";
 
 interface EditUserModalProps {
     isOpen: boolean;
     onClose: () => void;
     user: User | null;
-    onUserUpdated: (userId: number, newPlan: string) => void;
+    onUserUpdated: (userId: number, newRole: 'user' | 'admin') => void;
 }
 
 export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUserModalProps) {
@@ -24,15 +23,15 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
         setIsLoading(true);
         try {
             const form = e.target as HTMLFormElement;
-            const newPlan = (form.elements.namedItem("plan") as HTMLSelectElement).value;
+            const newRole = (form.elements.namedItem("role") as HTMLSelectElement).value as 'user' | 'admin';
 
-            await updateUserPlan(user.id, newPlan);
+            await updateUserRole(user.id, newRole);
 
-            onUserUpdated(user.id, newPlan);
+            onUserUpdated(user.id, newRole);
             onClose();
         } catch (error) {
             console.error("Failed to update user", error);
-            alert("Failed to update user plan");
+            alert("Failed to update user role");
         } finally {
             setIsLoading(false);
         }
@@ -53,51 +52,50 @@ export function EditUserModal({ isOpen, onClose, user, onUserUpdated }: EditUser
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-gray-900 border border-gray-800 rounded-2xl p-8 max-w-md w-full"
+                        className="bg-bg-secondary border border-border-primary rounded-2xl p-8 max-w-md w-full"
                     >
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-bold">Edit User</h3>
-                            <button onClick={onClose} className="text-gray-400 hover:text-white">
+                            <h3 className="text-xl font-bold text-text-primary">Edit User</h3>
+                            <button onClick={onClose} className="text-text-secondary hover:text-text-primary">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         <form onSubmit={saveUserChanges} className="space-y-4">
                             <div>
-                                <label className="text-sm text-gray-400 block mb-2">Name</label>
+                                <label className="text-sm text-text-secondary block mb-2">Name</label>
                                 <input
                                     type="text"
                                     defaultValue={user.name}
                                     disabled
-                                    className="w-full px-4 py-3 bg-gray-800/50 border border-gray-800 rounded-xl text-gray-500 cursor-not-allowed"
+                                    className="w-full px-4 py-3 bg-bg-tertiary border border-border-primary rounded-xl text-text-tertiary cursor-not-allowed"
                                 />
                             </div>
                             <div>
-                                <label className="text-sm text-gray-400 block mb-2">Email</label>
+                                <label className="text-sm text-text-secondary block mb-2">Email</label>
                                 <input
                                     type="email"
                                     defaultValue={user.email}
                                     disabled
-                                    className="w-full px-4 py-3 bg-gray-800/50 border border-gray-800 rounded-xl text-gray-500 cursor-not-allowed"
+                                    className="w-full px-4 py-3 bg-bg-tertiary border border-border-primary rounded-xl text-text-tertiary cursor-not-allowed"
                                 />
                             </div>
                             <div>
-                                <label className="text-sm text-gray-400 block mb-2">Plan / Role</label>
+                                <label className="text-sm text-text-secondary block mb-2">Role</label>
                                 <select
-                                    name="plan"
-                                    defaultValue={user.plan}
-                                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                                    name="role"
+                                    defaultValue={user.role}
+                                    className="w-full px-4 py-3 bg-bg-primary border border-border-primary rounded-xl focus:border-accent-primary focus:outline-none transition-colors text-text-primary"
                                 >
-                                    <option value="Explorer">Explorer</option>
-                                    <option value="Reader">Reader</option>
-                                    <option value="Visionary">Visionary</option>
+                                    <option value="user">User</option>
+                                    <option value="admin">Administrator</option>
                                 </select>
                             </div>
 
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity mt-4 disabled:opacity-50"
+                                className="w-full py-3 bg-accent-primary text-white font-bold uppercase tracking-widest rounded-xl hover:bg-accent-primary/90 transition-colors mt-4 disabled:opacity-50"
                             >
                                 {isLoading ? "Saving..." : "Save Changes"}
                             </button>

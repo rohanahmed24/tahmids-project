@@ -196,7 +196,7 @@ export default function CareersPage() {
         }
 
         try {
-            const result = await submitJobApplication(null, formData);
+            const result = await submitJobApplication(formData);
             if (result.success) {
                 setIsSubmitted(true);
                 form.reset();

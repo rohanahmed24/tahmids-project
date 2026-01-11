@@ -5,7 +5,6 @@ import { MotionWrapper } from "@/components/ui/MotionWrapper";
 import { DailyQuote } from "@/components/DailyQuote";
 import { Subscription } from "@/components/Subscription";
 import { getPostBySlug, getAllPosts } from "@/lib/posts";
-import { MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
 import { ArticleVideoPlayer } from "@/components/ArticleVideoPlayer";
@@ -65,7 +64,15 @@ export default async function ArticlePage({
                         )}
 
                         <ArticleContent>
-                            <MDXRemote source={post.content} />
+                            <div className="prose prose-lg max-w-none">
+                                {post.content.split('\n').map((paragraph, index) => (
+                                    paragraph.trim() ? (
+                                        <p key={index} className="mb-4 text-text-main leading-relaxed">
+                                            {paragraph}
+                                        </p>
+                                    ) : null
+                                ))}
+                            </div>
                         </ArticleContent>
                     </div>
 

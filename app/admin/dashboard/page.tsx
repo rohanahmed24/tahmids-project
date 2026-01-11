@@ -1,66 +1,107 @@
-import { auth } from "@/auth";
-import DashboardClient from "./DashboardClient";
-import { verifyAdmin } from "@/actions/admin-auth";
-
-import { getAllPosts } from "@/lib/posts";
-import { getAllUsers, getUserStats } from "@/lib/users";
-import { getUserGrowthOverTime, getTopArticles } from "@/lib/analytics";
-import { getSettings } from "@/lib/settings";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { verifyAdmin } from "@/actions/admin-auth";
+import { getAllUsers, getUserStats } from "@/lib/users";
+import { getAllPostsForAdmin, getPostStats } from "@/lib/posts";
+import { DashboardHeader } from "@/components/admin/DashboardHeader";
+import { StatsCards } from "@/components/admin/StatsCards";
+import { PostsTable } from "@/components/admin/PostsTable";
+import { UsersTable } from "@/components/admin/UsersTable";
+import { RecentActivity } from "@/components/admin/RecentActivity";
+import { AnalyticsChart } from "@/components/admin/AnalyticsChart";
+import { QuickActions } from "@/components/admin/QuickActions";
+import { MediaLibrary } from "@/components/admin/MediaLibrary";
 
-export default async function DashboardPage() {
+export default async function AdminDashboard() {
     const session = await auth();
-    const currentUser = session?.user;
-
     const isAdmin = await verifyAdmin();
-    if (!isAdmin) {
-        redirect("/admin");
+
+    if (!session || !isAdmin) {
+        redirect("/signin");
     }
 
-    const posts = await getAllPosts();
-    const users = await getAllUsers();
-    const stats = await getUserStats();
-    const settings = await getSettings();
-    const userGrowth = await getUserGrowthOverTime();
-    const topArticles = await getTopArticles();
+    // Fetch all data in parallel
+    const [users, userStats, posts, postStats] = await Promise.all([
+        getAllUsers(),
+        getUserStats(),
+        getAllPostsForAdmin(),
+        getPostStats()
+    ]);
 
-    const mappedPosts = posts.map((post, index) => ({
-        id: index + 1, // temporary ID
-        title: post.title,
-        author: post.author,
-        category: post.category,
-        status: post.featured ? "Featured" : "Published",
-        views: post.views || 0,
-        date: post.date,
-        img: post.coverImage || "/imgs/Chernobyl.png",
-        slug: post.slug
-    }));
+    const dashboardStats = {
+        totalUsers: userStats.totalUsers,
+        totalArticles: postStats.total,
+        publishedArticles: postStats.published,
+        draftArticles: postStats.drafts,
+        totalViews: postStats.totalViews,
+        monthlyGrowth: 12.5, // This would come from analytics
+        engagementRate: 68.3, // This would come from analytics
+        avgReadTime: "4.2 min" // This would come from analytics
+    };
 
-    const mappedUsers = users.map(user => ({
-        id: user.id || 0,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar || "/imgs/Alaxandria.jpeg", // Placeholder for now
-        plan: user.plan || "Explorer",
-        status: user.status || "active",
-        articles: user.article_count || 0,
-        joined: new Date(user.created_at).toLocaleDateString()
-    }));
+    return (
+        <div className="min-h-screen bg-bg-primary">
+            <div className="max-w-[1600px] mx-auto p-6 space-y-8">
+                {/* Header */}
+                <DashboardHeader user={session.user} />
 
-    const dashboardStats = [
-        { id: 1, label: "Total Users", value: stats.totalUsers.toLocaleString(), change: "+0%", trend: "up", iconName: "Users", color: "text-blue-500", bgColor: "bg-blue-500/10" },
-        { id: 2, label: "Articles", value: stats.totalArticles.toLocaleString(), change: "+0%", trend: "up", iconName: "FileText", color: "text-purple-500", bgColor: "bg-purple-500/10" },
-        { id: 3, label: "Page Views", value: stats.totalViews.toLocaleString(), change: "+0%", trend: "up", iconName: "Eye", color: "text-green-500", bgColor: "bg-green-500/10" },
-        { id: 4, label: "Revenue", value: "$0", change: "0%", trend: "down", iconName: "DollarSign", color: "text-amber-500", bgColor: "bg-amber-500/10" },
-    ];
+                {/* Stats Overview */}
+                <StatsCards stats={dashboardStats} />
 
-    return <DashboardClient
-        initialArticles={mappedPosts}
-        initialUsers={mappedUsers}
-        initialStats={dashboardStats}
-        initialSettings={settings}
-        userGrowth={userGrowth}
-        topArticles={topArticles}
-        currentUser={currentUser}
-    />;
+                {/* Quick Actions */}
+                <QuickActions />
+
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                    {/* Left Column - Posts & Analytics */}
+                    <div className="xl:col-span-2 space-y-8">
+                        {/* Analytics Chart */}
+                        <Suspense fallback={<div className="h-96 bg-bg-secondary rounded-xl animate-pulse" />}>
+                            <AnalyticsChart />
+                        </Suspense>
+
+                        {/* Posts Management */}
+                        <div className="bg-bg-secondary rounded-xl border border-border-primary">
+                            <div className="p-6 border-b border-border-primary">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-xl font-semibold text-text-primary">
+                                        Content Management
+                                    </h2>
+                                    <div className="flex gap-2">
+                                        <button className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors">
+                                            New Article
+                                        </button>
+                                        <button className="px-4 py-2 border border-border-primary rounded-lg hover:bg-bg-tertiary transition-colors">
+                                            Import
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <PostsTable posts={posts} />
+                        </div>
+                    </div>
+
+                    {/* Right Column - Users & Activity */}
+                    <div className="space-y-8">
+                        {/* Recent Activity */}
+                        <RecentActivity />
+
+                        {/* Users Management */}
+                        <div className="bg-bg-secondary rounded-xl border border-border-primary">
+                            <div className="p-6 border-b border-border-primary">
+                                <h2 className="text-xl font-semibold text-text-primary">
+                                    User Management
+                                </h2>
+                            </div>
+                            <UsersTable users={users} />
+                        </div>
+
+                        {/* Media Library Preview */}
+                        <MediaLibrary />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
