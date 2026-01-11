@@ -13,23 +13,29 @@ import {
 } from "recharts";
 import { useState } from "react";
 
-interface AnalyticsData {
-    name: string;
+// Define flexible data item for reusability
+export interface AnalyticsDataItem {
+    name?: string;
+    month?: string;
     users?: number;
     views?: number;
     [key: string]: string | number | undefined;
 }
 
 interface AnalyticsChartProps {
-    data: AnalyticsData[];
+    data: AnalyticsDataItem[];
 }
 
 export function AnalyticsChart({ data }: AnalyticsChartProps) {
     const [timeRange, setTimeRange] = useState("30d");
     const [activeTab, setActiveTab] = useState("growth");
 
-    // Mock data generation if real data is sparse for demo
-    const chartData = data.length > 0 ? data : [
+    // Map data to chart format
+    const chartData = data.length > 0 ? data.map(item => ({
+        name: item.month || item.name,
+        users: item.users || 0,
+        views: item.views || 0
+    })) : [
         { name: "Jan", users: 400, views: 2400 },
         { name: "Feb", users: 300, views: 1398 },
         { name: "Mar", users: 200, views: 9800 },

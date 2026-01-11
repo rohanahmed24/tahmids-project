@@ -4,6 +4,7 @@ import { verifyAdmin } from "@/actions/admin-auth";
 
 import { getAllPosts } from "@/lib/posts";
 import { getAllUsers, getUserStats } from "@/lib/users";
+import { getUserGrowthOverTime, getTopArticles } from "@/lib/analytics";
 import { getSettings } from "@/lib/settings";
 import { redirect } from "next/navigation";
 
@@ -20,6 +21,8 @@ export default async function DashboardPage() {
     const users = await getAllUsers();
     const stats = await getUserStats();
     const settings = await getSettings();
+    const userGrowth = await getUserGrowthOverTime();
+    const topArticles = await getTopArticles();
 
     const mappedPosts = posts.map((post, index) => ({
         id: index + 1, // temporary ID
@@ -56,6 +59,8 @@ export default async function DashboardPage() {
         initialUsers={mappedUsers}
         initialStats={dashboardStats}
         initialSettings={settings}
+        userGrowth={userGrowth}
+        topArticles={topArticles}
         currentUser={currentUser}
     />;
 }

@@ -19,6 +19,18 @@ export interface User {
     status: string;
     articles: number;
     joined: string;
+    bio?: string;
+    image?: string;
+}
+
+export interface CurrentUser {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    avatar?: string;
+    bio?: string;
+    role?: string;
 }
 
 export interface Stat {

@@ -69,15 +69,17 @@ const itemVariants = {
     },
 };
 
-import { Article, User, Stat, SiteSettings } from "./types";
+import { Article, User, Stat, SiteSettings, CurrentUser } from "./types";
+import { MonthlyGrowth, TopArticle } from "@/lib/analytics";
 
 interface DashboardClientProps {
     initialArticles: Article[];
     initialUsers: User[];
     initialStats: Stat[];
     initialSettings: SiteSettings;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    currentUser: any;
+    userGrowth: MonthlyGrowth[];
+    topArticles: TopArticle[];
+    currentUser?: CurrentUser;
 }
 
 const icons: Record<string, LucideIcon> = {
@@ -94,7 +96,7 @@ import { AddUserModal } from "../components/AddUserModal";
 import { EditUserModal } from "../components/EditUserModal";
 import { DeleteModal } from "../components/DeleteModal";
 
-export default function DashboardClient({ initialArticles, initialUsers, initialStats, initialSettings, currentUser }: DashboardClientProps) {
+export default function DashboardClient({ initialArticles, initialUsers, initialStats, initialSettings, userGrowth, topArticles, currentUser }: DashboardClientProps) {
     const [activeTab, setActiveTab] = useState("overview");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -103,8 +105,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: number; name: string; extra?: string } | null>(null);
     const [showEditUserModal, setShowEditUserModal] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [editingUser, setEditingUser] = useState<any | null>(null);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
     const [showAddUserModal, setShowAddUserModal] = useState(false);
 
     // Data states
@@ -883,7 +884,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
 
                                 <div className="grid grid-cols-3 gap-6 mb-8">
                                     {/* Chart Placeholder 1 REPLACED */}
-                                    <AnalyticsChart data={[]} />
+                                    <AnalyticsChart data={userGrowth} />
 
                                     {/* Top Articles */}
                                     <motion.div
@@ -894,12 +895,7 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                     >
                                         <h3 className="font-bold mb-4">Top Articles</h3>
                                         <div className="space-y-4">
-                                            {[
-                                                { title: "Future of AI Ethics", views: "2.1K" },
-                                                { title: "Digital Silence", views: "1.2K" },
-                                                { title: "Slow Interfaces", views: "856" },
-                                                { title: "Digital Garden", views: "654" },
-                                            ].map((article, i) => (
+                                            {topArticles.map((article, i) => (
                                                 <div key={i} className="flex items-center gap-3">
                                                     <span className="w-6 h-6 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center text-xs font-bold">
                                                         {i + 1}
@@ -908,6 +904,9 @@ export default function DashboardClient({ initialArticles, initialUsers, initial
                                                     <span className="text-sm text-gray-400">{article.views}</span>
                                                 </div>
                                             ))}
+                                            {topArticles.length === 0 && (
+                                                <p className="text-gray-500 text-sm">No articles found.</p>
+                                            )}
                                         </div>
                                     </motion.div>
                                 </div>
