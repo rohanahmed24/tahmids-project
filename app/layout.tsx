@@ -14,6 +14,20 @@ export const metadata: Metadata = {
 
 import { Toaster } from 'sonner';
 
+import { Inter, Playfair_Display } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,7 +37,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className="antialiased bg-base text-main transition-colors duration-300"
+        className={`${inter.variable} ${playfair.variable} antialiased bg-base text-main transition-colors duration-300`}
       >
         <SessionProvider>
           <ThemeProvider

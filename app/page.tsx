@@ -1,17 +1,19 @@
 import { HeroSlider } from "@/components/HeroSlider";
 import { FeaturedTales } from "@/components/FeaturedTales";
-import { Subscription } from "@/components/Subscription";
-import { ArticleGrid } from "@/components/ArticleGrid";
-import { Testimonials } from "@/components/Testimonials";
-import { FAQ } from "@/components/FAQ";
-import { CTABanner } from "@/components/CTABanner";
-import { DailyQuote } from "@/components/DailyQuote";
-import { TopicExplore } from "@/components/TopicExplore";
-import { AuthorsGrid } from "@/components/AuthorsGrid";
-import { CategorySection } from "@/components/CategorySection";
 import { getHotTopics, getRecentPosts, getPostsByCategories } from "@/lib/posts";
-
+import dynamic from "next/dynamic";
 import { Metadata } from "next";
+
+// Dynamic Imports for Code Splitting (Below the fold components)
+const Subscription = dynamic(() => import("@/components/Subscription").then(mod => mod.Subscription));
+const ArticleGrid = dynamic(() => import("@/components/ArticleGrid").then(mod => mod.ArticleGrid));
+const Testimonials = dynamic(() => import("@/components/Testimonials").then(mod => mod.Testimonials));
+const FAQ = dynamic(() => import("@/components/FAQ").then(mod => mod.FAQ));
+const CTABanner = dynamic(() => import("@/components/CTABanner").then(mod => mod.CTABanner));
+const DailyQuote = dynamic(() => import("@/components/DailyQuote").then(mod => mod.DailyQuote));
+const TopicExplore = dynamic(() => import("@/components/TopicExplore").then(mod => mod.TopicExplore));
+const AuthorsGrid = dynamic(() => import("@/components/AuthorsGrid").then(mod => mod.AuthorsGrid));
+const CategorySection = dynamic(() => import("@/components/CategorySection").then(mod => mod.CategorySection));
 
 // SEO Metadata
 export const metadata: Metadata = {

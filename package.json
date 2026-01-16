@@ -11,6 +11,9 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-class-names": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.26",
     "gray-matter": "^4.0.3",
     "lottie-react": "^2.4.1",
@@ -40,6 +43,7 @@
     "@types/react-dom": "^19",
     "@types/turndown": "^5.0.6",
     "@vitejs/plugin-react": "^5.1.2",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
     "jsdom": "^27.4.0",

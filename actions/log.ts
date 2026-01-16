@@ -69,14 +69,7 @@ export async function logActivity(action: string, description: string, type: str
 
     try {
         // In a real implementation, you would insert into activity_logs table
-        console.log("Activity logged:", {
-            action,
-            description,
-            type,
-            severity,
-            timestamp: new Date().toISOString()
-        });
-
+        console.log(`Logging activity: ${action} - ${description} [${type}/${severity}]`);
         return { success: true };
     } catch (error) {
         console.error("Failed to log activity:", error);

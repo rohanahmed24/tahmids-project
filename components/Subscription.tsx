@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 
 export function Subscription() {
     return (
-        <section className="w-full py-10 md:py-32 bg-accent text-white overflow-hidden relative">
-            {/* Decorative Circles */}
-            <div className="absolute top-0 right-0 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-[200px] md:w-[400px] h-[200px] md:h-[400px] bg-black/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        <section className="w-full py-10 md:py-32 bg-[#4A3428] text-white overflow-hidden relative">
+            {/* Decorative Circles - Adjusted opacity for brown background */}
+            <div className="absolute top-0 right-0 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-[200px] md:w-[400px] h-[200px] md:h-[400px] bg-black/40 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
             <div className="max-w-xl mx-auto px-6 text-center relative z-10">
                 <h2 className="text-4xl md:text-7xl font-serif font-medium mb-4 md:mb-6 tracking-tight text-white">
@@ -27,7 +27,7 @@ export function Subscription() {
                     />
                     <motion.button
                         whileTap={{ scale: 0.95 }}
-                        className="w-full bg-white text-accent font-bold text-sm uppercase tracking-widest py-4 rounded-full flex items-center justify-center gap-2 active:opacity-90"
+                        className="w-full bg-white text-[#4A3428] font-bold text-sm uppercase tracking-widest py-4 rounded-full flex items-center justify-center gap-2 active:opacity-90"
                     >
                         Subscribe
                         <ArrowRight className="w-4 h-4" />

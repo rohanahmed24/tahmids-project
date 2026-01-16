@@ -69,7 +69,7 @@ export function ArticleSidebar({ authorName }: ArticleSidebarProps) {
                                     <span className="mx-1.5">•</span>
                                     <span>{story.date}</span>
                                 </p>
-                                <h5 className="font-serif text-sm md:text-base leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-2">
+                                <h5 className="font-serif text-sm md:text-base leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary dark:text-gray-200 line-clamp-2">
                                     {story.title}
                                 </h5>
                             </div>

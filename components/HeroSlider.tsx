@@ -1,150 +1,81 @@
 "use client";
 
 import Image from "next/image";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { Post } from "@/lib/posts";
-
-// Move variants outside component to avoid recreation
-const slideVariants = {
-    enter: (direction: number) => ({
-        x: direction > 0 ? "100%" : "-100%",
-        opacity: 0,
-        scale: 1.1,
-    }),
-    center: {
-        zIndex: 1,
-        x: 0,
-        opacity: 1,
-        scale: 1,
-    },
-    exit: (direction: number) => ({
-        zIndex: 0,
-        x: direction < 0 ? "100%" : "-100%",
-        opacity: 0,
-        scale: 0.9,
-    }),
-};
-
-const textVariants = {
-    enter: { y: 50, opacity: 0 },
-    center: { y: 0, opacity: 1 },
-    exit: { y: -50, opacity: 0 },
-};
+import { motion, AnimatePresence } from "framer-motion";
 
 interface HeroSliderProps {
     items: Post[];
 }
 
 export function HeroSlider({ items }: HeroSliderProps) {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-    const [direction, setDirection] = useState(1);
-    const [isDragging, setIsDragging] = useState(false);
-
+    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 20 }, [Autoplay({ delay: 5000, stopOnInteraction: false })]);
+    const [selectedIndex, setSelectedIndex] = useState(0);
     // Filter mainly ensuring we have items, fallback to empty array if undefined
     const validItems = items || [];
 
-    const nextSlide = useCallback(() => {
-        if (validItems.length === 0) return;
-        setDirection(1);
-        setCurrentIndex((prev) => (prev + 1) % validItems.length);
-    }, [validItems.length]);
+    const onSelect = useCallback(() => {
+        if (!emblaApi) return;
+        setSelectedIndex(emblaApi.selectedScrollSnap());
+    }, [emblaApi]);
 
-    const prevSlide = useCallback(() => {
-        if (validItems.length === 0) return;
-        setDirection(-1);
-        setCurrentIndex((prev) => (prev - 1 + validItems.length) % validItems.length);
-    }, [validItems.length]);
-
-
-
-    const goToSlide = (index: number) => {
-        setDirection(index > currentIndex ? 1 : -1);
-        setCurrentIndex(index);
-    };
-
-    // Handle drag/swipe gestures
-    const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        setIsDragging(false);
-        const threshold = 30; // Reduced threshold for easier swiping
-        const velocity = info.velocity.x;
-        const offset = info.offset.x;
-
-        // Determine swipe direction based on velocity or offset
-        if (velocity < -300 || offset < -threshold) {
-            nextSlide();
-        } else if (velocity > 300 || offset > threshold) {
-            prevSlide();
-        }
-    };
-
-    // Auto-slide
     useEffect(() => {
-        if (!isAutoPlaying || isDragging || validItems.length === 0) return;
-        const interval = setInterval(nextSlide, 5000);
-        return () => clearInterval(interval);
-    }, [isAutoPlaying, isDragging, nextSlide, validItems.length]);
+        if (!emblaApi) return;
+        onSelect();
+        emblaApi.on("select", onSelect);
+    }, [emblaApi, onSelect]);
+
+    const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
+    const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
+    const scrollTo = useCallback((index: number) => emblaApi && emblaApi.scrollTo(index), [emblaApi]);
 
     if (validItems.length === 0) {
-        return null; // Or return a loading skeleton / nothing if no items
+        return null;
     }
 
-    const currentTopic = validItems[currentIndex];
+    const currentTopic = validItems[selectedIndex];
 
     return (
         <section
-            className="relative w-full h-[50vh] md:h-screen overflow-hidden bg-black"
-            onMouseEnter={() => setIsAutoPlaying(false)}
-            onMouseLeave={() => setIsAutoPlaying(true)}
+            className="relative w-full h-[50vh] md:h-screen overflow-hidden bg-black group"
+            onMouseEnter={() => {
+                emblaApi?.plugins().autoplay?.stop();
+            }}
+            onMouseLeave={() => {
+                emblaApi?.plugins().autoplay?.play();
+            }}
+            role="region"
+            aria-roledescription="carousel"
+            aria-label="Hero Highlights"
         >
-            {/* Background Slides */}
-            <AnimatePresence initial={false} custom={direction}>
-                <motion.div
-                    key={currentIndex}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-                    className="absolute inset-0"
-                >
-                    <Image
-                        src={currentTopic.coverImage || '/placeholder.jpg'}
-                        alt={currentTopic.title}
-                        fill
-                        sizes="100vw"
-                        className="object-cover"
-                        priority
-                    />
-                    {/* Gradient Overlays */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                    <div className={`absolute inset-0 bg-gradient-to-r ${currentTopic.accent_color || 'from-blue-600/80 to-purple-600/80'} mix-blend-multiply opacity-60`} />
-                </motion.div>
-            </AnimatePresence>
-
-            {/* Drag/Swipe Layer - Mobile touch handling - MUST be above all content */}
-            <motion.div
-                className="absolute inset-0 z-30 cursor-grab active:cursor-grabbing md:hidden touch-pan-y"
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.3}
-                dragMomentum={false}
-                onDragStart={() => {
-                    setIsDragging(true);
-                    setIsAutoPlaying(false);
-                }}
-                onDragEnd={handleDragEnd}
-            />
+            {/* Embla Carousel Viewport */}
+            <div className="overflow-hidden h-full" ref={emblaRef}>
+                <div className="flex h-full touch-pan-y">
+                    {validItems.map((item) => (
+                        <div key={item.slug} className="relative flex-[0_0_100%] min-w-0 h-full">
+                            <Image
+                                src={item.coverImage || '/placeholder.jpg'}
+                                alt={item.title}
+                                fill
+                                sizes="100vw"
+                                className="object-cover"
+                                priority
+                            />
+                            {/* Gradient Overlays */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                            <div className={`absolute inset-0 bg-gradient-to-r ${item.accent_color || 'from-blue-600/80 to-purple-600/80'} mix-blend-multiply opacity-60`} />
+                        </div>
+                    ))}
+                </div>
+            </div>
 
             {/* Hot Topics Badge - Desktop only */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+            <div
                 className="hidden md:block absolute top-32 left-12 z-20"
             >
                 <div className="flex items-center gap-2 bg-orange-500/80 backdrop-blur-md rounded-full px-3 py-1.5 md:px-4 md:py-2">
@@ -153,20 +84,19 @@ export function HeroSlider({ items }: HeroSliderProps) {
                         Hot Topics
                     </span>
                 </div>
-            </motion.div>
+            </div>
 
             {/* Main Content - At bottom on mobile */}
-            <div className="absolute inset-0 flex items-end z-10">
+            <div className="absolute inset-0 flex items-end z-10 pointer-events-none">
                 <div className="w-full max-w-7xl mx-auto px-4 md:px-12 pb-16 md:pb-32">
                     <AnimatePresence mode="wait">
                         <motion.div
-                            key={currentIndex}
-                            variants={textVariants}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{ duration: 0.5 }}
-                            className="max-w-3xl"
+                            key={selectedIndex}
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: -20, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="max-w-3xl pointer-events-auto"
                         >
                             {/* Title */}
                             <h1
@@ -187,45 +117,34 @@ export function HeroSlider({ items }: HeroSliderProps) {
             </div>
 
             {/* Navigation Arrows - Desktop only */}
-            <div className="hidden md:flex absolute bottom-1/2 -translate-y-1/2 left-8 z-20">
-                <motion.button
-                    whileHover={{ scale: 1.1, x: -5 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={prevSlide}
-                    className="w-12 h-12 md:w-14 md:h-14 bg-black/40 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-colors"
-                    aria-label="Previous slide"
-                >
-                    <ChevronLeft className="w-6 h-6 md:w-6 md:h-6" />
-                </motion.button>
-            </div>
-            <div className="hidden md:flex absolute bottom-1/2 -translate-y-1/2 right-8 z-20">
-                <motion.button
-                    whileHover={{ scale: 1.1, x: 5 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={nextSlide}
-                    className="w-12 h-12 md:w-14 md:h-14 bg-black/40 backdrop-blur-md border border-white/30 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-colors"
-                    aria-label="Next slide"
-                >
-                    <ChevronRight className="w-6 h-6 md:w-6 md:h-6" />
-                </motion.button>
-            </div>
+            <button
+                onClick={scrollPrev}
+                className="hidden md:flex absolute bottom-1/2 -translate-y-1/2 left-8 z-20 w-12 h-12 md:w-14 md:h-14 bg-black/40 backdrop-blur-md border border-white/30 rounded-full items-center justify-center text-white hover:bg-black/60 transition-colors opacity-0 group-hover:opacity-100 duration-300"
+                aria-label="Previous slide"
+            >
+                <ChevronLeft className="w-6 h-6" />
+            </button>
+
+            <button
+                onClick={scrollNext}
+                className="hidden md:flex absolute bottom-1/2 -translate-y-1/2 right-8 z-20 w-12 h-12 md:w-14 md:h-14 bg-black/40 backdrop-blur-md border border-white/30 rounded-full items-center justify-center text-white hover:bg-black/60 transition-colors opacity-0 group-hover:opacity-100 duration-300"
+                aria-label="Next slide"
+            >
+                <ChevronRight className="w-6 h-6" />
+            </button>
 
             {/* Slide Indicators */}
-            <div className="absolute bottom-3 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex lg:hidden items-center gap-2 md:gap-3">
+            <div className="absolute bottom-3 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex lg:hidden items-center gap-2 md:gap-3 pointer-events-auto">
                 {validItems.map((topic, index) => (
                     <button
-                        key={topic.slug} // Use slug as key
-                        onClick={() => goToSlide(index)}
-                        className="group relative flex items-center"
+                        key={topic.slug}
+                        onClick={() => scrollTo(index)}
+                        className={`w-[4px] h-[4px] !p-0 rounded-full transition-all duration-300 ${index === selectedIndex
+                            ? "bg-white"
+                            : "bg-white/30"
+                            }`}
                         aria-label={`Go to slide ${index + 1}`}
-                    >
-                        <motion.div
-                            className={`h-1 md:h-1.5 rounded-full transition-all duration-300 ${index === currentIndex
-                                ? "w-8 md:w-12 bg-white"
-                                : "w-4 md:w-6 bg-white/30 group-hover:bg-white/50"
-                                }`}
-                        />
-                    </button>
+                    />
                 ))}
             </div>
 
@@ -233,7 +152,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
             <div className="hidden md:block absolute bottom-8 md:bottom-12 right-6 md:right-12 z-20">
                 <div className="flex items-baseline gap-1 text-white">
                     <span className="text-3xl md:text-4xl font-bold">
-                        {String(currentIndex + 1).padStart(2, "0")}
+                        {String(selectedIndex + 1).padStart(2, "0")}
                     </span>
                     <span className="text-white/40">/</span>
                     <span className="text-sm text-white/40">
@@ -244,26 +163,23 @@ export function HeroSlider({ items }: HeroSliderProps) {
 
             {/* Progress Bar */}
             <div className="absolute bottom-0 left-0 right-0 h-0.5 md:h-1 bg-white/10 z-20">
-                <motion.div
-                    key={currentIndex}
-                    initial={{ width: "0%" }}
-                    animate={{ width: isAutoPlaying && !isDragging ? "100%" : "0%" }}
-                    transition={{ duration: 5, ease: "linear" }}
-                    className="h-full bg-white"
+                <div
+                    className="h-full bg-white transition-[width] ease-linear duration-100" // using js for progress might be smoother but this is okay
+                    style={{ width: `${((selectedIndex + 1) / validItems.length) * 100}%` }}
                 />
             </div>
 
             {/* Thumbnail Preview - Desktop Only */}
-            <div className="hidden lg:flex absolute bottom-12 left-0 right-0 justify-center z-20 gap-3">
+            <div className="hidden lg:flex absolute bottom-12 left-0 right-0 justify-center z-20 gap-3 pointer-events-auto">
                 {validItems.map((topic, index) => (
-                    <motion.button
+                    <button
                         key={topic.slug}
-                        onClick={() => goToSlide(index)}
-                        whileHover={{ scale: 1.05, y: -5 }}
-                        className={`relative w-20 h-14 rounded-lg overflow-hidden transition-all ${index === currentIndex
+                        onClick={() => scrollTo(index)}
+                        className={`relative w-20 h-14 rounded-lg overflow-hidden transition-all hover:-translate-y-1 hover:scale-105 ${index === selectedIndex
                             ? "ring-2 ring-white ring-offset-2 ring-offset-black/50"
                             : "opacity-50 hover:opacity-80"
                             }`}
+                        aria-label={`Go to slide ${index + 1}`}
                     >
                         <Image
                             src={topic.coverImage || '/placeholder.jpg'}
@@ -272,7 +188,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
                             sizes="120px"
                             className="object-cover"
                         />
-                    </motion.button>
+                    </button>
                 ))}
             </div>
         </section>

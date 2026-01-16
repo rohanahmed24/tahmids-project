@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Menu, X, Globe, User, LogOut, Loader2 } from "lucide-react";
+import { Search, Menu, X, User, LogOut, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageToggle } from "./LanguageToggle";
 import { useSession, signOut } from "next-auth/react";
 
 export default function Navbar() {
@@ -68,11 +69,11 @@ export default function Navbar() {
                     </div>
 
                     {/* Center: Logo */}
-                    <div className={`flex items-center justify-center ${textColorClass} absolute left-1/2 -translate-x-1/2`}>
+                    <div className={`flex items-center justify-center ${textColorClass} absolute left-[40%] -translate-x-1/2`}>
                         <Link href="/" className="block">
-                            <h1 className="font-serif text-2xl md:text-3xl font-black tracking-tighter transition-colors flex items-center gap-2">
-                                <span className="text-sm font-medium tracking-normal opacity-80">The</span>
-                                WISDOMIA
+                            <h1 className="font-serif text-center leading-none transition-colors">
+                                <span className="block text-[10px] md:text-xs font-medium tracking-widest uppercase opacity-60 mb-[-2px]">The</span>
+                                <span className="block text-2xl md:text-3xl font-black tracking-tighter">WISDOMIA</span>
                             </h1>
                         </Link>
                     </div>
@@ -128,25 +129,10 @@ export default function Navbar() {
                         )}
 
 
-                        <div className="flex">
-                            <ThemeToggle />
-                        </div>
+
                         {/* Language/Region Selector */}
-                        <div className="hidden md:flex items-center gap-1">
-                            <Globe className="w-4 h-4 opacity-60" />
-                            <button
-                                className="px-2 py-1 text-xs font-bold uppercase tracking-wider hover:bg-white/10 rounded transition-colors"
-                                title="English"
-                            >
-                                EN
-                            </button>
-                            <span className="opacity-40">|</span>
-                            <button
-                                className="px-2 py-1 text-xs font-bold hover:bg-white/10 rounded transition-colors"
-                                title="বাংলা"
-                            >
-                                বাংলা
-                            </button>
+                        <div className="flex items-center">
+                            <LanguageToggle />
                         </div>
                     </div>
                 </div>
@@ -159,81 +145,157 @@ export default function Navbar() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[10000] flex flex-col bg-base text-main"
+                        className="fixed inset-0 z-[10000] flex flex-col bg-bg-primary text-text-primary overflow-hidden"
                     >
-                        {/* Enforce solid background to ensure it overlays everything */}
-                        <div className="absolute inset-0 bg-base -z-10" />
+                        {/* Background Layer with Floating Bubbles */}
+                        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+                            <div className="absolute inset-0 bg-bg-primary/90 backdrop-blur-3xl z-10" /> {/* Subtle overlay to soften */}
 
-                        <div className="flex justify-between items-center p-6 md:p-12 border-b border-border">
-                            <span className="text-xl font-serif font-black tracking-tighter text-main flex items-center gap-1">
-                                <span className="text-sm font-medium tracking-normal opacity-80">The</span>
-                                WISDOMIA
-                            </span>
-                            <button
-                                onClick={() => setIsMenuOpen(false)}
-                                className="p-2 hover:bg-main/5 rounded-full transition-colors text-main"
-                            >
-                                <X className="w-8 h-8" />
-                            </button>
+                            {/* Bubble 1 */}
+                            <motion.div
+                                animate={{
+                                    x: [0, 50, 0],
+                                    y: [0, -30, 0],
+                                    scale: [1, 1.1, 1]
+                                }}
+                                transition={{
+                                    duration: 15,
+                                    repeat: Infinity,
+                                    ease: "linear"
+                                }}
+                                className="absolute -top-20 -left-20 w-80 h-80 bg-purple-500/30 rounded-full filter blur-3xl"
+                            />
+
+                            {/* Bubble 2 */}
+                            <motion.div
+                                animate={{
+                                    x: [0, -50, 0],
+                                    y: [0, 40, 0],
+                                    scale: [1, 1.05, 1]
+                                }}
+                                transition={{
+                                    duration: 18,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                    delay: 2
+                                }}
+                                className="absolute top-1/2 -right-20 w-80 h-80 bg-indigo-500/30 rounded-full filter blur-3xl"
+                            />
+
+                            {/* Bubble 3 */}
+                            <motion.div
+                                animate={{
+                                    x: [0, 30, 0],
+                                    y: [0, 30, 0],
+                                    scale: [1, 1.1, 1]
+                                }}
+                                transition={{
+                                    duration: 20,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                    delay: 4
+                                }}
+                                className="absolute -bottom-40 left-1/3 w-64 h-64 bg-pink-500/30 rounded-full filter blur-3xl"
+                            />
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 md:p-8 xl:p-12 flex flex-col md:flex-row gap-8 md:gap-12 xl:gap-24">
-                            {/* Navigation Links */}
-                            <div className="flex flex-col gap-4 md:gap-6">
-                                <span className="text-xs font-bold uppercase tracking-widest text-muted mb-2 md:mb-4">Navigation</span>
-                                {[
-                                    { name: "Home", href: "/" },
-                                    { name: "Stories", href: "/stories" },
-                                    { name: "Topics", href: "/topics" },
-                                    { name: "Pricing", href: "/pricing" },
-                                    { name: "About Us", href: "/about" },
-                                    { name: "Contact", href: "/contact" },
-                                ].map((item) => (
+                        {/* Content Wrapper - Scrollable */}
+                        <div className="flex-1 overflow-y-auto relative z-20">
+
+
+                            {/* Top Bar: Close (Left) | Sign In, Subscribe (Right) */}
+                            <div className="flex justify-between items-center px-4 py-4 border-b border-border">
+                                <button
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="text-text-secondary hover:text-text-primary transition-colors"
+                                >
+                                    <X className="w-8 h-8 font-light" />
+                                </button>
+
+                                <div className="flex items-center gap-6">
                                     <Link
-                                        key={item.name}
-                                        href={item.href}
+                                        href="/signin"
                                         onClick={() => setIsMenuOpen(false)}
-                                        className="text-3xl md:text-5xl xl:text-6xl font-serif font-medium text-main hover:italic transition-all duration-300 w-fit"
+                                        className="text-base font-sans text-text-primary hover:text-accent transition-colors"
                                     >
-                                        {item.name}
+                                        Sign In
                                     </Link>
-                                ))}
-                            </div>
-
-                            {/* Featured / Secondary */}
-                            <div className="flex flex-col gap-4 md:gap-6 pt-4 md:pt-10 xl:pt-14">
-                                <span className="text-xs font-bold uppercase tracking-widest text-muted mb-2 md:mb-4">Featured Topics</span>
-                                {[
-                                    { name: "Technology & AI", slug: "technology-ai" },
-                                    { name: "Design Culture", slug: "design-culture" },
-                                    { name: "Minimalism", slug: "minimalism" },
-                                    { name: "Future Tech", slug: "future-tech" },
-                                    { name: "Psychology", slug: "psychology" },
-                                ].map(topic => (
-                                    <Link key={topic.slug} href={`/topics/${topic.slug}`} onClick={() => setIsMenuOpen(false)} className="text-base md:text-lg xl:text-xl font-sans font-medium text-secondary hover:text-main transition-colors">
-                                        {topic.name}
+                                    <Link
+                                        href="/subscribe"
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-base font-sans text-accent font-medium hover:opacity-70"
+                                    >
+                                        Subscribe
                                     </Link>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="p-6 md:p-8 xl:p-12 border-t border-border flex justify-between items-center text-main">
-                            <div className="flex gap-6">
-                                <a href="#" className="opacity-50 hover:opacity-100 transition-opacity">Twitter</a>
-                                <a href="#" className="opacity-50 hover:opacity-100 transition-opacity">Instagram</a>
-                                <a href="#" className="opacity-50 hover:opacity-100 transition-opacity">LinkedIn</a>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-1 text-main">
-                                    <Globe className="w-4 h-4 opacity-60" />
-                                    <button className="px-2 py-1 text-xs font-bold uppercase tracking-wider hover:bg-main/10 rounded transition-colors">EN</button>
-                                    <span className="opacity-40">|</span>
-                                    <button className="px-2 py-1 text-xs font-bold hover:bg-main/10 rounded transition-colors">বাংলা</button>
-                                </div>
-                                <div className="hidden md:block">
-                                    <ThemeToggle />
                                 </div>
                             </div>
+
+                            {/* Secondary Bar: Search (Left) | Quick Links (Right) */}
+                            <div className="flex justify-between items-center px-4 py-4 border-b border-border">
+                                <div className="text-text-primary">
+                                    <Search className="w-6 h-6" />
+                                </div>
+
+                                <div className="flex items-center gap-4 text-sm font-sans text-text-secondary">
+                                    <Link href="/popular" onClick={() => setIsMenuOpen(false)} className="hover:text-text-primary">Popular</Link>
+                                    <Link href="/latest" onClick={() => setIsMenuOpen(false)} className="hover:text-text-primary">Latest</Link>
+                                    <Link href="/newsletters" onClick={() => setIsMenuOpen(false)} className="hover:text-text-primary">Newsletters</Link>
+                                </div>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="p-6">
+                                <div className="mb-6">
+                                    <span className="text-accent font-bold uppercase tracking-wider text-sm">
+                                        SECTIONS
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                                    {/* Combining standard nav and topics for the 2-col layout */}
+                                    {[
+                                        { name: "Politics", href: "/topics/politics" },
+                                        { name: "Ideas", href: "/topics/ideas" },
+                                        { name: "Fiction", href: "/topics/fiction" },
+                                        { name: "Technology", href: "/topics/technology" },
+                                        { name: "Science", href: "/topics/science" },
+                                        { name: "Photo", href: "/topics/photo" },
+                                        { name: "Economy", href: "/topics/economy" },
+                                        { name: "Culture", href: "/topics/culture" },
+                                        { name: "Planet", href: "/topics/planet" },
+                                        { name: "Global", href: "/topics/global" },
+                                        { name: "Books", href: "/topics/books" },
+                                        { name: "AI Watchdog", href: "/topics/ai-watchdog" },
+                                        { name: "Health", href: "/topics/health" },
+                                        { name: "Education", href: "/topics/education" },
+                                        { name: "Projects", href: "/projects" },
+                                        { name: "Features", href: "/features" },
+                                        { name: "Family", href: "/topics/family" },
+                                        { name: "Events", href: "/events" },
+                                        // Fallbacks to existing routes if needed, but trying to match density
+                                        { name: "Home", href: "/" },
+                                        { name: "About", href: "/about" },
+                                    ].map((item) => (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="text-lg font-sans text-text-primary hover:text-accent transition-colors"
+                                        >
+                                            {item.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Footer Utility (Optional, kept at bottom) */}
+                            <div className="mt-auto p-6 border-t border-border flex justify-between items-center text-text-muted">
+                                <ThemeToggle />
+                                <div className="text-xs">
+                                    &copy; {new Date().getFullYear()} Wisdomia
+                                </div>
+                            </div>
+
                         </div>
                     </motion.div>
                 )}

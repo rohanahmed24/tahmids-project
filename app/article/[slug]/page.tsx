@@ -8,6 +8,7 @@ import { getPostBySlug, getAllPosts } from "@/lib/posts";
 import { notFound } from "next/navigation";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
 import { ArticleVideoPlayer } from "@/components/ArticleVideoPlayer";
+import { GenerateVideoButton } from "@/components/GenerateVideoButton";
 
 export async function generateStaticParams() {
     const posts = await getAllPosts();
@@ -49,17 +50,35 @@ export default async function ArticlePage({
 
                 <div className="max-w-[1440px] mx-auto px-6 md:px-16 2xl:px-32 mt-12 md:mt-20 flex flex-col lg:flex-row gap-12 2xl:gap-24 relative">
                     <div className="flex-1 min-w-0"> {/* Main Content */}
-                        {/* Video Player (Watch Mode) */}
-                        {isWatchMode && post.videoUrl && (
+                        {/* Video Player (Watch Mode) - or Generator if missing */}
+                        {isWatchMode && (
                             <div className="mb-8">
-                                <ArticleVideoPlayer videoUrl={post.videoUrl} title={post.title} />
+                                {post.videoUrl ? (
+                                    <ArticleVideoPlayer videoUrl={post.videoUrl} title={post.title} />
+                                ) : (
+                                    <div className="aspect-video flex flex-col items-center justify-center bg-bg-secondary rounded-xl border border-border-subtle gap-4 p-8 text-center">
+                                        <div className="space-y-1">
+                                            <h3 className="text-lg font-semibold text-text-primary">No video available</h3>
+                                            <p className="text-sm text-text-tertiary">Generate an AI-powered video summary for this article.</p>
+                                        </div>
+                                        <GenerateVideoButton slug={post.slug} />
+                                    </div>
+                                )}
                             </div>
                         )}
 
                         {/* Audio Player (Default/Listen Mode) */}
                         {!isWatchMode && (
-                            <div className="mb-8">
+                            <div className="mb-8 space-y-4">
                                 <ArticleAudioPlayer title={post.title} content={post.content} />
+                                {!post.videoUrl && (
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-bg-secondary rounded-xl border border-border-subtle">
+                                        <div className="text-sm text-text-secondary">
+                                            <span className="font-medium text-text-primary">New:</span> Watch this article as a video explanation.
+                                        </div>
+                                        <GenerateVideoButton slug={post.slug} />
+                                    </div>
+                                )}
                             </div>
                         )}
 

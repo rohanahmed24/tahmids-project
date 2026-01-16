@@ -11,25 +11,12 @@ export async function updateSettings(formData: FormData) {
 
     try {
         // Extract settings from form data
-        const siteName = formData.get("siteName") as string;
-        const siteTagline = formData.get("siteTagline") as string;
-        const siteDescription = formData.get("siteDescription") as string;
-        const defaultLanguage = formData.get("defaultLanguage") as string;
-        const timezone = formData.get("timezone") as string;
-        const theme = formData.get("theme") as string;
-        const primaryColor = formData.get("primaryColor") as string;
+        // Extract settings from form data
+        // Unused variables removed for mock implementation
+        console.log("Updating settings:", Object.fromEntries(formData));
 
         // In a real implementation, you would save these to a settings table
         // For now, we'll just simulate success
-        console.log("Settings updated:", {
-            siteName,
-            siteTagline,
-            siteDescription,
-            defaultLanguage,
-            timezone,
-            theme,
-            primaryColor
-        });
 
         revalidatePath("/admin/settings");
         return { success: true };

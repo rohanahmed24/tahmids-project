@@ -40,6 +40,7 @@ interface EditorProps {
         topic_slug?: string;
         accent_color?: string;
         featured?: boolean;
+        published?: boolean;
     };
     action: (formData: FormData) => Promise<void>;
 }
@@ -51,6 +52,8 @@ export default function Editor({ initialData, action }: EditorProps) {
     const [content, setContent] = useState(initialData?.content || "");
     const [coverImage, setCoverImage] = useState(initialData?.coverImage || "");
     const [category, setCategory] = useState(initialData?.category || "Technology");
+    const [topicSlug, setTopicSlug] = useState(initialData?.topic_slug || "");
+    const [published, setPublished] = useState(initialData?.published ?? true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.coverImage || null);
 
@@ -235,7 +238,7 @@ export default function Editor({ initialData, action }: EditorProps) {
                 text = turndownService.turndown(html);
 
                 if (result.messages.length > 0) {
-                    console.log("Mammoth messages:", result.messages);
+
                 }
             } else {
                 // markdown or text
@@ -283,8 +286,17 @@ export default function Editor({ initialData, action }: EditorProps) {
         }
     };
 
+    // Add published status to form data before submitting
+    const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        formData.set("published", String(published));
+        // Ensure other states are set if not controlled inputs (they are mostly named inputs)
+        handleSubmit(formData);
+    };
+
     return (
-        <form action={handleSubmit} className={`transition-all duration-500 ${isFocusMode ? 'fixed inset-0 z-[100] bg-gray-950 p-8 overflow-y-auto' : 'space-y-8'}`}>
+        <form onSubmit={handleFormSubmit} className={`transition-all duration-500 ${isFocusMode ? 'fixed inset-0 z-[100] bg-gray-950 p-8 overflow-y-auto' : 'space-y-8'}`}>
             {/* Header Actions */}
             <div className={`flex items-center justify-between sticky top-4 z-50 bg-gray-950/80 backdrop-blur-md p-4 rounded-2xl border border-gray-800 shadow-xl transition-transform ${isFocusMode ? 'max-w-4xl mx-auto w-full' : ''}`}>
                 <div className="flex items-center gap-4">
@@ -328,12 +340,29 @@ export default function Editor({ initialData, action }: EditorProps) {
                             <Eye className="w-4 h-4" /> Preview
                         </button>
                     </div>
+                    <div className="flex bg-gray-900 rounded-lg p-1 border border-gray-800">
+                        <button
+                            type="button"
+                            onClick={() => setPublished(false)}
+                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!published ? "bg-yellow-500/20 text-yellow-400" : "text-gray-400 hover:text-gray-200"}`}
+                        >
+                            Draft
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setPublished(true)}
+                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${published ? "bg-green-500/20 text-green-400" : "text-gray-400 hover:text-gray-200"}`}
+                        >
+                            Publish
+                        </button>
+                    </div>
+
                     <button
                         type="submit"
                         disabled={isSubmitting}
                         className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-red-500 to-purple-600 text-white font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
                     >
-                        {isSubmitting ? "Saving..." : <><Save className="w-4 h-4" /> Save</>}
+                        {isSubmitting ? "Saving..." : <><Save className="w-4 h-4" /> {published ? "Publish" : "Save Draft"}</>}
                     </button>
                 </div>
             </div>
@@ -475,8 +504,23 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     <option value="Politics">Politics</option>
                                     <option value="Mystery">Mystery</option>
                                     <option value="Crime">Crime</option>
+                                    <option value="Politics">Politics</option>
+                                    <option value="Mystery">Mystery</option>
+                                    <option value="Crime">Crime</option>
                                     <option value="News">News</option>
                                 </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">Topic Slug</label>
+                                <input
+                                    type="text"
+                                    name="topic_slug"
+                                    value={topicSlug}
+                                    onChange={(e) => setTopicSlug(e.target.value)}
+                                    placeholder="e.g. artificial-intelligence"
+                                    className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg focus:border-purple-500 focus:outline-none transition-colors text-sm"
+                                />
                             </div>
 
                             <div className="space-y-2">

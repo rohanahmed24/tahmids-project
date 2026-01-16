@@ -55,7 +55,7 @@ export function ArticleGrid({ articles = [] }: ArticleGridProps) {
                                         src={article.coverImage || '/placeholder.jpg'}
                                         alt={article.title}
                                         fill
-                                        sizes="90vw"
+                                        sizes="(max-width: 768px) 85vw, 400px"
                                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                                     />
                                 </div>
@@ -82,8 +82,8 @@ export function ArticleGrid({ articles = [] }: ArticleGridProps) {
 
                 {/* Desktop: 2 Horizontal Sliders */}
                 <div className="hidden md:block max-w-[1600px] mx-auto space-y-16">
-                    <HorizontalSlider articles={topRowArticles} direction="left" />
-                    <HorizontalSlider articles={bottomRowArticles} direction="right" />
+                    <HorizontalSlider articles={topRowArticles} />
+                    <HorizontalSlider articles={bottomRowArticles} />
                 </div>
             </div>
         </section>

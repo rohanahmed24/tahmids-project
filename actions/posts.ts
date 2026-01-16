@@ -70,7 +70,7 @@ export async function createPost(formData: FormData) {
         await db.query(
             `INSERT INTO posts (
                 slug, title, subtitle, date, author, category, content, excerpt,
-                cover_image, video_url, topic_slug, accent_color, featured, published
+                coverImage, videoUrl, topic_slug, accent_color, featured, published
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 slug, title, subtitle, date, author, category, content, excerpt,
@@ -140,12 +140,12 @@ export async function updatePost(originalSlug: string, formData: FormData) {
         await db.query(
             `UPDATE posts SET 
                 title = ?, subtitle = ?, category = ?, content = ?, excerpt = ?,
-                cover_image = ?, video_url = ?, topic_slug = ?, accent_color = ?, 
+                coverImage = ?, videoUrl = ?, topic_slug = ?, accent_color = ?, 
                 featured = ?, published = ?
              WHERE slug = ?`,
             [
                 title, subtitle, category, content, excerpt,
-                coverImage, videoUrl, topic_slug, accent_color, 
+                coverImage, videoUrl, topic_slug, accent_color,
                 featured, published, originalSlug
             ]
         );

@@ -28,7 +28,7 @@ export function ArticleCard({ article, width }: ArticleCardProps) {
                     src={article.coverImage || '/placeholder.jpg'}
                     alt={article.title}
                     fill
-                    sizes="300px"
+                    sizes={width ? `${width}px` : "(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 350px"}
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
             </div>

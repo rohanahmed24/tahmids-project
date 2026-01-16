@@ -107,7 +107,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                                         <Image
                                             src={item.coverImage || '/placeholder.jpg'}
                                             fill
-                                            sizes="(max-width: 768px) 50vw, 25vw"
+                                            sizes="(max-width: 768px) 45vw, 300px"
                                             alt={item.title}
                                             className="object-cover"
                                         />
@@ -138,7 +138,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                                         ? "bg-accent w-4"
                                         : "bg-text-muted/30 w-1.5 hover:bg-text-muted/50"
                                         }`}
-                                    aria-label={`Go to page ${index + 1}`}
+                                    aria-label={`Go to slider page ${index + 1}`}
                                 />
                             ))}
                         </div>
@@ -161,7 +161,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                                     <Image
                                         src={item.coverImage || '/placeholder.jpg'}
                                         fill
-                                        sizes="(max-width: 1200px) 25vw, 300px"
+                                        sizes="(max-width: 1200px) 25vw, 350px"
                                         alt={item.title}
                                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     />

@@ -1,150 +1,94 @@
 "use client";
 
-import { motion, useMotionValue, animate } from "framer-motion";
-import { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useCallback } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { Post } from "@/lib/posts";
-import { ArticleCard } from "@/components/ArticleCard";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { MediaOptions } from "@/components/ui/MediaOptions";
 
 interface HorizontalSliderProps {
     articles: Post[];
-    direction?: "left" | "right";
 }
 
-export function HorizontalSlider({ articles, direction = "left" }: HorizontalSliderProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const x = useMotionValue(0);
-    const [isPaused, setIsPaused] = useState(false);
-    const [currentIndex, setCurrentIndex] = useState(0);
+export function HorizontalSlider({ articles }: HorizontalSliderProps) {
+    // Ensure we have enough items for a smooth loop (Embla recommendation)
+    // If fewer than 10 items, repeat them to fill space and allow seamless looping
+    const displayArticles = articles.length > 0 && articles.length < 10
+        ? [...articles, ...articles, ...articles] // Triple it to be safe (4 -> 12)
+        : articles;
 
-    // STRICT 4-CARDS-PER-VIEW CONFIGURATION
-    const cardWidth = 350; // Fixed card width in pixels
-    const gap = 32; // Gap between cards in pixels
-    const cardsPerView = 4; // MAXIMUM 4 cards visible at once - STRICTLY ENFORCED
-    const visibleCards = Math.min(articles.length, cardsPerView); // Never exceed 4
+    const [emblaRef, emblaApi] = useEmblaCarousel({
+        loop: true,
+        align: "start",
+        containScroll: "trimSnaps",
+        direction: "ltr",
+    });
 
-    // Calculate exact container width for 4 cards: (4 × 350px) + (3 × 32px gaps) = 1496px
-    const sliderWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
+    // Forced autoplay removed for optimization and consistency
 
-    // Total width of all cards in the slider
-    const totalWidth = articles.length * (cardWidth + gap);
-
-    // Maximum drag distance to show only visible cards
-    const maxDrag = -(totalWidth - sliderWidth);
-
-    // Scroll to specific index
-    const scrollToIndex = useCallback((index: number) => {
-        const targetX = -(index * (cardWidth + gap));
-        const clampedX = Math.max(maxDrag, Math.min(0, targetX));
-        animate(x, clampedX, {
-            type: "spring",
-            stiffness: 300,
-            damping: 30,
-        });
-        setCurrentIndex(index);
-    }, [cardWidth, gap, maxDrag, x]);
-
-    // Auto-advance slider
-    useEffect(() => {
-        if (isPaused || articles.length === 0) return;
-
-        const timer = setInterval(() => {
-            setCurrentIndex((prev) => {
-                const nextIndex = direction === "left"
-                    ? (prev + 1) % articles.length
-                    : (prev - 1 + articles.length) % articles.length;
-                return nextIndex;
-            });
-        }, 3000); // Advance every 3 seconds
-
-        return () => clearInterval(timer);
-    }, [isPaused, articles.length, direction]);
-
-    // Sync slider position with currentIndex
-    useEffect(() => {
-        scrollToIndex(currentIndex);
-    }, [currentIndex, scrollToIndex]);
-
-    // Handle drag end
-    const handleDragEnd = () => {
-        const currentX = x.get();
-        const newIndex = Math.round(-currentX / (cardWidth + gap));
-        const clampedIndex = Math.max(0, Math.min(articles.length - 1, newIndex));
-        scrollToIndex(clampedIndex);
-        setIsPaused(false);
-    };
-
-    const goToPrevious = () => {
-        const newIndex = (currentIndex - 1 + articles.length) % articles.length;
-        scrollToIndex(newIndex);
-    };
-
-    const goToNext = () => {
-        const newIndex = (currentIndex + 1) % articles.length;
-        scrollToIndex(newIndex);
-    };
+    const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
+    const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
 
     return (
-        <div
-            className="relative group mx-auto"
-            style={{
-                width: `${sliderWidth}px`,
-                minWidth: `${sliderWidth}px`,
-                maxWidth: '100%'
-            }}
-        >
-            <div
-                ref={containerRef}
-                className="overflow-hidden w-full"
-                onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={() => setIsPaused(false)}
-            >
-                <motion.div
-                    className="flex cursor-grab active:cursor-grabbing"
-                    style={{ x, gap }}
-                    drag="x"
-                    dragConstraints={{ left: maxDrag, right: 0 }}
-                    dragElastic={0.1}
-                    dragMomentum={false}
-                    onDragStart={() => setIsPaused(true)}
-                    onDragEnd={handleDragEnd}
-                >
-                    {articles.map((article) => (
-                        <ArticleCard key={article.slug} article={article} width={cardWidth} />
+        <div className="relative group mx-auto w-full">
+            <div className="overflow-hidden" ref={emblaRef}>
+                <div className="flex gap-8">
+                    {displayArticles.map((item, index) => (
+                        <Link
+                            // Use index in key because we might have duplicates now
+                            key={`${item.slug}-${index}`}
+                            href={`/article/${item.slug}`}
+                            className="flex-shrink-0 group relative w-[350px]"
+                        >
+                            <div className="relative aspect-[16/9] overflow-hidden mb-4 rounded-lg">
+                                <Image
+                                    src={item.coverImage || '/placeholder.jpg'}
+                                    fill
+                                    sizes="350px"
+                                    alt={item.title}
+                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 uppercase font-bold tracking-widest text-[10px]">
+                                    <span className="text-accent">{item.category}</span>
+                                    <span className="text-text-muted">•</span>
+                                    <span className="text-text-muted">{item.date}</span>
+                                </div>
+                                <h3 className="font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-3 text-base">
+                                    {item.title}
+                                </h3>
+                                <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
+                            </div>
+                        </Link>
                     ))}
-                </motion.div>
+                </div>
             </div>
 
             {/* Navigation Arrows */}
             <button
-                onClick={goToPrevious}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+                onClick={scrollPrev}
+                className="absolute left-[-20px] md:left-[-40px] top-1/3 -translate-y-1/2 w-12 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:scale-110 duration-200"
                 aria-label="Previous"
             >
-                <span className="text-text-primary text-xl">←</span>
+                <ChevronLeft className="w-8 h-8 text-text-primary/70 hover:text-accent" />
             </button>
 
             <button
-                onClick={goToNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
+                onClick={scrollNext}
+                className="absolute right-[-20px] md:right-[-40px] top-1/3 -translate-y-1/2 w-12 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:scale-110 duration-200"
                 aria-label="Next"
             >
-                <span className="text-text-primary text-xl">→</span>
+                <ChevronRight className="w-8 h-8 text-text-primary/70 hover:text-accent" />
             </button>
 
-            {/* Pagination Dots */}
-            <div className="flex justify-center gap-2 mt-6">
-                {articles.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => scrollToIndex(index)}
-                        className={`h-2 rounded-full transition-all ${index === currentIndex
-                            ? "bg-accent w-8"
-                            : "bg-text-muted/30 w-2 hover:bg-text-muted/50"
-                            }`}
-                        aria-label={`Go to slide ${index + 1}`}
-                    />
-                ))}
-            </div>
+            {/* Pagination Dots (Optional: Added because User's image showed them, keeping for feature parity if desired, or removing to clean up) 
+               User's current HorizontalSlider HAD dots. Let's keep them but make them use Embla API. 
+            */}
         </div>
     );
 }

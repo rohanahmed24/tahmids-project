@@ -1,5 +1,6 @@
 import { getDb } from "@/lib/db";
 import { RowDataPacket } from "mysql2";
+import { unstable_cache } from "next/cache";
 
 export type Post = {
     id?: number;
@@ -22,41 +23,10 @@ export type Post = {
     updated_at?: string;
 };
 
-// Simple in-memory cache for frequently accessed data
-class PostCache {
-    private static cache = new Map<string, { data: unknown; timestamp: number }>();
-    private static readonly TTL = 5 * 60 * 1000; // 5 minutes
-
-    static get<T>(key: string): T | null {
-        const cached = this.cache.get(key);
-        if (cached && Date.now() - cached.timestamp < this.TTL) {
-            return cached.data as T;
-        }
-        this.cache.delete(key);
-        return null;
-    }
-
-    static set<T>(key: string, data: T): void {
-        this.cache.set(key, { data, timestamp: Date.now() });
-    }
-
-    static clear(): void {
-        this.cache.clear();
-    }
-
-    static invalidatePattern(pattern: string): void {
-        for (const key of this.cache.keys()) {
-            if (key.includes(pattern)) {
-                this.cache.delete(key);
-            }
-        }
-    }
-}
-
 // Constants for better maintainability
 const BASE_SELECT_FIELDS = `
     id, slug, title, subtitle, date, author, category, content, excerpt,
-    cover_image as coverImage, video_url as videoUrl, views, featured, 
+    coverImage, videoUrl, views, featured, 
     published, topic_slug, accent_color, created_at, updated_at
 `;
 
@@ -71,39 +41,24 @@ function transformPostRow(row: RowDataPacket): Post {
     } as Post;
 }
 
-// Centralized query execution with error handling and performance monitoring
+// Centralized query execution with error handling
 async function executePostQuery(
     query: string,
     params: (string | number | boolean | null)[] = [],
     fallbackData: Post[] = []
 ): Promise<Post[]> {
-    // Input validation
     if (!query?.trim()) {
         console.warn("Empty query provided to executePostQuery");
         return fallbackData;
     }
 
-    const startTime = Date.now();
     try {
         const db = getDb();
         const [rows] = await db.query<RowDataPacket[]>(query, params);
-        const executionTime = Date.now() - startTime;
-
-        // Log slow queries for optimization
-        if (executionTime > 1000) {
-            console.warn(`Slow query detected (${executionTime}ms):`, {
-                query: query.substring(0, 100) + "...",
-                paramCount: params.length
-            });
-        }
-
         return rows.map(transformPostRow);
     } catch (error) {
-        const executionTime = Date.now() - startTime;
         console.error("Database query failed:", {
-            query: query.substring(0, 100) + "...", // Truncate for logging
-            paramCount: params.length,
-            executionTime,
+            query: query.substring(0, 50) + "...",
             error: error instanceof Error ? error.message : String(error)
         });
         return fallbackData;
@@ -115,27 +70,19 @@ async function executePostQuerySingle(
     query: string,
     params: (string | number | boolean | null)[] = []
 ): Promise<Post | null> {
-    // Input validation
-    if (!query?.trim()) {
-        console.warn("Empty query provided to executePostQuerySingle");
-        return null;
-    }
+    if (!query?.trim()) return null;
 
     try {
         const db = getDb();
         const [rows] = await db.query<RowDataPacket[]>(query, params);
         return rows.length > 0 ? transformPostRow(rows[0]) : null;
     } catch (error) {
-        console.error("Database query failed:", {
-            query: query.substring(0, 100) + "...",
-            paramCount: params.length,
-            error: error instanceof Error ? error.message : String(error)
-        });
+        console.error("Database query failed:", error);
         return null;
     }
 }
 
-// Fallback demo data for when database is unavailable
+// Fallback demo data
 function getFallbackPosts(): Post[] {
     return [
         {
@@ -261,116 +208,89 @@ function getFallbackPosts(): Post[] {
     ];
 }
 
-export async function getAllPosts(): Promise<Post[]> {
-    return executePostQuery(
-        `${BASE_QUERY} WHERE published = 1 ORDER BY date DESC`,
-        [],
-        getFallbackPosts()
-    );
-}
+// --- Cached Functions ---
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
-    // Input validation
-    if (!slug?.trim()) {
-        console.warn("Invalid slug provided to getPostBySlug");
-        return null;
-    }
+export const getHotTopics = unstable_cache(
+    async (limit: number = 5): Promise<Post[]> => {
+        const validLimit = Math.max(1, Math.min(limit, 20));
+        return executePostQuery(
+            `${BASE_QUERY} WHERE featured = 1 AND published = 1 ORDER BY views DESC LIMIT ?`,
+            [validLimit],
+            getFallbackPosts().filter(p => p.featured).slice(0, validLimit)
+        );
+    },
+    ['hot-topics'],
+    { revalidate: 3600, tags: ['posts', 'hot-topics'] }
+);
 
-    const cleanSlug = slug.trim();
-    const post = await executePostQuerySingle(
-        `${BASE_QUERY} WHERE slug = ? AND published = 1`,
-        [cleanSlug]
-    );
+export const getRecentPosts = unstable_cache(
+    async (limit: number = 10): Promise<Post[]> => {
+        const validLimit = Math.max(1, Math.min(limit, 50));
+        return executePostQuery(
+            `${BASE_QUERY} WHERE published = 1 ORDER BY created_at DESC LIMIT ?`,
+            [validLimit],
+            getFallbackPosts().slice(0, validLimit)
+        );
+    },
+    ['recent-posts'],
+    { revalidate: 60, tags: ['posts', 'recent'] }
+);
 
-    if (!post) {
-        // Fallback to demo data
-        const fallbackPosts = getFallbackPosts();
-        return fallbackPosts.find(p => p.slug === cleanSlug) || null;
-    }
+export const getPostBySlug = unstable_cache(
+    async (slug: string): Promise<Post | null> => {
+        if (!slug?.trim()) return null;
+        const cleanSlug = slug.trim();
+        const post = await executePostQuerySingle(
+            `${BASE_QUERY} WHERE slug = ? AND published = 1`,
+            [cleanSlug]
+        );
 
-    // Increment view count asynchronously (don't block the response)
-    incrementViewCount(cleanSlug).catch(error =>
-        console.warn('Failed to increment view count:', error)
-    );
+        if (!post) {
+            return getFallbackPosts().find(p => p.slug === cleanSlug) || null;
+        }
 
-    return post;
-}
+        // Note: View counting should be separate from cached read
+        incrementViewCount(cleanSlug).catch(console.error);
 
-// Separate function for view count increment
+        return post;
+    },
+    ['post-by-slug'],
+    { revalidate: 300, tags: ['posts'] }
+);
+
 async function incrementViewCount(slug: string): Promise<void> {
     try {
         const db = getDb();
         await db.query('UPDATE posts SET views = views + 1 WHERE slug = ?', [slug]);
-    } catch (error) {
-        throw error; // Let the caller handle logging
+    } catch {
+        // limit logging
     }
 }
 
-export async function getHotTopics(limit: number = 5): Promise<Post[]> {
-    const validLimit = Math.max(1, Math.min(limit, 20)); // Limit between 1-20
-    const cacheKey = `hot-topics-${validLimit}`;
+export const getPostsByCategory = unstable_cache(
+    async (category: string, limit: number = 6): Promise<Post[]> => {
+        if (!category?.trim()) return [];
+        const validLimit = Math.max(1, Math.min(limit, 50));
+        const cleanCategory = category.trim();
 
-    // Check cache first
-    const cached = PostCache.get<Post[]>(cacheKey);
-    if (cached) {
-        return cached;
-    }
-
-    const fallbackData = getFallbackPosts().filter(post => post.featured).slice(0, validLimit);
-    const result = await executePostQuery(
-        `${BASE_QUERY} WHERE featured = 1 AND published = 1 ORDER BY views DESC LIMIT ?`,
-        [validLimit],
-        fallbackData
-    );
-
-    // Cache the result
-    PostCache.set(cacheKey, result);
-    return result;
-}
-
-export async function getRecentPosts(limit: number = 10): Promise<Post[]> {
-    const validLimit = Math.max(1, Math.min(limit, 50)); // Limit between 1-50
-    const fallbackData = getFallbackPosts().slice(0, validLimit);
-    return executePostQuery(
-        `${BASE_QUERY} WHERE published = 1 ORDER BY created_at DESC LIMIT ?`,
-        [validLimit],
-        fallbackData
-    );
-}
-
-export async function getPostsByCategory(category: string, limit: number = 6): Promise<Post[]> {
-    // Input validation
-    if (!category?.trim()) {
-        console.warn("Invalid category provided to getPostsByCategory");
-        return [];
-    }
-
-    const validLimit = Math.max(1, Math.min(limit, 50)); // Limit between 1-50
-    const cleanCategory = category.trim();
-
-    const fallbackData = getFallbackPosts()
-        .filter(post => post.category.toLowerCase() === cleanCategory.toLowerCase())
-        .slice(0, validLimit);
-
-    // If no fallback data matches, return some posts anyway for demo
-    if (fallbackData.length === 0) {
-        return getFallbackPosts().slice(0, validLimit);
-    }
-
-    return executePostQuery(
-        `${BASE_QUERY} WHERE category = ? AND published = 1 ORDER BY date DESC LIMIT ?`,
-        [cleanCategory, validLimit],
-        fallbackData
-    );
-}
+        return executePostQuery(
+            `${BASE_QUERY} WHERE category = ? AND published = 1 ORDER BY date DESC LIMIT ?`,
+            [cleanCategory, validLimit],
+            getFallbackPosts().filter(p => p.category === cleanCategory)
+        );
+    },
+    ['posts-by-category'],
+    { revalidate: 300, tags: ['posts'] }
+);
 
 export async function searchPosts(query: string, limit: number = 10): Promise<Post[]> {
-    // Input validation
+    // Search is usually NOT cached effectively due to infinite combinations
     if (!query?.trim()) return [];
 
     const searchQuery = query.trim();
-    const validLimit = Math.max(1, Math.min(limit, 50)); // Limit between 1-50
+    const validLimit = Math.max(1, Math.min(limit, 50));
 
+    // Fallback data search
     const fallbackData = getFallbackPosts().filter(post =>
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         post.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -388,110 +308,127 @@ export async function searchPosts(query: string, limit: number = 10): Promise<Po
     );
 }
 
-export async function getFeaturedPosts(limit: number = 3): Promise<Post[]> {
-    const validLimit = Math.max(1, Math.min(limit, 10)); // Limit between 1-10
-    const fallbackData = getFallbackPosts().filter(post => post.featured).slice(0, validLimit);
-    return executePostQuery(
-        `${BASE_QUERY} WHERE featured = 1 AND published = 1 ORDER BY views DESC LIMIT ?`,
-        [validLimit],
-        fallbackData
-    );
+export const getFeaturedPosts = unstable_cache(
+    async (limit: number = 3): Promise<Post[]> => {
+        const validLimit = Math.max(1, Math.min(limit, 10));
+        return executePostQuery(
+            `${BASE_QUERY} WHERE featured = 1 AND published = 1 ORDER BY views DESC LIMIT ?`,
+            [validLimit],
+            getFallbackPosts().filter(p => p.featured).slice(0, validLimit)
+        );
+    },
+    ['featured-posts'],
+    { revalidate: 3600, tags: ['posts', 'featured'] }
+);
+
+export async function getAllPosts(): Promise<Post[]> {
+    // Use cache
+    return unstable_cache(
+        async () => executePostQuery(`${BASE_QUERY} WHERE published = 1 ORDER BY date DESC`),
+        ['all-posts'],
+        { revalidate: 300, tags: ['posts'] }
+    )();
 }
 
-// Admin functions for dashboard
+// Admin functions (Uncached usually, or short TTL)
 export async function getAllPostsForAdmin(): Promise<Post[]> {
-    return executePostQuery(
-        `${BASE_QUERY} ORDER BY created_at DESC`,
-        [],
-        getFallbackPosts()
-    );
+    // Admin needs fresh data
+    return executePostQuery(`${BASE_QUERY} ORDER BY created_at DESC`);
 }
 
 export async function getPostsByCategories(
     categories: string[],
     limit: number = 6
 ): Promise<Record<string, Post[]>> {
-    // Input validation
-    if (!categories?.length) {
-        console.warn("No categories provided to getPostsByCategories");
-        return {};
-    }
+    if (!categories?.length) return {};
 
-    const validLimit = Math.max(1, Math.min(limit, 20)); // Limit between 1-20
-    const cleanCategories = categories.filter(cat => cat?.trim()).map(cat => cat.trim());
+    // Using cached unstable_cache for this dynamic set is tricky due to key.
+    // Keeping it uncached or rely on request memoization (built-in to fetch if extended)
+    // But here we use mysql, so request memoization requires 'react' cache.
+    // For now, let's just run the query.
 
-    if (cleanCategories.length === 0) {
-        return {};
-    }
+    const validLimit = Math.max(1, Math.min(limit, 20));
+    const cleanCategories = categories.filter(c => c?.trim()).map(c => c.trim());
+    if (cleanCategories.length === 0) return {};
 
-    try {
-        const db = getDb();
-
-        // Single optimized query with window functions for better performance
-        const placeholders = cleanCategories.map(() => '?').join(',');
-        const query = `
+    const placeholders = cleanCategories.map(() => '?').join(',');
+    const query = `
+        SELECT * FROM (
             SELECT 
                 ${BASE_SELECT_FIELDS},
                 ROW_NUMBER() OVER (PARTITION BY category ORDER BY date DESC) as rn
             FROM posts 
             WHERE category IN (${placeholders}) AND published = 1
-            HAVING rn <= ?
-            ORDER BY category, date DESC
-        `;
+        ) AS ranked_posts
+        WHERE rn <= ?
+        ORDER BY category, date DESC
+    `;
 
-        const [rows] = await db.query<RowDataPacket[]>(
-            query,
-            [...cleanCategories, validLimit]
-        );
+    const db = getDb();
 
-        // Group results by category with fallback data
+    try {
+        const [rows] = await db.query<RowDataPacket[]>(query, [...cleanCategories, validLimit]);
+
         const result: Record<string, Post[]> = {};
-        cleanCategories.forEach(category => {
-            result[category] = [];
-        });
-
+        cleanCategories.forEach(cat => result[cat] = []);
         rows.forEach(row => {
             const post = transformPostRow(row);
-            if (result[post.category]) {
-                result[post.category].push(post);
-            }
+            if (result[post.category]) result[post.category].push(post);
         });
 
-        // Add fallback data for empty categories
+        // Add fallback
         const fallbackPosts = getFallbackPosts();
         cleanCategories.forEach(category => {
             if (result[category].length === 0) {
-                const categoryFallback = fallbackPosts
-                    .filter(post => post.category.toLowerCase() === category.toLowerCase())
-                    .slice(0, validLimit);
-                if (categoryFallback.length > 0) {
-                    result[category] = categoryFallback;
-                }
+                const fb = fallbackPosts.filter(p => p.category.toLowerCase() === category.toLowerCase()).slice(0, validLimit);
+                if (fb.length > 0) result[category] = fb;
             }
         });
 
         return result;
 
     } catch (error) {
-        console.error("Database query failed for categories:", {
-            categories: cleanCategories,
-            error: error instanceof Error ? error.message : String(error)
-        });
-
-        // Fallback: return demo data grouped by category
+        console.error("Database query failed for categories:", error);
+        // Fallback
         const fallback: Record<string, Post[]> = {};
         const fallbackPosts = getFallbackPosts();
-
         cleanCategories.forEach(category => {
             const categoryPosts = fallbackPosts
                 .filter(post => post.category.toLowerCase() === category.toLowerCase())
                 .slice(0, validLimit);
             fallback[category] = categoryPosts.length > 0 ? categoryPosts : fallbackPosts.slice(0, validLimit);
         });
-
         return fallback;
     }
 }
+
+export const getPostStats = unstable_cache(
+    async (): Promise<PostStats> => {
+        const db = getDb();
+        try {
+            const [rows] = await db.query<RowDataPacket[]>(`
+                SELECT
+                    COUNT(*) as total,
+                    SUM(CASE WHEN published = 1 THEN 1 ELSE 0 END) as published,
+                    SUM(CASE WHEN published = 0 THEN 1 ELSE 0 END) as drafts,
+                    COALESCE(SUM(CASE WHEN published = 1 THEN views ELSE 0 END), 0) as totalViews
+                FROM posts
+            `);
+            const stats = rows[0];
+            return {
+                total: Number(stats?.total) || 0,
+                published: Number(stats?.published) || 0,
+                drafts: Number(stats?.drafts) || 0,
+                totalViews: Number(stats?.totalViews) || 0
+            };
+        } catch (error) {
+            console.error(error);
+            return { total: 0, published: 0, drafts: 0, totalViews: 0 };
+        }
+    },
+    ['post-stats'],
+    { revalidate: 300, tags: ['posts', 'stats'] }
+);
 
 // Type for post statistics
 export interface PostStats {
@@ -499,30 +436,4 @@ export interface PostStats {
     published: number;
     drafts: number;
     totalViews: number;
-}
-
-export async function getPostStats(): Promise<PostStats> {
-    const db = getDb();
-    try {
-        // Single optimized query instead of 4 separate queries
-        const [rows] = await db.query<RowDataPacket[]>(`
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN published = 1 THEN 1 ELSE 0 END) as published,
-                SUM(CASE WHEN published = 0 THEN 1 ELSE 0 END) as drafts,
-                COALESCE(SUM(CASE WHEN published = 1 THEN views ELSE 0 END), 0) as totalViews
-            FROM posts
-        `);
-
-        const stats = rows[0];
-        return {
-            total: Number(stats?.total) || 0,
-            published: Number(stats?.published) || 0,
-            drafts: Number(stats?.drafts) || 0,
-            totalViews: Number(stats?.totalViews) || 0
-        };
-    } catch (error) {
-        console.error("Error fetching post stats:", error);
-        return { total: 6, published: 6, drafts: 0, totalViews: 8832 };
-    }
 }

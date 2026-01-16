@@ -48,9 +48,8 @@ export async function updateApplicationStatus(applicationId: number, status: str
 
     try {
         // In a real implementation, you would update the application status in database
-        console.log(`Updated application ${applicationId} status to ${status}`);
-
-        revalidatePath("/admin/careers");
+        // Mock usage:
+        console.log(`Updating application ${applicationId} to ${status}`);
         return { success: true };
     } catch (error) {
         console.error("Failed to update application status:", error);
@@ -65,20 +64,12 @@ export async function createJobPosting(formData: FormData) {
     }
 
     try {
-        const title = formData.get("title") as string;
-        const description = formData.get("description") as string;
-        const requirements = formData.get("requirements") as string;
-        const location = formData.get("location") as string;
-        const type = formData.get("type") as string;
+        // formData.get... lines removed as they are unused in mock
+        // const title = formData.get("title") as string;
+        // ...
+        console.log("Creating job posting with data:", Object.fromEntries(formData));
 
         // In a real implementation, you would save to database
-        console.log("Job posting created:", {
-            title,
-            description,
-            requirements,
-            location,
-            type
-        });
 
         revalidatePath("/admin/careers");
         return { success: true };
@@ -90,20 +81,12 @@ export async function createJobPosting(formData: FormData) {
 
 export async function submitJobApplication(formData: FormData) {
     try {
-        const name = formData.get("name") as string;
-        const email = formData.get("email") as string;
-        const position = formData.get("position") as string;
-        const coverLetter = formData.get("coverLetter") as string;
-        const resume = formData.get("resume") as File;
+        // Unused vars removed
+        // const name = formData.get("name") as string;
+        // ...
+        console.log("Submitting application with data:", Object.fromEntries(formData));
 
         // In a real implementation, you would save to database
-        console.log("Job application submitted:", {
-            name,
-            email,
-            position,
-            coverLetter,
-            resumeSize: resume?.size || 0
-        });
 
         return { success: true, message: "Application submitted successfully!" };
     } catch (error) {

@@ -1,125 +1,42 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useMotionValue, animate, PanInfo } from "framer-motion";
 import Link from "next/link";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { DecorativeBackgrounds } from "@/components/ui/DecorativeBackgrounds";
 import { MediaOptions } from "@/components/ui/MediaOptions";
-
 import { Post } from "@/lib/posts";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// Desktop Horizontal Slider Component
-function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Post[]; direction?: "left" | "right" }) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const x = useMotionValue(0);
-    const [isPaused, setIsPaused] = useState(false);
-    const [currentIndex, setCurrentIndex] = useState(0);
+// Desktop Horizontal Slider Component using Embla
+function FeaturedHorizontalSlider({ items }: { items: Post[] }) {
+    const [emblaRef, emblaApi] = useEmblaCarousel({
+        loop: true,
+        align: "start",
+        slidesToScroll: 1,
+        dragFree: true, // Allows smooth dragging
+        containScroll: "trimSnaps",
+    });
 
-    // STRICT 4-CARDS-PER-VIEW CONFIGURATION
-    const cardWidth = 350; // Fixed card width in pixels
-    const gap = 24; // Gap between cards in pixels
-    const cardsPerView = 4; // MAXIMUM 4 cards visible at once - STRICTLY ENFORCED
-    const visibleCards = Math.min(items.length, cardsPerView); // Never exceed 4
-
-    // Calculate exact container width for 4 cards: (4 × 350px) + (3 × 24px gaps) = 1472px
-    const sliderWidth = visibleCards * cardWidth + (visibleCards - 1) * gap;
-
-    // Total width of all cards in the slider
-    const totalWidth = items.length * (cardWidth + gap);
-
-    // Maximum drag distance to show only visible cards
-    const maxDrag = -(totalWidth - sliderWidth);
-
-    // Scroll to specific index
-    const scrollToIndex = useCallback((index: number) => {
-        const targetX = -(index * (cardWidth + gap));
-        const clampedX = Math.max(maxDrag, Math.min(0, targetX));
-        animate(x, clampedX, {
-            type: "spring",
-            stiffness: 300,
-            damping: 30,
-        });
-        setCurrentIndex(index);
-    }, [cardWidth, gap, maxDrag, x]);
-
-    // Auto-advance slider
-    useEffect(() => {
-        if (isPaused || items.length === 0) return;
-
-        const timer = setInterval(() => {
-            setCurrentIndex((prev) => {
-                const nextIndex = direction === "left"
-                    ? (prev + 1) % items.length
-                    : (prev - 1 + items.length) % items.length;
-                return nextIndex;
-            });
-        }, 3000);
-
-        return () => clearInterval(timer);
-    }, [isPaused, items.length, direction]);
-
-    // Sync slider position with currentIndex
-    useEffect(() => {
-        scrollToIndex(currentIndex);
-    }, [currentIndex, scrollToIndex]);
-
-    // Handle drag end
-    const handleDragEnd = () => {
-        const currentX = x.get();
-        const newIndex = Math.round(-currentX / (cardWidth + gap));
-        const clampedIndex = Math.max(0, Math.min(items.length - 1, newIndex));
-        scrollToIndex(clampedIndex);
-        // Don't resume autoplay here - let onMouseLeave handle it
-    };
-
-    const goToPrevious = () => {
-        const newIndex = (currentIndex - 1 + items.length) % items.length;
-        scrollToIndex(newIndex);
-    };
-
-    const goToNext = () => {
-        const newIndex = (currentIndex + 1) % items.length;
-        scrollToIndex(newIndex);
-    };
+    const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
+    const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
 
     return (
-        <div
-            className="relative group mx-auto"
-            style={{
-                width: `${sliderWidth}px`,
-                minWidth: `${sliderWidth}px`,
-                maxWidth: '100%'
-            }}
-        >
-            <div
-                ref={containerRef}
-                className="overflow-hidden w-full"
-                onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={() => setIsPaused(false)}
-            >
-                <motion.div
-                    className="flex cursor-grab active:cursor-grabbing"
-                    style={{ x, gap }}
-                    drag="x"
-                    dragConstraints={{ left: maxDrag, right: 0 }}
-                    dragElastic={0.1}
-                    dragMomentum={false}
-                    onDragStart={() => setIsPaused(true)}
-                    onDragEnd={handleDragEnd}
-                >
+        <div className="relative group mx-auto max-w-[1472px]">
+            <div className="overflow-hidden" ref={emblaRef}>
+                <div className="flex gap-6">
                     {items.map((item) => (
                         <Link
                             key={item.slug}
                             href={`/article/${item.slug}`}
-                            className="flex-shrink-0 group"
-                            style={{ width: `${cardWidth}px`, minWidth: `${cardWidth}px`, maxWidth: `${cardWidth}px` }}
+                            className="flex-shrink-0 group relative w-[350px]"
                         >
-                            <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700 rounded-lg">
+                            <div className="relative aspect-[16/9] overflow-hidden mb-4 rounded-lg">
                                 <Image
                                     src={item.coverImage || '/placeholder.jpg'}
                                     fill
-                                    sizes="300px"
+                                    sizes="350px"
                                     alt={item.title}
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
@@ -139,40 +56,25 @@ function FeaturedHorizontalSlider({ items, direction = "left" }: { items: Post[]
                             </div>
                         </Link>
                     ))}
-                </motion.div>
+                </div>
             </div>
 
             {/* Navigation Arrows */}
             <button
-                onClick={goToPrevious}
+                onClick={scrollPrev}
                 className="absolute left-4 top-1/3 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
                 aria-label="Previous"
             >
-                <span className="text-text-primary text-xl">←</span>
+                <ChevronLeft className="w-6 h-6 text-text-primary" />
             </button>
 
             <button
-                onClick={goToNext}
+                onClick={scrollNext}
                 className="absolute right-4 top-1/3 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
                 aria-label="Next"
             >
-                <span className="text-text-primary text-xl">→</span>
+                <ChevronRight className="w-6 h-6 text-text-primary" />
             </button>
-
-            {/* Pagination Dots */}
-            <div className="flex justify-center gap-2 mt-6">
-                {items.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => scrollToIndex(index)}
-                        className={`h-2 rounded-full transition-all ${index === currentIndex
-                            ? "bg-accent w-8"
-                            : "bg-text-muted/30 w-2 hover:bg-text-muted/50"
-                            }`}
-                        aria-label={`Go to slide ${index + 1}`}
-                    />
-                ))}
-            </div>
         </div>
     );
 }
@@ -182,73 +84,33 @@ interface FeaturedTalesProps {
 }
 
 export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
-    const [currentPage, setCurrentPage] = useState(0);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const x = useMotionValue(0);
-    const [containerWidth, setContainerWidth] = useState(0);
-    const [isPausedMobile, setIsPausedMobile] = useState(false);
+    // Mobile Slider
+    const [mobileRef, mobileApi] = useEmblaCarousel({
+        loop: true,
+        align: "start",
+        slidesToScroll: 1,
+        containScroll: "trimSnaps"
+    });
 
-    const cardsPerPage = 2;
-    const gap = 12;
-    const totalPages = Math.ceil(articles.length / cardsPerPage);
+    const [selectedIndex, setSelectedIndex] = useState(0);
 
-    // Split breakingNews into top 6 and bottom 6 for desktop sliders
+    const onSelect = useCallback(() => {
+        if (!mobileApi) return;
+        setSelectedIndex(mobileApi.selectedScrollSnap());
+    }, [mobileApi]);
+
+    useEffect(() => {
+        if (!mobileApi) return;
+        onSelect();
+        mobileApi.on("select", onSelect);
+    }, [mobileApi, onSelect]);
+
+    const scrollTo = useCallback((index: number) => mobileApi && mobileApi.scrollTo(index), [mobileApi]);
+
+    // Split items for desktop
     const half = Math.ceil(articles.length / 2);
     const topRowItems = articles.slice(0, half);
     const bottomRowItems = articles.slice(half, articles.length);
-
-    useEffect(() => {
-        if (containerRef.current) {
-            setContainerWidth(containerRef.current.offsetWidth);
-        }
-        const handleResize = () => {
-            if (containerRef.current) {
-                setContainerWidth(containerRef.current.offsetWidth);
-            }
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const cardWidth = containerWidth > 0 ? (containerWidth - gap) / 2 : 150;
-    const slideWidth = containerWidth;
-    const maxDrag = -slideWidth * (totalPages - 1);
-
-    const snapToPage = (page: number) => {
-        const targetX = -page * slideWidth;
-        animate(x, targetX, { type: "spring", stiffness: 300, damping: 30 });
-        setCurrentPage(page);
-    };
-
-    const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-        const offset = info.offset.x;
-        const velocity = info.velocity.x;
-        const threshold = slideWidth / 4;
-
-        let newPage = currentPage;
-        if (offset < -threshold || velocity < -500) {
-            newPage = Math.min(currentPage + 1, totalPages - 1);
-        } else if (offset > threshold || velocity > 500) {
-            newPage = Math.max(currentPage - 1, 0);
-        }
-        snapToPage(newPage);
-    };
-
-    // Autoslide every 2 seconds
-    useEffect(() => {
-        if (containerWidth === 0 || isPausedMobile) return;
-
-        const timer = setInterval(() => {
-            setCurrentPage(prev => {
-                const next = (prev + 1) % totalPages;
-                const targetX = -next * slideWidth;
-                animate(x, targetX, { type: "spring", stiffness: 300, damping: 30 });
-                return next;
-            });
-        }, 2000);
-
-        return () => clearInterval(timer);
-    }, [containerWidth, slideWidth, totalPages, x, isPausedMobile]);
 
     return (
         <section className="relative w-full pt-8 pb-4 md:py-24 bg-bg-primary overflow-hidden">
@@ -265,29 +127,15 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
                     </h2>
                 </div>
 
-                {/* Mobile: 2 Cards Side by Side Draggable Slider */}
-                <div className="md:hidden relative" ref={containerRef}>
-                    <div
-                        className="overflow-hidden"
-                        onMouseEnter={() => setIsPausedMobile(true)}
-                        onMouseLeave={() => setIsPausedMobile(false)}
-                        onTouchStart={() => setIsPausedMobile(true)}
-                        onTouchEnd={() => setIsPausedMobile(false)}
-                    >
-                        <motion.div
-                            className="flex"
-                            style={{ x, gap: `${gap}px` }}
-                            drag="x"
-                            dragConstraints={{ left: maxDrag, right: 0 }}
-                            dragElastic={0.1}
-                            onDragEnd={handleDragEnd}
-                        >
+                {/* Mobile: Embla Slider */}
+                <div className="md:hidden relative" role="region" aria-roledescription="carousel" aria-label="Latest Articles Mobile">
+                    <div className="overflow-hidden" ref={mobileRef}>
+                        <div className="flex gap-3">
                             {articles.map((item) => (
                                 <Link
                                     key={item.slug}
                                     href={`/article/${item.slug}`}
-                                    className="flex-shrink-0"
-                                    style={{ width: cardWidth }}
+                                    className="flex-shrink-0 w-[85vw] sm:w-[50vw] relative"
                                 >
                                     <div className="relative aspect-[16/9] overflow-hidden rounded-lg mb-2">
                                         <span className="absolute top-2 left-2 px-2 py-0.5 bg-amber-600/90 text-[8px] uppercase font-bold tracking-wider text-white rounded z-20">
@@ -296,16 +144,16 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
                                         <Image
                                             src={item.coverImage || '/placeholder.jpg'}
                                             fill
-                                            sizes="(max-width: 768px) 50vw, 25vw"
+                                            sizes="(max-width: 768px) 85vw, 350px"
                                             alt={item.title}
                                             className="object-cover"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                                     </div>
-                                    <h3 className="text-xs font-serif leading-tight text-text-primary line-clamp-3 mb-1">
+                                    <h3 className="text-sm font-serif leading-tight text-text-primary line-clamp-2 mb-1">
                                         {item.title}
                                     </h3>
-                                    <div className="flex items-center gap-1 text-[9px] text-text-muted">
+                                    <div className="flex items-center gap-1 text-[10px] text-text-muted">
                                         <span className="text-accent">●</span>
                                         <span>{item.author}</span>
                                         <span>·</span>
@@ -313,31 +161,30 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
                                     </div>
                                 </Link>
                             ))}
-                        </motion.div>
+                        </div>
                     </div>
 
-
-
-                    {/* Pagination Dots */}
-                    <div className="flex justify-center gap-1.5 mt-3">
-                        {Array.from({ length: totalPages }).map((_, index) => (
+                    {/* Mobile Pagination Dots */}
+                    <div className="flex justify-center gap-1.5 mt-4">
+                        {articles.map((_, index) => (
                             <button
                                 key={index}
-                                onClick={() => snapToPage(index)}
-                                className={`h-1.5 rounded-full transition-all ${index === currentPage
-                                    ? "bg-accent w-4"
-                                    : "bg-text-muted/30 w-1.5 hover:bg-text-muted/50"
+                                onClick={() => scrollTo(index)}
+                                className={`w-[4px] h-[4px] !p-0 rounded-full transition-all ${index === selectedIndex
+                                    ? "bg-accent"
+                                    : "bg-text-muted/30 hover:bg-text-muted/50"
                                     }`}
-                                aria-label={`Go to page ${index + 1}`}
+                                aria-label={`Go to slide ${index + 1}`}
+                                aria-current={index === selectedIndex ? "true" : "false"}
                             />
                         ))}
                     </div>
                 </div>
 
-                {/* Desktop: 2 Horizontal Sliders with opposite directions */}
+                {/* Desktop: 2 Horizontal Sliders */}
                 <div className="hidden md:block space-y-12">
-                    <FeaturedHorizontalSlider items={topRowItems} direction="left" />
-                    <FeaturedHorizontalSlider items={bottomRowItems} direction="right" />
+                    <FeaturedHorizontalSlider items={topRowItems} />
+                    <FeaturedHorizontalSlider items={bottomRowItems} />
                 </div>
             </div>
         </section>

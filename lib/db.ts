@@ -21,7 +21,7 @@ export async function testConnection() {
     const connection = await pool.getConnection();
     await connection.ping();
     connection.release();
-    console.log('✅ Database connection successful');
+
     return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error);
