@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Menu, X, Globe, User, LogOut, Loader2 } from "lucide-react";
+import { Search, Menu, X, User, LogOut, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -112,20 +112,21 @@ export default function Navbar() {
                             <ThemeToggle />
                         </div>
                         {/* Language/Region Selector */}
-                        <div className="flex items-center gap-1">
-                            <Globe className="w-4 h-4 opacity-60" />
+                        <div className="flex items-center gap-2">
                             <button
-                                className="px-2 py-1 text-xs font-bold uppercase tracking-wider hover:bg-white/10 rounded transition-colors"
+                                className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold uppercase tracking-wider hover:bg-white/10 rounded transition-colors"
                                 title="English"
                             >
-                                EN
+                                <span className="text-base">🇺🇸</span>
+                                <span>EN</span>
                             </button>
                             <span className="opacity-40">|</span>
                             <button
-                                className="px-2 py-1 text-xs font-bold hover:bg-white/10 rounded transition-colors"
+                                className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold hover:bg-white/10 rounded transition-colors"
                                 title="বাংলা"
                             >
-                                বাংলা
+                                <span className="text-base">🇧🇩</span>
+                                <span>বাংলা</span>
                             </button>
                         </div>
                     </div>
