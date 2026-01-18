@@ -22,94 +22,97 @@ async function main() {
     // Sample Posts Data
     const posts = [
         {
-            title: 'Global Political Shifts in 2026',
-            slug: 'global-political-shifts-2026',
-            excerpt: 'An in-depth analysis of the changing political landscape.',
-            content: '# Politics\n\nMajor changes are happening...',
+            title: 'The Impact of the Arab Spring',
+            slug: 'arab-spring-impact',
+            excerpt: 'Analyzing the long-term political shifts in the Middle East.',
+            content: '# Politics\n\nA decade later, the effects are still felt...',
             category: 'Politics',
             featured: true,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1529101091760-6149d4c81f2d?auto=format&fit=crop&w=800&q=80'
+            coverImage: '/imgs/Arab Spring.png'
         },
         {
-            title: 'The Great Mystery of the Deep Sea',
-            slug: 'mystery-deep-sea',
-            excerpt: 'What lies beneath the ocean surface?',
-            content: '# Mystery\n\nUnexplained phenomena...',
+            title: 'The Mystery of Stonehenge',
+            slug: 'mystery-stonehenge',
+            excerpt: 'Who built it and why? New theories emerge.',
+            content: '# Mystery\n\nAncient stones tell a story...',
             category: 'Mystery',
             featured: true,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1518337231758-d58679b69992?auto=format&fit=crop&w=800&q=80'
+            coverImage: '/imgs/Stonehenge.jpeg'
         },
         {
-            title: 'Cold Cases Solved',
-            slug: 'cold-cases-solved',
-            excerpt: 'Recent breakthroughs in forensic science.',
-            content: '# Crime\n\nJustice served...',
+            title: 'Jack the Ripper: Case Closed?',
+            slug: 'jack-the-ripper',
+            excerpt: 'New DNA evidence sheds light on the infamous killer.',
+            content: '# Crime\n\nThe whitechapel murders...',
             category: 'Crime',
             featured: false,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1453873419-481dc7251185?auto=format&fit=crop&w=800&q=80'
+            coverImage: '/imgs/Jack the Ripper.jpeg'
         },
         {
-            title: 'Ancient Civilizations Unearthed',
-            slug: 'ancient-civilizations',
-            excerpt: 'New discoveries rewriting history books.',
-            content: '# History\n\nDigging into the past...',
+            title: 'The Great Wall: A History',
+            slug: 'great-wall-history',
+            excerpt: 'Beyond the myths: The true story of the Great Wall.',
+            content: '# History\n\nBuilt over centuries...',
             category: 'History',
             featured: false,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=800&q=80'
+            coverImage: '/imgs/Great Wall of China.jpeg'
         },
         {
-            title: 'Breaking: Major Tech Announcement',
-            slug: 'breaking-tech-news',
-            excerpt: 'The biggest news of the day.',
-            content: '# News\n\nRead all about it...',
+            title: 'Global Financial Update: Petrodollar',
+            slug: 'global-finance-petrodollar',
+            excerpt: 'Understanding the shifts in global currency markets.',
+            content: '# News\n\nEconomic tides are turning...',
             category: 'News',
             featured: true,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80'
+            coverImage: '/imgs/Petrodollar.png'
         },
         {
-            title: 'Mars Colonization Update',
-            slug: 'mars-colonization',
-            excerpt: 'Are we ready to live on the red planet?',
-            content: '# Science\n\nSpace exploration...',
+            title: 'Genetic Memory: Fact or Fiction?',
+            slug: 'genetic-memory',
+            excerpt: 'Can we inherit memories from our ancestors?',
+            content: '# Science\n\nThe science of epigenetics...',
             category: 'Science',
             featured: true,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80'
+            coverImage: '/imgs/Genetic Memory.png'
         }
     ];
 
     for (const post of posts) {
         const p = await prisma.post.upsert({
             where: { slug: post.slug },
-            update: {},
+            update: {
+                coverImage: post.coverImage,
+                title: post.title,
+                excerpt: post.excerpt
+            },
             create: post,
         });
-        console.log(`Created post: ${p.title}`);
+        console.log(`Upserted post: ${p.title}`);
     }
-
     console.log('Seeding finished.');
 }
 
