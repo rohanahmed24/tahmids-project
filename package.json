@@ -20,7 +20,6 @@
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.561.0",
     "mammoth": "^1.11.0",
-    "mysql2": "^3.16.0",
     "next": "16.0.10",
     "next-auth": "^5.0.0-beta.30",
     "next-mdx-remote": "^5.0.0",

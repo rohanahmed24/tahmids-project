@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { verifyAdmin } from "@/actions/admin-auth";
@@ -90,9 +91,9 @@ export async function createPost(formData: FormData) {
                 published
             }
         });
-    } catch (error: any) {
+    } catch (error) {
         console.error("Failed to create post:", error);
-        if (error.code === 'P2002') {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
             throw new Error("A story with this title/slug already exists. Please change the title.");
         }
         throw new Error("Failed to create post");

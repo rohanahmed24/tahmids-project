@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { verifyAdmin } from "@/actions/admin-auth";
 import { writeFile, mkdir } from "fs/promises";
@@ -151,11 +152,11 @@ export class PostService {
                     published: postData.published
                 }
             });
-        } catch (error: unknown) {
+        } catch (error) {
             console.error("Database insert failed:", error);
 
             // Check for Prisma unique constraint violation
-            if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'P2002') {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
                 throw new Error("A story with this title/slug already exists. Please change the title.");
             }
 
@@ -165,7 +166,7 @@ export class PostService {
 
     private async updatePostInDb(originalSlug: string, postData: Partial<PostInsertData>): Promise<void> {
         try {
-            const dataToUpdate: any = {
+            const dataToUpdate: Prisma.PostUpdateInput = {
                 title: postData.title,
                 subtitle: postData.subtitle,
                 category: postData.category,
@@ -180,18 +181,18 @@ export class PostService {
             };
 
             // Remove undefined keys
-            Object.keys(dataToUpdate).forEach(key => dataToUpdate[key] === undefined && delete dataToUpdate[key]);
+            Object.keys(dataToUpdate).forEach(key => (dataToUpdate as any)[key] === undefined && delete (dataToUpdate as any)[key]);
 
             await prisma.post.update({
                 where: { slug: originalSlug },
                 data: dataToUpdate
             });
 
-        } catch (error: unknown) {
+        } catch (error) {
             console.error("Database update failed:", error);
 
             // Check for Prisma record not found
-            if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'P2025') {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
                 throw new Error("Post not found or no changes made");
             }
 

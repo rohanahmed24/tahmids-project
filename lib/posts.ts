@@ -51,11 +51,7 @@ function mapPrismaPost(post: PrismaPost): Post {
 }
 
 // Fallback demo data
-function getFallbackPosts(): Post[] {
-    // Keeping simple fallback logic if DB fails completely, 
-    // but usually with Prisma we just throw or return empty.
-    return [];
-}
+
 
 // --- Cached Functions ---
 

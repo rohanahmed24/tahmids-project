@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { User as PrismaUser } from "@prisma/client";
+import { User as PrismaUser, Prisma } from "@prisma/client";
 
 // Re-export type compatible with frontend
 export type User = {
@@ -140,9 +140,10 @@ export async function createUser(userData: {
 export async function updateUser(id: number, updates: Partial<User>): Promise<User | null> {
     try {
         // Filter out fields that shouldn't be updated directly or map them
-        const { id: _, created_at, article_count, role, ...cleanUpdates } = updates;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id: _id, created_at, article_count, role, ...cleanUpdates } = updates;
 
-        const data: any = { ...cleanUpdates };
+        const data: Prisma.UserUpdateInput = { ...cleanUpdates };
         if (role) data.role = role; // allow role update if provided
 
         const user = await prisma.user.update({

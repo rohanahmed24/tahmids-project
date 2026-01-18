@@ -11,7 +11,8 @@ import { deleteUser } from "@/actions/users";
 import { updateSettings } from "@/actions/settings";
 import { getApplications, updateApplicationStatus } from "@/actions/careers";
 import { getImages, uploadImage, deleteImage } from "@/actions/media";
-import { RowDataPacket } from "mysql2";
+// import { RowDataPacket } from "mysql2"; // Removed
+type RowDataPacket = any;
 import {
     LayoutDashboard,
     Users,

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { Media } from "@prisma/client";
 
+
 export interface MediaStats {
     totalImages: number;
     totalVideos: number;
@@ -22,7 +23,12 @@ export interface MediaItem {
 export async function getMediaStats(): Promise<MediaStats> {
     try {
         // Use raw query for complex aggregation matching original logic
-        const rows = await prisma.$queryRaw<any[]>`
+        const rows = await prisma.$queryRaw<Array<{
+            totalImages: bigint;
+            totalVideos: bigint;
+            totalDocuments: bigint;
+            totalSize: bigint;
+        }>>`
             SELECT 
                 COUNT(CASE WHEN mime_type LIKE 'image/%' THEN 1 END) as totalImages,
                 COUNT(CASE WHEN mime_type LIKE 'video/%' THEN 1 END) as totalVideos,
@@ -60,7 +66,7 @@ export async function getAllMedia(): Promise<MediaItem[]> {
             orderBy: { createdAt: 'desc' }
         });
 
-        return mediaItems.map(item => ({
+        return mediaItems.map((item: Media) => ({
             id: String(item.id),
             filename: item.filename,
             originalName: item.originalName,
