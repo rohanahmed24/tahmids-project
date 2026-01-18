@@ -14,7 +14,7 @@ async function main() {
             name: 'Admin User',
             role: 'admin',
             image: 'https://ui-avatars.com/api/?name=Admin+User',
-            password: '$2a$10$EpWaTGVQ7J.JE.8s.pO7Hu/y.u.B.e.P.e.r.s.o.n.a.l.H.a.s.h', // Placeholder hash
+            password: '$2b$10$72MbE1yQMq8VB6PEve1Yv.hy1R4UcIC5pGT122/shOtQGI8GEqui2', // Hash for 'wisdomia2024'
         },
     });
     console.log(`Created user: ${admin.name}`);

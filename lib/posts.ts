@@ -137,10 +137,12 @@ export const getPostsByCategory = unstable_cache(
                 orderBy: { date: 'desc' },
                 take: limit
             });
+            // Ensure we verify mapped results
             return posts.map(mapPrismaPost);
         } catch (error) {
             console.error("Failed to fetch posts by category:", error);
-            return [];
+            // Return empty array on error
+            return [] as Post[];
         }
     },
     ['posts-by-category'],
@@ -167,7 +169,7 @@ export async function searchPosts(query: string, limit: number = 10): Promise<Po
         return posts.map(mapPrismaPost);
     } catch (error) {
         console.error("Search failed:", error);
-        return [];
+        return [] as Post[];
     }
 }
 
