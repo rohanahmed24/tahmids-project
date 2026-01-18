@@ -32,7 +32,7 @@ async function main() {
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1541872703-74c5963631df?auto=format&fit=crop&w=800&q=80'
+            coverImage: 'https://images.unsplash.com/photo-1529101091760-6149d4c81f2d?auto=format&fit=crop&w=800&q=80'
         },
         {
             title: 'The Great Mystery of the Deep Sea',
@@ -45,7 +45,7 @@ async function main() {
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=800&q=80'
+            coverImage: 'https://images.unsplash.com/photo-1518337231758-d58679b69992?auto=format&fit=crop&w=800&q=80'
         },
         {
             title: 'Cold Cases Solved',

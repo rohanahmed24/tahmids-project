@@ -23,33 +23,48 @@ const topicsData: Record<string, {
         accent: "#60A5FA",
         heroImage: Assets.imgPlaceholderImage7,
     },
-    "design-culture": {
-        title: "Design Culture",
-        subtitle: "Form Meets Function",
-        description: "A deep dive into the world of design thinking, visual aesthetics, and the cultural movements that shape how we create and experience beauty in everyday life.",
-        accent: "#F472B6",
-        heroImage: Assets.imgPlaceholderImage5,
+    // ... existing ... 
+    "politics": {
+        title: "Politics",
+        subtitle: "Global Perspectives",
+        description: "In-depth analysis of political shifts, policy changes, and international relations defining our era.",
+        accent: "#EF4444",
+        heroImage: "https://images.unsplash.com/photo-1541872703-74c5963631df?auto=format&fit=crop&w=1200&q=80",
     },
-    "minimalism": {
-        title: "Minimalism",
-        subtitle: "Less is More",
-        description: "The art of intentional living. Discover how stripping away the unnecessary reveals what truly matters—in design, lifestyle, and thought.",
-        accent: "#A78BFA",
-        heroImage: Assets.imgPlaceholderImage4,
+    "mystery": {
+        title: "Mystery",
+        subtitle: "The Unknown",
+        description: "Unraveling the world's most perplexing enigmas, from vanishings to unexplained phenomena.",
+        accent: "#8B5CF6",
+        heroImage: "https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=1200&q=80",
     },
-    "future-tech": {
-        title: "Future Tech",
-        subtitle: "Tomorrow's World Today",
-        description: "Emerging technologies, speculative futures, and the innovations that will define the next decade. From quantum computing to space exploration.",
-        accent: "#34D399",
-        heroImage: Assets.imgPlaceholderImage6,
+    "crime": {
+        title: "Crime",
+        subtitle: "True Stories",
+        description: "Examination of cold cases, forensic breakthroughs, and the pursuit of justice.",
+        accent: "#DC2626",
+        heroImage: "https://images.unsplash.com/photo-1453873419-481dc7251185?auto=format&fit=crop&w=1200&q=80",
     },
-    "psychology": {
-        title: "Psychology",
-        subtitle: "The Mind Explored",
-        description: "Understanding human behavior, cognitive patterns, and the science of the mind. Insights that help us understand ourselves and others better.",
-        accent: "#FBBF24",
-        heroImage: Assets.imgPlaceholderImage2,
+    "history": {
+        title: "History",
+        subtitle: "Past & Present",
+        description: "Connecting the dots between historical events and modern realities.",
+        accent: "#D97706",
+        heroImage: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=1200&q=80",
+    },
+    "news": {
+        title: "Breaking News",
+        subtitle: "Up to the Minute",
+        description: "Essential updates on the events shaping our world right now.",
+        accent: "#2563EB",
+        heroImage: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1200&q=80",
+    },
+    "science": {
+        title: "Science",
+        subtitle: "Discovery & Innovation",
+        description: "From the cosmos to the microscopic, exploring the frontiers of scientific discovery.",
+        accent: "#10B981",
+        heroImage: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
     },
 };
 
