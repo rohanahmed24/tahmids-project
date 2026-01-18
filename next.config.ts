@@ -60,6 +60,18 @@ const nextConfig: NextConfig = {
   },
   // Disable X-Powered-By header
   poweredByHeader: false,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

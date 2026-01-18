@@ -22,69 +22,82 @@ async function main() {
     // Sample Posts Data
     const posts = [
         {
-            title: 'Welcome to The Wisdomia',
-            slug: 'welcome-to-the-wisdomia',
-            excerpt: 'This is the first post on our new platform. Stay tuned for more updates!',
-            content: '# Welcome\n\nWe are excited to launch The Wisdomia. This platform is dedicated to sharing knowledge and insights.',
-            category: 'General',
+            title: 'Global Political Shifts in 2026',
+            slug: 'global-political-shifts-2026',
+            excerpt: 'An in-depth analysis of the changing political landscape.',
+            content: '# Politics\n\nMajor changes are happening...',
+            category: 'Politics',
             featured: true,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1499750310159-54100fff19f4?auto=format&fit=crop&w=800&q=80'
+            coverImage: 'https://images.unsplash.com/photo-1541872703-74c5963631df?auto=format&fit=crop&w=800&q=80'
         },
         {
-            title: 'The Future of Artificial Intelligence',
-            slug: 'future-of-ai',
-            excerpt: 'Exploring how AI will shape our lives in the coming decades.',
-            content: '# AI Future\n\nArtificial Intelligence is rapidly evolving. From machine learning to generative models...',
-            category: 'Technology',
+            title: 'The Great Mystery of the Deep Sea',
+            slug: 'mystery-deep-sea',
+            excerpt: 'What lies beneath the ocean surface?',
+            content: '# Mystery\n\nUnexplained phenomena...',
+            category: 'Mystery',
             featured: true,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80'
+            coverImage: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?auto=format&fit=crop&w=800&q=80'
         },
         {
-            title: '10 Tips for a Healthy Lifestyle',
-            slug: 'healthy-lifestyle-tips',
-            excerpt: 'Simple habits that can improve your physical and mental well-being.',
-            content: '# Healthy Living\n\n1. Drink water\n2. Sleep well\n3. Exercise daily...',
-            category: 'Lifestyle',
+            title: 'Cold Cases Solved',
+            slug: 'cold-cases-solved',
+            excerpt: 'Recent breakthroughs in forensic science.',
+            content: '# Crime\n\nJustice served...',
+            category: 'Crime',
             featured: false,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80'
+            coverImage: 'https://images.unsplash.com/photo-1453873419-481dc7251185?auto=format&fit=crop&w=800&q=80'
         },
         {
-            title: 'Top Travel Destinations for 2026',
-            slug: 'top-travel-destinations-2026',
-            excerpt: 'Discover the most beautiful places to visit this year.',
-            content: '# Travel 2026\n\nPack your bags! Here are the top spots...',
-            category: 'Travel',
+            title: 'Ancient Civilizations Unearthed',
+            slug: 'ancient-civilizations',
+            excerpt: 'New discoveries rewriting history books.',
+            content: '# History\n\nDigging into the past...',
+            category: 'History',
             featured: false,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=800&q=80'
+            coverImage: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=800&q=80'
         },
         {
-            title: 'Understanding Global Economics',
-            slug: 'understanding-global-economics',
-            excerpt: 'A deep dive into the current state of the world economy.',
-            content: '# Global Economy\n\nInflation, interest rates, and trade...',
-            category: 'Finance',
-            featured: false,
+            title: 'Breaking: Major Tech Announcement',
+            slug: 'breaking-tech-news',
+            excerpt: 'The biggest news of the day.',
+            content: '# News\n\nRead all about it...',
+            category: 'News',
+            featured: true,
             published: true,
             date: new Date(),
             authorId: admin.id,
             authorName: admin.name,
-            coverImage: 'https://images.unsplash.com/photo-1611974765270-ca1258634369?auto=format&fit=crop&w=800&q=80'
+            coverImage: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80'
+        },
+        {
+            title: 'Mars Colonization Update',
+            slug: 'mars-colonization',
+            excerpt: 'Are we ready to live on the red planet?',
+            content: '# Science\n\nSpace exploration...',
+            category: 'Science',
+            featured: true,
+            published: true,
+            date: new Date(),
+            authorId: admin.id,
+            authorName: admin.name,
+            coverImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80'
         }
     ];
 
