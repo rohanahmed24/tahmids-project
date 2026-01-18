@@ -1,54 +1,35 @@
-"use server";
+import { signIn, signOut, auth } from "@/auth";
+import { AuthError } from "next-auth";
 
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
-// Use environment variable for secret, as backup
-const DEFAULT_ADMIN_PASS = process.env.ADMIN_PASSWORD || "wisdomia2024";
-const ADMIN_COOKIE_NAME = "admin_session";
-
-import { prisma } from "@/lib/db";
-import bcrypt from "bcryptjs";
+// Default admin email for password-only login flow
+const ADMIN_EMAIL = "admin@thewisdomia.com";
 
 export async function loginAdmin(password: string) {
-    // 1. Check strict Admin User in DB
-    const adminUser = await prisma.user.findFirst({
-        where: { role: 'admin' }
-    });
-
-    let isValid = false;
-
-    if (adminUser && adminUser.password) {
-        // Verify against DB hash
-        isValid = await bcrypt.compare(password, adminUser.password);
-    } else {
-        // Fallback for initial setup if no DB user or no hash (legacy support)
-        // This ensures you don't get locked out before seeding
-        isValid = password === DEFAULT_ADMIN_PASS;
-    }
-
-    if (isValid) {
-        // Set HTTP-only cookie
-        (await cookies()).set(ADMIN_COOKIE_NAME, "true", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 60 * 60 * 24, // 1 day
+    try {
+        await signIn("credentials", {
+            email: ADMIN_EMAIL,
+            password: password,
+            redirect: false,
         });
         return { success: true };
+    } catch (error) {
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case "CredentialsSignin":
+                    return { error: "Invalid credentials" };
+                default:
+                    return { error: "Something went wrong" };
+            }
+        }
+        throw error;
     }
-
-    return { error: "Invalid credentials" };
 }
 
 export async function logoutAdmin() {
-    (await cookies()).delete(ADMIN_COOKIE_NAME);
-    redirect("/admin");
+    await signOut({ redirectTo: "/admin" });
 }
 
 export async function verifyAdmin() {
-    const cookieStore = await cookies();
-    const isAdmin = cookieStore.get(ADMIN_COOKIE_NAME)?.value === "true";
-    return isAdmin;
+    const session = await auth();
+    return session?.user?.role === 'admin';
 }
