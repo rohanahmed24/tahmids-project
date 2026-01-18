@@ -27,12 +27,12 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                         title: post.title,
                         slug: post.slug,
                         category: post.category,
-                        content: post.content,
-                        coverImage: post.coverImage,
-                        videoUrl: post.videoUrl,
-                        subtitle: post.subtitle,
-                        topic_slug: post.topic_slug,
-                        accent_color: post.accent_color,
+                        content: post.content || "",
+                        coverImage: post.coverImage || undefined,
+                        videoUrl: post.videoUrl || undefined,
+                        subtitle: post.subtitle || undefined,
+                        topic_slug: post.topic_slug || undefined,
+                        accent_color: post.accent_color || undefined,
                         featured: post.featured
                     }}
                     action={updateAction}

@@ -3,7 +3,7 @@
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { verifyAdmin } from "@/actions/admin-auth";
-import { getDb } from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 export async function uploadImage(formData: FormData) {
     const isAdmin = await verifyAdmin();
@@ -29,37 +29,40 @@ export async function uploadImage(formData: FormData) {
     try {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        
+
         // Generate unique filename
         const timestamp = Date.now();
         const originalName = file.name.replace(/[^a-zA-Z0-9.]/g, '');
         const filename = `${timestamp}-${originalName}`;
-        
+
         // Ensure upload directory exists
         const uploadDir = path.join(process.cwd(), "public/imgs/uploads");
         await mkdir(uploadDir, { recursive: true });
-        
+
         // Write file
         const filePath = path.join(uploadDir, filename);
         await writeFile(filePath, buffer);
-        
+
         // Store in database
-        const db = getDb();
         try {
-            await db.query(
-                `INSERT INTO media (filename, original_name, mime_type, size, path) 
-                 VALUES (?, ?, ?, ?, ?)`,
-                [filename, file.name, file.type, file.size, `/imgs/uploads/${filename}`]
-            );
+            await prisma.media.create({
+                data: {
+                    filename,
+                    originalName: file.name,
+                    mimeType: file.type,
+                    size: file.size,
+                    path: `/imgs/uploads/${filename}`
+                }
+            });
         } catch (dbError) {
             console.warn("Failed to store media in database:", dbError);
             // Continue anyway - file is uploaded
         }
-        
-        return { 
-            success: true, 
+
+        return {
+            success: true,
             url: `/imgs/uploads/${filename}`,
-            filename 
+            filename
         };
     } catch (error) {
         console.error("Upload failed:", error);
@@ -74,9 +77,10 @@ export async function deleteMedia(filename: string) {
     }
 
     try {
-        const db = getDb();
-        await db.query("DELETE FROM media WHERE filename = ?", [filename]);
-        
+        await prisma.media.deleteMany({
+            where: { filename }
+        });
+
         return { success: true };
     } catch (error) {
         console.error("Delete failed:", error);
@@ -91,13 +95,16 @@ export async function deleteMediaById(id: number, filename?: string) {
     }
 
     try {
-        const db = getDb();
         if (filename) {
-            await db.query("DELETE FROM media WHERE id = ? AND filename = ?", [id, filename]);
+            await prisma.media.deleteMany({
+                where: { id, filename }
+            });
         } else {
-            await db.query("DELETE FROM media WHERE id = ?", [id]);
+            await prisma.media.delete({
+                where: { id }
+            });
         }
-        
+
         return { success: true };
     } catch (error) {
         console.error("Delete failed:", error);
@@ -112,14 +119,11 @@ export async function getMediaLibrary() {
     }
 
     try {
-        const db = getDb();
-        const [rows] = await db.query(`
-            SELECT id, filename, original_name, mime_type, size, path, alt_text, created_at
-            FROM media 
-            ORDER BY created_at DESC
-        `);
-        
-        return { success: true, media: rows };
+        const media = await prisma.media.findMany({
+            orderBy: { createdAt: 'desc' }
+        });
+
+        return { success: true, media };
     } catch (error) {
         console.error("Failed to fetch media:", error);
         return { success: false, error: "Failed to fetch media", media: [] };

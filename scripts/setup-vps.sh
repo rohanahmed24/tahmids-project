@@ -88,8 +88,11 @@ EOF
 echo "📦 Installing Dependencies..."
 npm install
 
-echo "🗄️ Setting up Database Schema..."
-npx tsx setup-production-db.ts
+echo "🗄️ Setting up Database Schema with Prisma..."
+# Generate Prisma Client
+npx prisma generate
+# Push schema to database
+npx prisma db push --accept-data-loss
 
 echo "🏗️ Building Next.js App..."
 npm run build

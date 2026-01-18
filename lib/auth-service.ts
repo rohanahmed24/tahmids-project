@@ -1,6 +1,5 @@
-import { pool } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { RowDataPacket } from "mysql2";
 
 export async function authorizeUser(credentials: Partial<Record<"email" | "password", unknown>>) {
     if (!credentials?.email || !credentials?.password) {
@@ -8,18 +7,15 @@ export async function authorizeUser(credentials: Partial<Record<"email" | "passw
     }
 
     try {
-        const [rows] = await pool.query<RowDataPacket[]>(
-            "SELECT * FROM users WHERE email = ?",
-            [credentials.email]
-        );
+        const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string }
+        });
 
-        if (rows.length === 0) {
+        if (!user || !user.password) {
             return null;
         }
 
-        const user = rows[0];
-
-        const isValid = await bcrypt.compare(credentials.password as string, user.password_hash);
+        const isValid = await bcrypt.compare(credentials.password as string, user.password);
 
         if (!isValid) return null;
 

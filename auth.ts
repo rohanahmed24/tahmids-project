@@ -3,9 +3,8 @@ import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
 import GitHub from "next-auth/providers/github"
-import { pool } from "@/lib/db"
+import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
-import { RowDataPacket, ResultSetHeader } from "mysql2"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
@@ -29,16 +28,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 }
 
                 try {
-                    const [rows] = await pool.query<RowDataPacket[]>(
-                        "SELECT id, name, email, password, role, image FROM users WHERE email = ?",
-                        [credentials.email]
-                    );
+                    const user = await prisma.user.findUnique({
+                        where: { email: credentials.email as string }
+                    });
 
-                    if (rows.length === 0) {
+                    if (!user) {
                         return null;
                     }
-
-                    const user = rows[0];
 
                     // Check if user has a password (for OAuth users, password might be null)
                     if (!user.password) {
@@ -69,66 +65,59 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 if (!user.email) return false;
 
                 try {
-                    const connection = await pool.getConnection();
-                    try {
-                        // Check if user exists
-                        const [rows] = await connection.query<RowDataPacket[]>(
-                            "SELECT id, name, email, role, image FROM users WHERE email = ?",
-                            [user.email]
-                        );
+                    // Check if user exists
+                    let dbUser = await prisma.user.findUnique({
+                        where: { email: user.email }
+                    });
 
-                        if (rows.length === 0) {
-                            // Create new user for OAuth
-                            const [result] = await connection.query<ResultSetHeader>(
-                                "INSERT INTO users (name, email, role, image) VALUES (?, ?, ?, ?)",
-                                [
-                                    user.name || 'User',
-                                    user.email,
-                                    'user',
-                                    user.image || null
-                                ]
-                            );
-                            user.id = result.insertId.toString();
-
-                            // Create account record
-                            await connection.query(
-                                `INSERT INTO accounts (user_id, type, provider, provider_account_id, access_token, token_type) 
-                                 VALUES (?, ?, ?, ?, ?, ?)`,
-                                [
-                                    result.insertId,
-                                    account.type,
-                                    account.provider,
-                                    account.providerAccountId,
-                                    account.access_token || null,
-                                    account.token_type || null
-                                ]
-                            );
-                        } else {
-                            user.id = rows[0].id.toString();
-
-                            // Update existing account or create if not exists
-                            const [accountRows] = await connection.query<RowDataPacket[]>(
-                                "SELECT id FROM accounts WHERE user_id = ? AND provider = ?",
-                                [rows[0].id, account.provider]
-                            );
-
-                            if (accountRows.length === 0) {
-                                await connection.query(
-                                    `INSERT INTO accounts (user_id, type, provider, provider_account_id, access_token, token_type) 
-                                     VALUES (?, ?, ?, ?, ?, ?)`,
-                                    [
-                                        rows[0].id,
-                                        account.type,
-                                        account.provider,
-                                        account.providerAccountId,
-                                        account.access_token || null,
-                                        account.token_type || null
-                                    ]
-                                );
+                    if (!dbUser) {
+                        // Create new user for OAuth
+                        dbUser = await prisma.user.create({
+                            data: {
+                                name: user.name || 'User',
+                                email: user.email,
+                                role: 'user',
+                                image: user.image || null
                             }
+                        });
+
+                        user.id = dbUser.id.toString();
+
+                        // Create account record
+                        await prisma.account.create({
+                            data: {
+                                userId: dbUser.id,
+                                type: account.type,
+                                provider: account.provider,
+                                providerAccountId: account.providerAccountId,
+                                accessToken: account.access_token || null,
+                                tokenType: account.token_type || null
+                            }
+                        });
+                    } else {
+                        user.id = dbUser.id.toString();
+
+                        // Update existing account or create if not exists
+                        // Note: provider + providerAccountId should be unique, but here we check by user_id + provider
+                        const existingAccount = await prisma.account.findFirst({
+                            where: {
+                                userId: dbUser.id,
+                                provider: account.provider
+                            }
+                        });
+
+                        if (!existingAccount) {
+                            await prisma.account.create({
+                                data: {
+                                    userId: dbUser.id,
+                                    type: account.type,
+                                    provider: account.provider,
+                                    providerAccountId: account.providerAccountId,
+                                    accessToken: account.access_token || null,
+                                    tokenType: account.token_type || null
+                                }
+                            });
                         }
-                    } finally {
-                        connection.release();
                     }
                 } catch (error) {
                     console.error("SignIn callback error:", error);

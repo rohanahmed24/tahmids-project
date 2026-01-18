@@ -1,8 +1,7 @@
 "use server";
 
-import { pool } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { RowDataPacket, ResultSetHeader } from "mysql2";
 
 export async function registerUser(formData: FormData) {
   const name = formData.get("name") as string;
@@ -18,33 +17,30 @@ export async function registerUser(formData: FormData) {
   }
 
   try {
-    const connection = await pool.getConnection();
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
 
-    try {
-      // Check if user already exists
-      const [existingUsers] = await connection.query<RowDataPacket[]>(
-        "SELECT id FROM users WHERE email = ?",
-        [email]
-      );
-
-      if (existingUsers.length > 0) {
-        return { success: false, message: "An account with this email already exists" };
-      }
-
-      // Hash password
-      const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash(password, salt);
-
-      // Insert new user
-      await connection.query<ResultSetHeader>(
-        "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-        [name, email, passwordHash]
-      );
-
-      return { success: true, message: "Account created successfully" };
-    } finally {
-      connection.release();
+    if (existingUser) {
+      return { success: false, message: "An account with this email already exists" };
     }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
+    // Insert new user
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: passwordHash,
+        role: "user"
+      }
+    });
+
+    return { success: true, message: "Account created successfully" };
   } catch (error) {
     console.error("Registration error:", error);
     return { success: false, message: "Something went wrong. Please try again." };

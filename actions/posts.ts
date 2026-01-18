@@ -1,6 +1,6 @@
 "use server";
 
-import { getDb } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { verifyAdmin } from "@/actions/admin-auth";
@@ -33,7 +33,7 @@ export async function createPost(formData: FormData) {
     const session = await auth();
     const isAdmin = await verifyAdmin();
 
-    if (!session?.user?.name) {
+    if (!session?.user?.name || !session?.user?.email) {
         throw new Error("User not authenticated");
     }
 
@@ -44,7 +44,7 @@ export async function createPost(formData: FormData) {
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
     const category = formData.get("category") as string;
-    const author = session.user.name;
+    const authorName = session.user.name;
     const videoUrl = (formData.get("videoUrl") as string) || undefined;
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = (formData.get("topic_slug") as string) || undefined;
@@ -63,24 +63,36 @@ export async function createPost(formData: FormData) {
     const uploadedImagePath = await handleFileUpload(coverImageFile);
     const coverImage = uploadedImagePath || (formData.get("coverImage") as string) || undefined;
 
-    const date = new Date().toISOString().split('T')[0];
+    const date = new Date();
 
-    const db = getDb();
+    // Find author id
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email }
+    });
+
     try {
-        await db.query(
-            `INSERT INTO posts (
-                slug, title, subtitle, date, author, category, content, excerpt,
-                coverImage, videoUrl, topic_slug, accent_color, featured, published
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                slug, title, subtitle, date, author, category, content, excerpt,
-                coverImage, videoUrl, topic_slug, accent_color, featured, published
-            ]
-        );
-    } catch (error: unknown) {
+        await prisma.post.create({
+            data: {
+                slug,
+                title,
+                subtitle,
+                date,
+                authorName,
+                authorId: user?.id,
+                category,
+                content,
+                excerpt,
+                coverImage,
+                videoUrl,
+                topicSlug: topic_slug,
+                accentColor: accent_color,
+                featured,
+                published
+            }
+        });
+    } catch (error: any) {
         console.error("Failed to create post:", error);
-        const err = error as { code?: string; };
-        if (err.code === 'ER_DUP_ENTRY') {
+        if (error.code === 'P2002') {
             throw new Error("A story with this title/slug already exists. Please change the title.");
         }
         throw new Error("Failed to create post");
@@ -97,9 +109,10 @@ export async function deletePost(slug: string) {
         throw new Error("Unauthorized");
     }
 
-    const db = getDb();
     try {
-        await db.query("DELETE FROM posts WHERE slug = ?", [slug]);
+        await prisma.post.delete({
+            where: { slug }
+        });
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {
@@ -134,21 +147,23 @@ export async function updatePost(originalSlug: string, formData: FormData) {
         coverImage = uploadedImagePath;
     }
 
-    const db = getDb();
-
     try {
-        await db.query(
-            `UPDATE posts SET 
-                title = ?, subtitle = ?, category = ?, content = ?, excerpt = ?,
-                coverImage = ?, videoUrl = ?, topic_slug = ?, accent_color = ?, 
-                featured = ?, published = ?
-             WHERE slug = ?`,
-            [
-                title, subtitle, category, content, excerpt,
-                coverImage, videoUrl, topic_slug, accent_color,
-                featured, published, originalSlug
-            ]
-        );
+        await prisma.post.update({
+            where: { slug: originalSlug },
+            data: {
+                title,
+                subtitle,
+                category,
+                content,
+                excerpt,
+                coverImage,
+                videoUrl,
+                topicSlug: topic_slug,
+                accentColor: accent_color,
+                featured,
+                published
+            }
+        });
 
         revalidatePath(`/article/${originalSlug}`);
         revalidatePath(`/admin/edit/${originalSlug}`);
@@ -168,9 +183,11 @@ export async function togglePostStatus(slug: string, published: boolean) {
         throw new Error("Unauthorized");
     }
 
-    const db = getDb();
     try {
-        await db.query("UPDATE posts SET published = ? WHERE slug = ?", [published, slug]);
+        await prisma.post.update({
+            where: { slug },
+            data: { published }
+        });
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {

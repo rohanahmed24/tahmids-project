@@ -1,5 +1,5 @@
-import { getDb } from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import { prisma } from "@/lib/db";
+import { Media } from "@prisma/client";
 
 export interface MediaStats {
     totalImages: number;
@@ -20,21 +20,22 @@ export interface MediaItem {
 }
 
 export async function getMediaStats(): Promise<MediaStats> {
-    const db = getDb();
-    
     try {
-        const [rows] = await db.query<RowDataPacket[]>(`
+        // Use raw query for complex aggregation matching original logic
+        const rows = await prisma.$queryRaw<any[]>`
             SELECT 
                 COUNT(CASE WHEN mime_type LIKE 'image/%' THEN 1 END) as totalImages,
                 COUNT(CASE WHEN mime_type LIKE 'video/%' THEN 1 END) as totalVideos,
                 COUNT(CASE WHEN mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%' THEN 1 END) as totalDocuments,
                 COALESCE(SUM(size), 0) as totalSize
             FROM media
-        `);
+        `;
 
         const stats = rows[0];
-        const totalSizeGB = (Number(stats?.totalSize) || 0) / (1024 * 1024 * 1024);
-        
+        // Ensure numbers are handled correctly (BigInt to Number if needed)
+        const totalSize = Number(stats?.totalSize) || 0;
+        const totalSizeGB = totalSize / (1024 * 1024 * 1024);
+
         return {
             totalImages: Number(stats?.totalImages) || 0,
             totalVideos: Number(stats?.totalVideos) || 0,
@@ -54,26 +55,20 @@ export async function getMediaStats(): Promise<MediaStats> {
 }
 
 export async function getAllMedia(): Promise<MediaItem[]> {
-    const db = getDb();
-    
     try {
-        const [rows] = await db.query<RowDataPacket[]>(`
-            SELECT 
-                id, filename, original_name as originalName, mime_type as mimeType,
-                size, path, alt_text as altText, created_at as createdAt
-            FROM media 
-            ORDER BY created_at DESC
-        `);
-        
-        return rows.map(row => ({
-            id: String(row.id),
-            filename: row.filename,
-            originalName: row.originalName,
-            mimeType: row.mimeType,
-            size: row.size,
-            path: row.path,
-            altText: row.altText,
-            createdAt: row.createdAt.toISOString()
+        const mediaItems = await prisma.media.findMany({
+            orderBy: { createdAt: 'desc' }
+        });
+
+        return mediaItems.map(item => ({
+            id: String(item.id),
+            filename: item.filename,
+            originalName: item.originalName,
+            mimeType: item.mimeType,
+            size: item.size,
+            path: item.path,
+            altText: item.altText || undefined, // explicit undefined for optional
+            createdAt: item.createdAt.toISOString()
         }));
     } catch (error) {
         console.error("Error fetching media:", error);

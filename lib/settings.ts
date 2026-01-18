@@ -1,5 +1,4 @@
-import { getDb } from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import { prisma } from "@/lib/db";
 
 export type SiteSettings = {
     siteName: string;
@@ -7,12 +6,14 @@ export type SiteSettings = {
 };
 
 export async function getSettings(): Promise<SiteSettings> {
-    const db = getDb();
     try {
-        const [rows] = await db.query<RowDataPacket[]>("SELECT key_name, value FROM settings");
+        const rows = await prisma.setting.findMany({
+            select: { keyName: true, value: true }
+        });
+
         const settings: Record<string, string> = {};
         rows.forEach((row) => {
-            settings[row.key_name as string] = row.value as string;
+            settings[row.keyName] = row.value;
         });
 
         return {

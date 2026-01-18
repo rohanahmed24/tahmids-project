@@ -16,9 +16,10 @@ npm install
 echo "🏗️ Building application..."
 npm run build
 
-# 4. Migrate Database (if needed)
-# echo "🗄️ Running database migrations..."
-# npx tsx setup-production-db.ts
+# 4. Migrate Database
+echo "🗄️ Running database migrations..."
+npx prisma generate
+npx prisma db push
 
 # 5. Restart PM2
 echo "🔄 Restarting application..."

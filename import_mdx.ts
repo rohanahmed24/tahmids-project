@@ -1,12 +1,10 @@
 
-import { getDb } from "./lib/db";
-import { RowDataPacket } from "mysql2/promise";
+import { prisma } from "./lib/db";
 import fs from "fs/promises";
 import path from "path";
 import matter from "gray-matter";
 
 async function importMdx() {
-    const db = getDb();
     const postsDir = path.join(process.cwd(), "content/posts");
 
     try {
@@ -25,45 +23,38 @@ async function importMdx() {
             console.log(`Processing ${slug}...`);
 
             // Check if exists
-            const [rows] = await db.query<RowDataPacket[]>("SELECT id FROM posts WHERE slug = ?", [slug]);
+            const existingPost = await prisma.post.findUnique({
+                where: { slug }
+            });
 
-            if (rows.length > 0) {
+            if (existingPost) {
                 console.log(`Updating existing post: ${slug}`);
-                await db.query(
-                    "UPDATE posts SET title = ?, date = ?, author = ?, category = ?, content = ?, coverImage = ?, videoUrl = ? WHERE slug = ?",
-                    [
-                        data.title,
-                        // Convert date to ISO string if needed, or keep as string if DB column is varchar. 
-                        // lib/posts.ts Post type says string. Usually safe to pass as is if consistent.
-                        // But let's verify if DB expects datetime or string. 
-                        // Existing update_db_missing_articles.ts used "Dec 10". 
-                        // MDX has "December 15, 2024". 
-                        // Let's assume the DB schema handles it or it's a varchar.
-                        // I'll leave it as is for now.
-                        data.date,
-                        data.author,
-                        data.category,
-                        mdxContent,
-                        data.coverImage,
-                        data.videoUrl || null,
-                        slug
-                    ]
-                );
+                await prisma.post.update({
+                    where: { slug },
+                    data: {
+                        title: data.title,
+                        date: new Date(data.date),
+                        authorName: data.author,
+                        category: data.category,
+                        content: mdxContent,
+                        coverImage: data.coverImage,
+                        videoUrl: data.videoUrl || null
+                    }
+                });
             } else {
                 console.log(`Inserting new post: ${slug}`);
-                await db.query(
-                    "INSERT INTO posts (slug, title, date, author, category, content, coverImage, videoUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    [
+                await prisma.post.create({
+                    data: {
                         slug,
-                        data.title,
-                        data.date,
-                        data.author,
-                        data.category,
-                        mdxContent,
-                        data.coverImage,
-                        data.videoUrl || null
-                    ]
-                );
+                        title: data.title,
+                        date: new Date(data.date),
+                        authorName: data.author,
+                        category: data.category,
+                        content: mdxContent,
+                        coverImage: data.coverImage,
+                        videoUrl: data.videoUrl || null
+                    }
+                });
             }
         }
         console.log("Import complete.");

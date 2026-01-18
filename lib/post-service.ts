@@ -1,4 +1,4 @@
-import { getDb } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { verifyAdmin } from "@/actions/admin-auth";
 import { writeFile, mkdir } from "fs/promises";
@@ -41,12 +41,12 @@ export class PostService {
         if (!session?.user?.name) {
             throw new Error("User not authenticated");
         }
-        
+
         const isAdmin = await verifyAdmin();
         if (!isAdmin) {
             throw new Error("Unauthorized");
         }
-        
+
         return session.user.name;
     }
 
@@ -54,7 +54,7 @@ export class PostService {
         if (file.size > MAX_FILE_SIZE) {
             throw new Error("File size exceeds 5MB limit");
         }
-        
+
         if (!ALLOWED_FILE_TYPES.includes(file.type)) {
             throw new Error("Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed");
         }
@@ -62,11 +62,11 @@ export class PostService {
 
     private validatePostData(data: Partial<PostFormData>): void {
         const errors: string[] = [];
-        
+
         if (!data.title?.trim()) errors.push("Title is required");
         if (!data.content?.trim()) errors.push("Content is required");
         if (!data.category?.trim()) errors.push("Category is required");
-        
+
         if (errors.length > 0) {
             throw new Error(`Validation failed: ${errors.join(", ")}`);
         }
@@ -74,7 +74,7 @@ export class PostService {
 
     private async handleFileUpload(file: File | null): Promise<string | undefined> {
         if (!file || file.size === 0) return undefined;
-        
+
         this.validateFile(file);
 
         const bytes = await file.arrayBuffer();
@@ -93,7 +93,7 @@ export class PostService {
         if (!title?.trim()) {
             throw new Error("Title is required to generate slug");
         }
-        
+
         return title
             .toLowerCase()
             .trim()
@@ -105,9 +105,9 @@ export class PostService {
 
     private generateExcerpt(content: string): string {
         if (!content?.trim()) return "";
-        
+
         const plainText = content.replace(/<[^>]*>/g, ''); // Remove HTML tags
-        return plainText.length > EXCERPT_LENGTH 
+        return plainText.length > EXCERPT_LENGTH
             ? plainText.substring(0, EXCERPT_LENGTH).trim() + "..."
             : plainText;
     }
@@ -126,77 +126,75 @@ export class PostService {
             slug: (formData.get("slug") as string)?.trim() || undefined,
             coverImage: (formData.get("coverImage") as string)?.trim() || undefined,
         };
-        
+
         this.validatePostData(data);
         return data;
     }
 
     private async insertPost(postData: PostInsertData): Promise<void> {
-        const db = getDb();
-        
         try {
-            await db.query(
-                `INSERT INTO posts (
-                    slug, title, subtitle, date, author, category, content, excerpt,
-                    cover_image, video_url, topic_slug, accent_color, featured, published
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    postData.slug, postData.title, postData.subtitle, postData.date, 
-                    postData.author, postData.category, postData.content, postData.excerpt,
-                    postData.cover_image, postData.video_url, postData.topic_slug, 
-                    postData.accent_color, postData.featured, postData.published
-                ]
-            );
+            await prisma.post.create({
+                data: {
+                    slug: postData.slug!,
+                    title: postData.title,
+                    subtitle: postData.subtitle,
+                    date: new Date(postData.date),
+                    authorName: postData.author, // Assuming authorName exists, or standardizing on authorId
+                    category: postData.category,
+                    content: postData.content,
+                    excerpt: postData.excerpt,
+                    coverImage: postData.cover_image,
+                    videoUrl: postData.video_url,
+                    topicSlug: postData.topic_slug,
+                    accentColor: postData.accent_color,
+                    featured: postData.featured,
+                    published: postData.published
+                }
+            });
         } catch (error: unknown) {
             console.error("Database insert failed:", error);
-            
-            if (error && typeof error === 'object' && 'code' in error) {
-                const dbError = error as { code: string; sqlMessage?: string };
-                
-                switch (dbError.code) {
-                    case 'ER_DUP_ENTRY':
-                        throw new Error("A story with this title/slug already exists. Please change the title.");
-                    case 'ER_DATA_TOO_LONG':
-                        throw new Error("Content is too long. Please reduce the content size.");
-                    case 'ER_BAD_NULL_ERROR':
-                        throw new Error("Required field is missing. Please check all required fields.");
-                    default:
-                        throw new Error(`Database error: ${dbError.sqlMessage || 'Unknown error'}`);
-                }
+
+            // Check for Prisma unique constraint violation
+            if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'P2002') {
+                throw new Error("A story with this title/slug already exists. Please change the title.");
             }
-            
+
             throw new Error("Failed to create post. Please try again.");
         }
     }
 
     private async updatePostInDb(originalSlug: string, postData: Partial<PostInsertData>): Promise<void> {
-        const db = getDb();
-        
         try {
-            const [result] = await db.query(
-                `UPDATE posts SET 
-                    title = ?, subtitle = ?, category = ?, content = ?, excerpt = ?,
-                    cover_image = ?, video_url = ?, topic_slug = ?, accent_color = ?, 
-                    featured = ?, published = ?
-                 WHERE slug = ?`,
-                [
-                    postData.title, postData.subtitle, postData.category, postData.content, postData.excerpt,
-                    postData.cover_image, postData.video_url, postData.topic_slug, postData.accent_color, 
-                    postData.featured, postData.published, originalSlug
-                ]
-            );
-            
-            // Check if any rows were affected
-            if (Array.isArray(result) && 'affectedRows' in result[0] && result[0].affectedRows === 0) {
-                throw new Error("Post not found or no changes made");
-            }
+            const dataToUpdate: any = {
+                title: postData.title,
+                subtitle: postData.subtitle,
+                category: postData.category,
+                content: postData.content,
+                excerpt: postData.excerpt,
+                coverImage: postData.cover_image,
+                videoUrl: postData.video_url,
+                topicSlug: postData.topic_slug,
+                accentColor: postData.accent_color,
+                featured: postData.featured,
+                published: postData.published
+            };
+
+            // Remove undefined keys
+            Object.keys(dataToUpdate).forEach(key => dataToUpdate[key] === undefined && delete dataToUpdate[key]);
+
+            await prisma.post.update({
+                where: { slug: originalSlug },
+                data: dataToUpdate
+            });
+
         } catch (error: unknown) {
             console.error("Database update failed:", error);
-            
-            if (error instanceof Error && error.message === "Post not found or no changes made") {
-                throw error;
+
+            // Check for Prisma record not found
+            if (error && typeof error === 'object' && 'code' in error && (error as any).code === 'P2025') {
+                throw new Error("Post not found or no changes made");
             }
-            
+
             throw new Error("Failed to update post. Please try again.");
         }
     }
@@ -204,7 +202,7 @@ export class PostService {
     private revalidatePostPaths(slug?: string): void {
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
-        
+
         if (slug) {
             revalidatePath(`/article/${slug}`);
             revalidatePath(`/admin/edit/${slug}`);
@@ -213,19 +211,19 @@ export class PostService {
 
     async createPost(formData: FormData): Promise<void> {
         const author = await this.validateAuthentication();
-        
+
         try {
             // Extract and validate form data
             const postFormData = this.extractFormData(formData);
-            
+
             // Handle file upload
             const coverImageFile = formData.get("coverImageFile") as File;
             const uploadedImagePath = await this.handleFileUpload(coverImageFile);
             const coverImage = uploadedImagePath || postFormData.coverImage;
-            
+
             // Generate slug if not provided
             const slug = postFormData.slug || this.generateSlug(postFormData.title);
-            
+
             // Prepare post data for insertion
             const postData: PostInsertData = {
                 ...postFormData,
@@ -234,15 +232,15 @@ export class PostService {
                 excerpt: this.generateExcerpt(postFormData.content),
                 cover_image: coverImage,
                 video_url: postFormData.videoUrl,
-                date: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
+                date: new Date().toISOString(), // Use ISO string for consistency
             };
-            
+
             // Insert into database
             await this.insertPost(postData);
-            
+
             // Revalidate cache
             this.revalidatePostPaths();
-            
+
         } catch (error) {
             console.error("Create post failed:", error);
             throw error; // Re-throw to let the UI handle the error
@@ -255,12 +253,12 @@ export class PostService {
         try {
             // Extract and validate form data
             const postFormData = this.extractFormData(formData);
-            
+
             // Handle file upload
             const coverImageFile = formData.get("coverImageFile") as File;
             const uploadedImagePath = await this.handleFileUpload(coverImageFile);
             const coverImage = uploadedImagePath || postFormData.coverImage;
-            
+
             // Prepare update data
             const updateData: Partial<PostInsertData> = {
                 ...postFormData,
@@ -268,13 +266,13 @@ export class PostService {
                 cover_image: coverImage,
                 video_url: postFormData.videoUrl,
             };
-            
+
             // Update in database
             await this.updatePostInDb(originalSlug, updateData);
-            
+
             // Revalidate cache
             this.revalidatePostPaths(originalSlug);
-            
+
         } catch (error) {
             console.error("Update post failed:", error);
             throw error; // Re-throw to let the UI handle the error
@@ -284,9 +282,8 @@ export class PostService {
     async deletePost(slug: string): Promise<void> {
         await this.validateAuthentication();
 
-        const db = getDb();
         try {
-            await db.query("DELETE FROM posts WHERE slug = ?", [slug]);
+            await prisma.post.delete({ where: { slug } });
             this.revalidatePostPaths();
         } catch (error) {
             console.error("Failed to delete post:", error);
@@ -297,9 +294,11 @@ export class PostService {
     async togglePostStatus(slug: string, published: boolean): Promise<void> {
         await this.validateAuthentication();
 
-        const db = getDb();
         try {
-            await db.query("UPDATE posts SET published = ? WHERE slug = ?", [published, slug]);
+            await prisma.post.update({
+                where: { slug },
+                data: { published }
+            });
             this.revalidatePostPaths();
         } catch (error) {
             console.error("Failed to toggle post status:", error);

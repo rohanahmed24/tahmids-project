@@ -1,6 +1,7 @@
-import { getDb } from "@/lib/db";
-import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { prisma } from "@/lib/db";
+import { User as PrismaUser } from "@prisma/client";
 
+// Re-export type compatible with frontend
 export type User = {
     id: number;
     name: string;
@@ -8,32 +9,36 @@ export type User = {
     role: 'user' | 'admin';
     created_at: string;
     updated_at?: string;
-    image?: string;
+    image?: string | null;
     email_verified?: string | null;
     article_count?: number;
 };
 
+function mapPrismaUser(user: PrismaUser & { _count?: { posts: number } }): User {
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role as 'user' | 'admin',
+        created_at: user.createdAt.toISOString(),
+        updated_at: user.updatedAt.toISOString(),
+        image: user.image,
+        email_verified: user.emailVerified?.toISOString() || null,
+        article_count: user._count?.posts || 0
+    };
+}
+
 export async function getAllUsers(): Promise<User[]> {
-    const db = getDb();
     try {
-        const [rows] = await db.query<RowDataPacket[]>(
-            `SELECT 
-                u.id, 
-                u.name, 
-                u.email, 
-                u.role, 
-                u.image,
-                u.email_verified,
-                u.created_at, 
-                u.updated_at,
-                COALESCE((SELECT COUNT(*) FROM posts p WHERE p.author = u.name), 0) as article_count
-             FROM users u 
-             ORDER BY u.created_at DESC`
-        );
-        return rows.map(row => ({
-            ...row,
-            article_count: Number(row.article_count) || 0
-        })) as User[];
+        const users = await prisma.user.findMany({
+            include: {
+                _count: {
+                    select: { posts: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        return users.map(mapPrismaUser);
     } catch (error) {
         console.error("Error fetching users:", error);
         return [];
@@ -41,31 +46,16 @@ export async function getAllUsers(): Promise<User[]> {
 }
 
 export async function getUserById(id: number): Promise<User | null> {
-    const db = getDb();
     try {
-        const [rows] = await db.query<RowDataPacket[]>(
-            `SELECT 
-                u.id, 
-                u.name, 
-                u.email, 
-                u.role, 
-                u.image,
-                u.email_verified,
-                u.created_at, 
-                u.updated_at,
-                COALESCE((SELECT COUNT(*) FROM posts p WHERE p.author = u.name), 0) as article_count
-             FROM users u 
-             WHERE u.id = ?`,
-            [id]
-        );
-
-        if (rows.length === 0) return null;
-
-        const user = rows[0];
-        return {
-            ...user,
-            article_count: Number(user.article_count) || 0
-        } as User;
+        const user = await prisma.user.findUnique({
+            where: { id },
+            include: {
+                _count: {
+                    select: { posts: true }
+                }
+            }
+        });
+        return user ? mapPrismaUser(user) : null;
     } catch (error) {
         console.error("Error fetching user by ID:", error);
         return null;
@@ -73,31 +63,16 @@ export async function getUserById(id: number): Promise<User | null> {
 }
 
 export async function getUserByEmail(email: string): Promise<User | null> {
-    const db = getDb();
     try {
-        const [rows] = await db.query<RowDataPacket[]>(
-            `SELECT 
-                u.id, 
-                u.name, 
-                u.email, 
-                u.role, 
-                u.image,
-                u.email_verified,
-                u.created_at, 
-                u.updated_at,
-                COALESCE((SELECT COUNT(*) FROM posts p WHERE p.author = u.name), 0) as article_count
-             FROM users u 
-             WHERE u.email = ?`,
-            [email]
-        );
-
-        if (rows.length === 0) return null;
-
-        const user = rows[0];
-        return {
-            ...user,
-            article_count: Number(user.article_count) || 0
-        } as User;
+        const user = await prisma.user.findUnique({
+            where: { email },
+            include: {
+                _count: {
+                    select: { posts: true }
+                }
+            }
+        });
+        return user ? mapPrismaUser(user) : null;
     } catch (error) {
         console.error("Error fetching user by email:", error);
         return null;
@@ -105,24 +80,27 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 }
 
 export async function getUserStats() {
-    const db = getDb();
     try {
-        // Single optimized query to get all stats
-        const [rows] = await db.query<RowDataPacket[]>(`
-            SELECT 
-                COUNT(*) as totalUsers,
-                SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as adminUsers,
-                SUM(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH) THEN 1 ELSE 0 END) as recentUsers,
-                SUM(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK) THEN 1 ELSE 0 END) as activeUsers
-            FROM users
-        `);
+        const totalUsers = await prisma.user.count();
+        const adminUsers = await prisma.user.count({ where: { role: 'admin' } });
 
-        const stats = rows[0];
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        const recentUsers = await prisma.user.count({
+            where: { createdAt: { gte: oneMonthAgo } }
+        });
+
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const activeUsers = await prisma.user.count({
+            where: { createdAt: { gte: oneWeekAgo } }
+        });
+
         return {
-            totalUsers: Number(stats?.totalUsers) || 0,
-            adminUsers: Number(stats?.adminUsers) || 0,
-            recentUsers: Number(stats?.recentUsers) || 0,
-            activeUsers: Number(stats?.activeUsers) || 0
+            totalUsers,
+            adminUsers,
+            recentUsers,
+            activeUsers
         };
     } catch (error) {
         console.error("Error fetching user stats:", error);
@@ -142,22 +120,17 @@ export async function createUser(userData: {
     role?: 'user' | 'admin';
     image?: string;
 }): Promise<User | null> {
-    const db = getDb();
     try {
-        const [result] = await db.query(
-            `INSERT INTO users (name, email, password, role, image) 
-             VALUES (?, ?, ?, ?, ?)`,
-            [
-                userData.name,
-                userData.email,
-                userData.password || null,
-                userData.role || 'user',
-                userData.image || null
-            ]
-        );
-
-        const insertId = (result as ResultSetHeader).insertId;
-        return await getUserById(insertId);
+        const user = await prisma.user.create({
+            data: {
+                name: userData.name,
+                email: userData.email,
+                password: userData.password,
+                role: userData.role || 'user',
+                image: userData.image
+            }
+        });
+        return mapPrismaUser(user);
     } catch (error) {
         console.error("Error creating user:", error);
         return null;
@@ -165,25 +138,21 @@ export async function createUser(userData: {
 }
 
 export async function updateUser(id: number, updates: Partial<User>): Promise<User | null> {
-    const db = getDb();
     try {
-        const setClause = Object.keys(updates)
-            .filter(key => key !== 'id' && key !== 'created_at' && key !== 'article_count')
-            .map(key => `${key} = ?`)
-            .join(', ');
+        // Filter out fields that shouldn't be updated directly or map them
+        const { id: _, created_at, article_count, role, ...cleanUpdates } = updates;
 
-        const values = Object.entries(updates)
-            .filter(([key]) => key !== 'id' && key !== 'created_at' && key !== 'article_count')
-            .map(([, value]) => value);
+        const data: any = { ...cleanUpdates };
+        if (role) data.role = role; // allow role update if provided
 
-        if (setClause) {
-            await db.query(
-                `UPDATE users SET ${setClause} WHERE id = ?`,
-                [...values, id]
-            );
-        }
-
-        return await getUserById(id);
+        const user = await prisma.user.update({
+            where: { id },
+            data,
+            include: {
+                _count: { select: { posts: true } }
+            }
+        });
+        return mapPrismaUser(user);
     } catch (error) {
         console.error("Error updating user:", error);
         return null;
@@ -191,9 +160,8 @@ export async function updateUser(id: number, updates: Partial<User>): Promise<Us
 }
 
 export async function deleteUser(id: number): Promise<boolean> {
-    const db = getDb();
     try {
-        await db.query('DELETE FROM users WHERE id = ?', [id]);
+        await prisma.user.delete({ where: { id } });
         return true;
     } catch (error) {
         console.error("Error deleting user:", error);

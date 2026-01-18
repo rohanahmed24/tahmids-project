@@ -1,5 +1,4 @@
-import { getDb } from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import { prisma } from "@/lib/db";
 
 export interface MonthlyGrowth {
     month: string;
@@ -13,20 +12,23 @@ export interface TopArticle {
 }
 
 export async function getUserGrowthOverTime(): Promise<MonthlyGrowth[]> {
-    const db = getDb();
     try {
-        // Group users by Month-Year (e.g., "Jan 2024")
-        // MySQL format: %b %Y
-        const [rows] = await db.query<RowDataPacket[]>(
-            `SELECT 
+        // Using raw query for efficient date grouping
+        const rows = await prisma.$queryRaw<MonthlyGrowth[]>`
+            SELECT 
                 DATE_FORMAT(created_at, '%b %Y') as month,
                 COUNT(*) as users
-             FROM users
-             GROUP BY DATE_FORMAT(created_at, '%Y-%m'), month
-             ORDER BY DATE_FORMAT(created_at, '%Y-%m') ASC
-             LIMIT 6`
-        );
-        return rows as MonthlyGrowth[];
+            FROM users
+            GROUP BY DATE_FORMAT(created_at, '%Y-%m'), month
+            ORDER BY DATE_FORMAT(created_at, '%Y-%m') ASC
+            LIMIT 6
+        `;
+
+        // Prisma raw query returns BigInt for count in some environments, need to handle simple numbers
+        return rows.map(row => ({
+            ...row,
+            users: Number(row.users)
+        }));
     } catch (error) {
         console.error("Error fetching user growth:", error);
         return [];
@@ -34,16 +36,13 @@ export async function getUserGrowthOverTime(): Promise<MonthlyGrowth[]> {
 }
 
 export async function getTopArticles(limit: number = 5): Promise<TopArticle[]> {
-    const db = getDb();
     try {
-        const [rows] = await db.query<RowDataPacket[]>(
-            `SELECT title, views 
-             FROM posts 
-             ORDER BY views DESC 
-             LIMIT ?`,
-            [limit]
-        );
-        return rows as TopArticle[];
+        const posts = await prisma.post.findMany({
+            select: { title: true, views: true },
+            orderBy: { views: 'desc' },
+            take: limit
+        });
+        return posts;
     } catch (error) {
         console.error("Error fetching top articles:", error);
         return [];

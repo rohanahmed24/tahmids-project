@@ -1,6 +1,6 @@
 'use server';
 
-import { getDb } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function generateVideoForArticle(slug: string) {
@@ -14,11 +14,10 @@ export async function generateVideoForArticle(slug: string) {
         // Using a reliable sample video for demonstration
         const mockVideoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
-        const db = getDb();
-        await db.query(
-            'UPDATE posts SET videoUrl = ? WHERE slug = ?',
-            [mockVideoUrl, slug]
-        );
+        await prisma.post.update({
+            where: { slug },
+            data: { videoUrl: mockVideoUrl }
+        });
 
         revalidatePath(`/article/${slug}`);
         revalidatePath('/');

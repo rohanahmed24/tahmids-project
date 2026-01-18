@@ -43,7 +43,7 @@ export default async function ArticlePage({
                         author={post.author}
                         date={post.date}
                         category={post.category}
-                        coverImage={post.coverImage}
+                        coverImage={post.coverImage || undefined}
                         slug={post.slug}
                     />
                 </MotionWrapper>
@@ -70,7 +70,7 @@ export default async function ArticlePage({
                         {/* Audio Player (Default/Listen Mode) */}
                         {!isWatchMode && (
                             <div className="mb-8 space-y-4">
-                                <ArticleAudioPlayer title={post.title} content={post.content} />
+                                <ArticleAudioPlayer title={post.title} content={post.content || ""} />
                                 {!post.videoUrl && (
                                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-bg-secondary rounded-xl border border-border-subtle">
                                         <div className="text-sm text-text-secondary">
@@ -84,7 +84,7 @@ export default async function ArticlePage({
 
                         <ArticleContent>
                             <div className="prose prose-lg max-w-none">
-                                {post.content.split('\n').map((paragraph, index) => (
+                                {(post.content || "").split('\n').map((paragraph, index) => (
                                     paragraph.trim() ? (
                                         <p key={index} className="mb-4 text-text-main leading-relaxed">
                                             {paragraph}

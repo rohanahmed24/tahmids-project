@@ -1,7 +1,6 @@
 "use server";
 
-import { getDb } from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import { prisma } from "@/lib/db";
 import { Post } from "@/lib/posts";
 
 export async function searchPosts(query: string): Promise<Post[]> {
@@ -9,20 +8,33 @@ export async function searchPosts(query: string): Promise<Post[]> {
         return [];
     }
 
-    const searchTerm = `%${query.trim()}%`;
-    const db = getDb();
+    const searchTerm = query.trim();
 
     try {
-        const [rows] = await db.query<RowDataPacket[]>(
-            `SELECT * FROM posts 
-             WHERE title LIKE ? 
-             OR content LIKE ? 
-             OR subtitle LIKE ? 
-             OR category LIKE ? 
-             ORDER BY date DESC`,
-            [searchTerm, searchTerm, searchTerm, searchTerm]
-        );
-        return rows as Post[];
+        const posts = await prisma.post.findMany({
+            where: {
+                OR: [
+                    { title: { contains: searchTerm } },
+                    { content: { contains: searchTerm } },
+                    { subtitle: { contains: searchTerm } },
+                    { category: { contains: searchTerm } }
+                ],
+                published: true
+            },
+            orderBy: { date: 'desc' }
+        });
+
+        // Map Prisma result to Post type where necessary
+        return posts.map(post => ({
+            ...post,
+            date: post.date.toISOString(),
+            createdAt: post.createdAt.toISOString(),
+            updatedAt: post.updatedAt.toISOString(),
+            // Ensure compatibility with existing Post type which expects specific field names
+            created_at: post.createdAt.toISOString(),
+            updated_at: post.updatedAt.toISOString()
+        })) as unknown as Post[];
+
     } catch (error) {
         console.error("Search failed:", error);
         return [];
