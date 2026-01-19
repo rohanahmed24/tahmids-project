@@ -1,12 +1,15 @@
 "use client";
 
-import { User } from "next-auth";
 import { Bell, Search, Settings, LogOut } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { logoutAdmin } from "@/actions/admin-auth";
 import { useState } from "react";
 
 interface DashboardHeaderProps {
-    user: User;
+    user: {
+        name?: string | null;
+        email?: string | null;
+        image?: string | null;
+    };
 }
 
 export function DashboardHeader({ user }: DashboardHeaderProps) {
@@ -56,7 +59,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                             </span>
                         </div>
                         <button
-                            onClick={() => signOut()}
+                            onClick={() => logoutAdmin()}
                             className="p-2 text-text-secondary hover:text-red-500 transition-colors"
                             title="Sign Out"
                         >

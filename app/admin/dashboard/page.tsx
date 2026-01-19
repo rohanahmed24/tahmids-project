@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import { verifyAdmin } from "@/actions/admin-auth";
+import { verifyAdmin, getAdminSession } from "@/actions/admin-auth";
 import { getAllUsers, getUserStats } from "@/lib/users";
 import { getAllPostsForAdmin, getPostStats } from "@/lib/posts";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
@@ -14,7 +13,7 @@ import { QuickActions } from "@/components/admin/QuickActions";
 import { MediaLibrary } from "@/components/admin/MediaLibrary";
 
 export default async function AdminDashboard() {
-    const session = await auth();
+    const session = await getAdminSession();
     const isAdmin = await verifyAdmin();
 
     if (!session || !isAdmin) {
@@ -44,7 +43,7 @@ export default async function AdminDashboard() {
         <div className="min-h-screen bg-bg-primary">
             <div className="max-w-[1600px] mx-auto p-6 space-y-8">
                 {/* Header */}
-                <DashboardHeader user={session.user} />
+                <DashboardHeader user={session} />
 
                 {/* Stats Overview */}
                 <StatsCards stats={dashboardStats} />
