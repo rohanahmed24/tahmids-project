@@ -25,26 +25,26 @@ export default async function SettingsPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Settings Navigation */}
                     <div className="lg:col-span-1">
-                        <div className="bg-bg-secondary rounded-xl border border-border-primary p-4 space-y-2">
-                            <h3 className="font-semibold text-text-primary mb-4">Settings Categories</h3>
-                            <nav className="space-y-1">
-                                <a href="#general" className="flex items-center gap-3 px-3 py-2 text-text-primary bg-accent-primary/10 rounded-lg">
+                        <div className="bg-bg-secondary rounded-xl border border-border-primary p-4 space-y-2 lg:sticky lg:top-24">
+                            <h3 className="font-semibold text-text-primary mb-4 hidden lg:block">Settings Categories</h3>
+                            <nav className="flex overflow-x-auto gap-2 pb-2 lg:block lg:space-y-1 lg:pb-0 hide-scrollbar">
+                                <a href="#general" className="flex items-center gap-2 lg:gap-3 px-3 py-2 text-text-primary bg-accent-primary/10 rounded-lg whitespace-nowrap flex-shrink-0">
                                     <Settings className="w-4 h-4" />
                                     General
                                 </a>
-                                <a href="#appearance" className="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors">
+                                <a href="#appearance" className="flex items-center gap-2 lg:gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                                     <Palette className="w-4 h-4" />
                                     Appearance
                                 </a>
-                                <a href="#security" className="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors">
+                                <a href="#security" className="flex items-center gap-2 lg:gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                                     <Shield className="w-4 h-4" />
                                     Security
                                 </a>
-                                <a href="#notifications" className="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors">
+                                <a href="#notifications" className="flex items-center gap-2 lg:gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                                     <Bell className="w-4 h-4" />
                                     Notifications
                                 </a>
-                                <a href="#integrations" className="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors">
+                                <a href="#integrations" className="flex items-center gap-2 lg:gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                                     <Database className="w-4 h-4" />
                                     Integrations
                                 </a>
@@ -185,7 +185,7 @@ export default async function SettingsPage() {
                                     </div>
                                     <label className="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" className="sr-only peer" defaultChecked />
-                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-primary"></div>
+                                        <div className="w-11 h-6 bg-bg-tertiary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent-primary/25 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-primary"></div>
                                     </label>
                                 </div>
 

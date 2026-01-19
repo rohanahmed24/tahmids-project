@@ -296,12 +296,12 @@ export default function Editor({ initialData, action }: EditorProps) {
     };
 
     return (
-        <form onSubmit={handleFormSubmit} className={`transition-all duration-500 ${isFocusMode ? 'fixed inset-0 z-[100] bg-gray-950 p-8 overflow-y-auto' : 'space-y-8'}`}>
+        <form onSubmit={handleFormSubmit} className={`transition-all duration-500 ${isFocusMode ? 'fixed inset-0 z-[100] bg-bg-primary p-8 overflow-y-auto' : 'space-y-8'}`}>
             {/* Header Actions */}
-            <div className={`flex items-center justify-between sticky top-4 z-50 bg-gray-950/80 backdrop-blur-md p-4 rounded-2xl border border-gray-800 shadow-xl transition-transform ${isFocusMode ? 'max-w-4xl mx-auto w-full' : ''}`}>
+            <div className={`flex items-center justify-between sticky top-4 z-50 bg-bg-primary/80 backdrop-blur-md p-4 rounded-2xl border border-border-primary shadow-xl transition-transform ${isFocusMode ? 'max-w-4xl mx-auto w-full' : ''}`}>
                 <div className="flex items-center gap-4">
                     {!isFocusMode && (
-                        <a href="/admin/dashboard" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                        <a href="/admin/dashboard" className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors">
                             <ArrowLeft className="w-4 h-4" />
                             Back
                         </a>
@@ -316,17 +316,17 @@ export default function Editor({ initialData, action }: EditorProps) {
                     <button
                         type="button"
                         onClick={() => setIsFocusMode(!isFocusMode)}
-                        className={`p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors ${isFocusMode ? 'bg-purple-500/20 text-purple-400' : ''}`}
+                        className={`p-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-bg-tertiary transition-colors ${isFocusMode ? 'bg-accent-main/20 text-accent-main' : ''}`}
                         title="Toggle Focus Mode"
                     >
                         {isFocusMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                     </button>
 
-                    <div className="flex bg-gray-900 rounded-lg p-1 border border-gray-800">
+                    <div className="flex bg-bg-card rounded-lg p-1 border border-border-primary">
                         <button
                             type="button"
                             onClick={() => setActiveTab("write")}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === "write" ? "bg-gray-800 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === "write" ? "bg-bg-tertiary text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"
                                 }`}
                         >
                             <Edit3 className="w-4 h-4" /> Write
@@ -334,24 +334,24 @@ export default function Editor({ initialData, action }: EditorProps) {
                         <button
                             type="button"
                             onClick={() => setActiveTab("preview")}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === "preview" ? "bg-gray-800 text-white shadow-sm" : "text-gray-400 hover:text-gray-200"
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === "preview" ? "bg-bg-tertiary text-text-primary shadow-sm" : "text-text-secondary hover:text-text-primary"
                                 }`}
                         >
                             <Eye className="w-4 h-4" /> Preview
                         </button>
                     </div>
-                    <div className="flex bg-gray-900 rounded-lg p-1 border border-gray-800">
+                    <div className="flex bg-bg-card rounded-lg p-1 border border-border-primary">
                         <button
                             type="button"
                             onClick={() => setPublished(false)}
-                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!published ? "bg-yellow-500/20 text-yellow-400" : "text-gray-400 hover:text-gray-200"}`}
+                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!published ? "bg-yellow-500/20 text-yellow-400" : "text-text-secondary hover:text-text-primary"}`}
                         >
                             Draft
                         </button>
                         <button
                             type="button"
                             onClick={() => setPublished(true)}
-                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${published ? "bg-green-500/20 text-green-400" : "text-gray-400 hover:text-gray-200"}`}
+                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${published ? "bg-green-500/20 text-green-400" : "text-text-secondary hover:text-text-primary"}`}
                         >
                             Publish
                         </button>
@@ -371,7 +371,7 @@ export default function Editor({ initialData, action }: EditorProps) {
                 {/* Main Editor Area */}
                 <div className={`lg:col-span-2 space-y-6 transition-all`}>
                     {/* Title & Slug */}
-                    <div className="space-y-4 bg-gray-900 border border-gray-800 rounded-2xl p-6">
+                    <div className="space-y-4 bg-bg-card border border-border-primary rounded-2xl p-6">
                         <div>
                             <input
                                 type="text"
@@ -379,7 +379,7 @@ export default function Editor({ initialData, action }: EditorProps) {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="Article Title"
-                                className="w-full bg-transparent text-4xl font-serif font-bold placeholder:text-gray-700 focus:outline-none"
+                                className="w-full bg-transparent text-4xl font-serif font-bold placeholder:text-text-muted focus:outline-none text-text-primary"
                                 required
                             />
                         </div>
@@ -391,29 +391,29 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     name="slug"
                                     value={slug}
                                     onChange={(e) => setSlug(e.target.value)}
-                                    className="w-full bg-transparent border-none p-0 focus:ring-0 text-gray-400 font-mono text-sm"
+                                    className="w-full bg-transparent border-none p-0 focus:ring-0 text-text-secondary font-mono text-sm"
                                 />
                             </div>
                         </div>
                     </div>
 
                     {/* Content Editor / Preview */}
-                    <div className="min-h-[70vh] bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col relative group">
+                    <div className="min-h-[70vh] bg-bg-card border border-border-primary rounded-2xl overflow-hidden flex flex-col relative group">
                         {/* Toolbar */}
                         {activeTab === "write" && (
-                            <div className="flex items-center gap-1 p-3 border-b border-gray-800 bg-gray-900/50 sticky top-0 z-10 backdrop-blur-sm">
-                                <button type="button" onClick={() => handleFormat('bold')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors" title="Bold"><Bold className="w-4 h-4" /></button>
-                                <button type="button" onClick={() => handleFormat('italic')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors" title="Italic"><Italic className="w-4 h-4" /></button>
-                                <div className="w-px h-4 bg-gray-800 mx-2" />
-                                <button type="button" onClick={() => handleFormat('list')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors" title="List"><List className="w-4 h-4" /></button>
-                                <button type="button" onClick={() => handleFormat('quote')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors" title="Quote"><Quote className="w-4 h-4" /></button>
-                                <button type="button" onClick={() => handleFormat('code')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors" title="Code"><Code className="w-4 h-4" /></button>
-                                <button type="button" onClick={() => handleFormat('link')} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors" title="Link"><LinkIcon className="w-4 h-4" /></button>
-                                <div className="w-px h-4 bg-gray-800 mx-2" />
+                            <div className="flex items-center gap-1 p-3 border-b border-border-primary bg-bg-card/50 sticky top-0 z-10 backdrop-blur-sm overflow-x-auto hide-scrollbar whitespace-nowrap">
+                                <button type="button" onClick={() => handleFormat('bold')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Bold"><Bold className="w-4 h-4" /></button>
+                                <button type="button" onClick={() => handleFormat('italic')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Italic"><Italic className="w-4 h-4" /></button>
+                                <div className="w-px h-4 bg-border-primary mx-2" />
+                                <button type="button" onClick={() => handleFormat('list')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="List"><List className="w-4 h-4" /></button>
+                                <button type="button" onClick={() => handleFormat('quote')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Quote"><Quote className="w-4 h-4" /></button>
+                                <button type="button" onClick={() => handleFormat('code')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Code"><Code className="w-4 h-4" /></button>
+                                <button type="button" onClick={() => handleFormat('link')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Link"><LinkIcon className="w-4 h-4" /></button>
+                                <div className="w-px h-4 bg-border-primary mx-2" />
                                 <button
                                     type="button"
                                     onClick={() => document.getElementById('docImport')?.click()}
-                                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2"
+                                    className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors flex items-center gap-2 flex-shrink-0"
                                     title="Import Document (.docx, .md, .txt)"
                                 >
                                     <UploadCloud className="w-4 h-4" />
@@ -426,11 +426,11 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     accept=".docx,.md,.txt"
                                     onChange={handleDocImport}
                                 />
-                                <div className="w-px h-4 bg-gray-800 mx-2" />
+                                <div className="w-px h-4 bg-border-primary mx-2" />
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="p-2 text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 rounded-lg flex items-center gap-2 transition-colors"
+                                    className="p-2 text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 rounded-lg flex items-center gap-2 transition-colors flex-shrink-0"
                                     title="Insert Image"
                                 >
                                     <ImageIcon className="w-4 h-4" />
@@ -456,11 +456,11 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     onPaste={handlePaste}
                                     onDrop={handleDrop}
                                     placeholder="Tell your story... (Drag & Drop images enabled)"
-                                    className="w-full min-h-[70vh] bg-transparent p-6 resize-y focus:outline-none font-mono text-base leading-relaxed text-gray-300 placeholder:text-gray-700"
+                                    className="w-full min-h-[70vh] bg-transparent p-6 resize-y focus:outline-none font-mono text-base leading-relaxed text-text-primary placeholder:text-text-muted"
                                     spellCheck={false}
                                 />
                                 {/* Bottom Status Bar */}
-                                <div className="absolute bottom-4 right-4 flex items-center gap-4 text-xs text-gray-500 bg-gray-950/80 backdrop-blur px-3 py-1.5 rounded-full border border-gray-800 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute bottom-4 right-4 flex items-center gap-4 text-xs text-text-muted bg-bg-primary/80 backdrop-blur px-3 py-1.5 rounded-full border border-border-primary opacity-0 group-hover:opacity-100 transition-opacity">
                                     <span className="flex items-center gap-1"><AlignLeft className="w-3 h-3" /> {wordCount} words</span>
                                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {readTime} min read</span>
                                 </div>
@@ -484,16 +484,16 @@ export default function Editor({ initialData, action }: EditorProps) {
                         className="space-y-6"
                     >
                         {/* Metadata Card */}
-                        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
-                            <h3 className="font-bold text-gray-400 uppercase tracking-widest text-xs">Publishing</h3>
+                        <div className="bg-bg-card border border-border-primary rounded-2xl p-6 space-y-6">
+                            <h3 className="font-bold text-text-muted uppercase tracking-widest text-xs">Publishing</h3>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Category</label>
+                                <label className="text-sm font-medium text-text-secondary">Category</label>
                                 <select
                                     name="category"
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg focus:border-purple-500 focus:outline-none transition-colors text-sm"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-sm text-text-primary"
                                 >
                                     <option value="Technology">Technology</option>
                                     <option value="Philosophy">Philosophy</option>
@@ -512,30 +512,30 @@ export default function Editor({ initialData, action }: EditorProps) {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Topic Slug</label>
+                                <label className="text-sm font-medium text-text-secondary">Topic Slug</label>
                                 <input
                                     type="text"
                                     name="topic_slug"
                                     value={topicSlug}
                                     onChange={(e) => setTopicSlug(e.target.value)}
                                     placeholder="e.g. artificial-intelligence"
-                                    className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg focus:border-purple-500 focus:outline-none transition-colors text-sm"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-sm text-text-primary"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Subtitle</label>
+                                <label className="text-sm font-medium text-text-secondary">Subtitle</label>
                                 <input
                                     type="text"
                                     name="subtitle"
                                     defaultValue={initialData?.subtitle}
                                     placeholder="Brief tagline..."
-                                    className="w-full px-3 py-2 bg-gray-950 border border-gray-800 rounded-lg focus:border-purple-500 focus:outline-none transition-colors text-sm"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-300">Accent Color</label>
+                                <label className="text-sm font-medium text-text-secondary">Accent Color</label>
                                 <div className="grid grid-cols-5 gap-2">
                                     {['from-blue-600 to-cyan-600', 'from-purple-600 to-pink-600', 'from-red-600 to-orange-600', 'from-green-600 to-emerald-600', 'from-amber-600 to-yellow-600'].map((color) => (
                                         <label key={color} className="cursor-pointer">
@@ -558,18 +558,18 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     name="featured"
                                     value="true"
                                     defaultChecked={initialData?.featured}
-                                    className="w-4 h-4 rounded border-gray-700 bg-gray-950 text-purple-600 focus:ring-purple-500"
+                                    className="w-4 h-4 rounded border-border-primary bg-bg-tertiary text-accent-main focus:ring-accent-main"
                                 />
-                                <label className="text-sm font-medium text-gray-300">Featured Article</label>
+                                <label className="text-sm font-medium text-text-secondary">Featured Article</label>
                             </div>
                         </div>
 
                         {/* Media Card */}
-                        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-6">
-                            <h3 className="font-bold text-gray-400 uppercase tracking-widest text-xs">Media</h3>
+                        <div className="bg-bg-card border border-border-primary rounded-2xl p-6 space-y-6">
+                            <h3 className="font-bold text-text-muted uppercase tracking-widest text-xs">Media</h3>
 
                             <div className="space-y-3">
-                                <label className="text-sm font-medium text-gray-300">Cover Image</label>
+                                <label className="text-sm font-medium text-text-secondary">Cover Image</label>
 
                                 {/* Hidden File Input */}
                                 <input
@@ -584,7 +584,7 @@ export default function Editor({ initialData, action }: EditorProps) {
                                 {/* Image Preview & Drop Zone */}
                                 <div
                                     onClick={() => document.getElementById("coverUpload")?.click()}
-                                    className="relative aspect-video rounded-xl overflow-hidden bg-gray-950 border-2 border-dashed border-gray-800 hover:border-purple-500/50 hover:bg-gray-950/50 transition-all cursor-pointer group"
+                                    className="relative aspect-video rounded-xl overflow-hidden bg-bg-primary border-2 border-dashed border-border-primary hover:border-accent-main/50 hover:bg-bg-primary/50 transition-all cursor-pointer group"
                                 >
                                     {previewImage ? (
                                         <>
@@ -612,13 +612,13 @@ export default function Editor({ initialData, action }: EditorProps) {
                                         value={coverImage}
                                         onChange={handleUrlChange}
                                         placeholder="Or paste image URL"
-                                        className="w-full pl-9 pr-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-xs placeholder:text-gray-700 focus:border-purple-500 focus:outline-none"
+                                        className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-xs placeholder:text-text-muted focus:border-accent-main focus:outline-none text-text-primary"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-sm font-medium text-gray-300">Video Link</label>
+                                <label className="text-sm font-medium text-text-secondary">Video Link</label>
                                 <div className="relative">
                                     <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
                                     <input
@@ -626,7 +626,7 @@ export default function Editor({ initialData, action }: EditorProps) {
                                         name="videoUrl"
                                         defaultValue={initialData?.videoUrl}
                                         placeholder="YouTube URL (optional)"
-                                        className="w-full pl-9 pr-3 py-2 bg-gray-950 border border-gray-800 rounded-lg text-xs placeholder:text-gray-700 focus:border-purple-500 focus:outline-none"
+                                        className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-xs placeholder:text-text-muted focus:border-accent-main focus:outline-none text-text-primary"
                                     />
                                 </div>
                             </div>

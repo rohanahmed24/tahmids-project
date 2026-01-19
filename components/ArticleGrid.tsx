@@ -70,7 +70,7 @@ export function ArticleGrid({ articles = [] }: ArticleGridProps) {
                                     </h3>
                                     <div className="flex items-center gap-2 pt-2">
                                         <div className="w-6 h-6 rounded-full bg-bg-secondary relative overflow-hidden">
-                                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill sizes="24px" className="object-cover" />
+                                            <Image src={article.authorImage || Assets.imgAvatarImage} alt="Avatar" fill sizes="24px" className="object-cover" />
                                         </div>
                                         <span className="text-xs font-medium text-text-secondary">{article.author}</span>
                                     </div>

@@ -54,14 +54,14 @@ export function PostsTable({ posts }: PostsTableProps) {
     return (
         <div className="space-y-4">
             {/* Filters and Controls */}
-            <div className="flex items-center justify-between p-4 border-b border-border-primary">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-border-primary gap-4">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
                     <select
                         value={filter}
                         onChange={(e) => setFilter(e.target.value as "all" | "published" | "draft")}
-                        className="px-3 py-2 bg-bg-primary border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                        className="flex-1 sm:flex-none px-3 py-2 bg-bg-primary border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary text-sm"
                     >
-                        <option value="all">All Posts ({posts.length})</option>
+                        <option value="all">All ({posts.length})</option>
                         <option value="published">Published ({posts.filter(p => p.published).length})</option>
                         <option value="draft">Drafts ({posts.filter(p => !p.published).length})</option>
                     </select>
@@ -69,24 +69,24 @@ export function PostsTable({ posts }: PostsTableProps) {
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as "date" | "views" | "title")}
-                        className="px-3 py-2 bg-bg-primary border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                        className="flex-1 sm:flex-none px-3 py-2 bg-bg-primary border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary text-sm"
                     >
-                        <option value="date">Sort by Date</option>
-                        <option value="views">Sort by Views</option>
-                        <option value="title">Sort by Title</option>
+                        <option value="date">Latest</option>
+                        <option value="views">Most Viewed</option>
+                        <option value="title">Title</option>
                     </select>
                 </div>
 
                 <Link
                     href="/admin/write"
-                    className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors"
+                    className="w-full sm:w-auto text-center px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors text-sm font-medium"
                 >
                     New Article
                 </Link>
             </div>
 
-            {/* Posts Table */}
-            <div className="overflow-x-auto">
+            {/* Posts Table (Desktop) */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                     <thead>
                         <tr className="border-b border-border-primary">
@@ -189,23 +189,86 @@ export function PostsTable({ posts }: PostsTableProps) {
                         ))}
                     </tbody>
                 </table>
+
             </div>
 
-            {sortedPosts.length === 0 && (
-                <div className="text-center py-12">
-                    <FileText className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-text-primary mb-2">No posts found</h3>
-                    <p className="text-text-secondary mb-4">
-                        {filter === "all" ? "Get started by creating your first article" : `No ${filter} posts found`}
-                    </p>
-                    <Link
-                        href="/admin/write"
-                        className="inline-flex items-center px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors"
-                    >
-                        Create New Article
-                    </Link>
-                </div>
-            )}
-        </div>
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-4 p-4">
+                {sortedPosts.map((post) => (
+                    <div key={post.slug} className="bg-bg-primary rounded-lg border border-border-primary p-4 space-y-4">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                {post.coverImage && (
+                                    <Image
+                                        src={post.coverImage}
+                                        alt={post.title}
+                                        width={48}
+                                        height={48}
+                                        className="object-cover rounded-lg shrink-0"
+                                    />
+                                )}
+                                <div>
+                                    <h3 className="font-medium text-text-primary line-clamp-2 text-sm">
+                                        {post.title}
+                                    </h3>
+                                    <div className="text-xs text-text-secondary mt-1">
+                                        {new Date(post.date).toLocaleDateString()} • {post.views || 0} views
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="shrink-0">
+                                <div className={`w-2 h-2 rounded-full ${post.published ? "bg-green-500" : "bg-yellow-500"}`} />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-3 border-t border-border-primary">
+                            <div className="flex items-center gap-2">
+                                <span className="px-2 py-1 bg-bg-tertiary text-text-secondary rounded-md text-xs">
+                                    {post.category}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Link
+                                    href={`/admin/edit/${post.slug}`}
+                                    className="p-2 text-text-secondary hover:text-accent-primary transition-colors"
+                                >
+                                    <Edit className="w-4 h-4" />
+                                </Link>
+                                <button
+                                    onClick={() => handleToggleStatus(post.slug, post.published || false)}
+                                    className="p-2 text-text-secondary hover:text-blue-500 transition-colors"
+                                >
+                                    {post.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(post.slug)}
+                                    className="p-2 text-text-secondary hover:text-red-500 transition-colors"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {
+                sortedPosts.length === 0 && (
+                    <div className="text-center py-12">
+                        <FileText className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-text-primary mb-2">No posts found</h3>
+                        <p className="text-text-secondary mb-4">
+                            {filter === "all" ? "Get started by creating your first article" : `No ${filter} posts found`}
+                        </p>
+                        <Link
+                            href="/admin/write"
+                            className="inline-flex items-center px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors"
+                        >
+                            Create New Article
+                        </Link>
+                    </div>
+                )
+            }
+        </div >
     );
 }

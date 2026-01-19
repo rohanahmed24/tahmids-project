@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { verifyAdmin, getAdminSession } from "@/actions/admin-auth";
 import { writeFile, mkdir } from "fs/promises";
@@ -98,6 +98,7 @@ export async function createPost(formData: FormData) {
         throw new Error("Failed to create post");
     }
 
+    revalidateTag('posts', 'default');
     revalidatePath("/admin/dashboard");
     revalidatePath("/");
     redirect("/admin/dashboard");
@@ -113,6 +114,7 @@ export async function deletePost(slug: string) {
         await prisma.post.delete({
             where: { slug }
         });
+        revalidateTag('posts', 'default');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {
@@ -165,6 +167,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
             }
         });
 
+        revalidateTag('posts', 'default');
         revalidatePath(`/article/${originalSlug}`);
         revalidatePath(`/admin/edit/${originalSlug}`);
         revalidatePath("/admin/dashboard");
@@ -188,6 +191,7 @@ export async function togglePostStatus(slug: string, published: boolean) {
             where: { slug },
             data: { published }
         });
+        revalidateTag('posts', 'default');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {

@@ -47,20 +47,20 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
 
     return (
 
-        <div className="col-span-4 bg-gray-900 border border-gray-800 rounded-2xl p-6">
+        <div className="col-span-4 bg-bg-card border border-border-primary rounded-2xl p-6">
             <div className="flex flex-row items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-xl font-bold text-white">Analytics Overview</h3>
-                    <p className="text-sm text-gray-400">
+                    <h3 className="text-xl font-bold text-text-primary">Analytics Overview</h3>
+                    <p className="text-sm text-text-secondary">
                         User growth and content engagement over time.
                     </p>
                 </div>
-                <div className="flex bg-gray-800 border-gray-700 rounded-lg p-1">
+                <div className="flex bg-bg-tertiary border-border-primary rounded-lg p-1">
                     {["7d", "30d", "all"].map((val) => (
                         <button
                             key={val}
                             onClick={() => setTimeRange(val)}
-                            className={`px-3 py-1 text-xs rounded-md transition-colors ${timeRange === val ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-3 py-1 text-xs rounded-md transition-colors ${timeRange === val ? "bg-accent-main text-white" : "text-text-secondary hover:text-text-primary"}`}
                         >
                             {val === "all" ? "All Time" : val === "7d" ? "7 Days" : "30 Days"}
                         </button>
@@ -69,16 +69,16 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
             </div>
             <div className="pl-2">
                 <div className="space-y-4">
-                    <div className="flex bg-gray-800 border-gray-700 rounded-lg p-1 w-fit">
+                    <div className="flex bg-bg-tertiary border-border-primary rounded-lg p-1 w-fit">
                         <button
                             onClick={() => setActiveTab("growth")}
-                            className={`px-3 py-1 text-xs rounded-md transition-colors ${activeTab === "growth" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-3 py-1 text-xs rounded-md transition-colors ${activeTab === "growth" ? "bg-accent-main text-white" : "text-text-secondary hover:text-text-primary"}`}
                         >
                             User Growth
                         </button>
                         <button
                             onClick={() => setActiveTab("views")}
-                            className={`px-3 py-1 text-xs rounded-md transition-colors ${activeTab === "views" ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}
+                            className={`px-3 py-1 text-xs rounded-md transition-colors ${activeTab === "views" ? "bg-accent-main text-white" : "text-text-secondary hover:text-text-primary"}`}
                         >
                             Article Views
                         </button>
@@ -90,27 +90,27 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
                                 <AreaChart data={chartData}>
                                     <defs>
                                         <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <XAxis
                                         dataKey="name"
-                                        stroke="#888888"
+                                        stroke="#9ca3af"
                                         fontSize={12}
                                         tickLine={false}
                                         axisLine={false}
                                     />
                                     <YAxis
-                                        stroke="#888888"
+                                        stroke="#9ca3af"
                                         fontSize={12}
                                         tickLine={false}
                                         axisLine={false}
                                         tickFormatter={(value) => `${value}`}
                                     />
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
                                     <Tooltip
-                                        contentStyle={{ backgroundColor: "#1f2937", border: "1px solid #374151" }}
+                                        contentStyle={{ backgroundColor: "#1f2937", border: "1px solid #374151", borderRadius: "12px" }}
                                         itemStyle={{ color: "#fff" }}
                                     />
                                     <Area

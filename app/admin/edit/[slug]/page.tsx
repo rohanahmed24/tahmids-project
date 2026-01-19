@@ -21,11 +21,11 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
     const updateAction = updatePost.bind(null, slug);
 
     return (
-        <main className="min-h-screen bg-gray-950 text-white p-6 md:p-8 pt-24">
+        <main className="min-h-screen bg-bg-primary text-text-primary p-6 md:p-8 pt-24">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold font-serif mb-2">Edit Story</h1>
-                    <p className="text-gray-400">Editing: <span className="text-purple-400">{post.title}</span></p>
+                    <h1 className="text-3xl font-bold font-serif mb-2 text-text-primary">Edit Story</h1>
+                    <p className="text-text-secondary">Editing: <span className="text-accent-main">{post.title}</span></p>
                 </div>
 
                 <Editor

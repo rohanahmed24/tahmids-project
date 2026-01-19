@@ -23,10 +23,11 @@ export type Post = {
     accent_color?: string | null;
     created_at: string;
     updated_at: string;
+    authorImage?: string | null;
 };
 
 // Mapper function to convert Prisma result to frontend Post type
-function mapPrismaPost(post: PrismaPost): Post {
+function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | null }): Post {
     return {
         id: post.id,
         slug: post.slug,
@@ -47,6 +48,7 @@ function mapPrismaPost(post: PrismaPost): Post {
         accent_color: post.accentColor,
         created_at: post.createdAt.toISOString(),
         updated_at: post.updatedAt.toISOString(),
+        authorImage: post.author?.image
     };
 }
 
@@ -60,6 +62,7 @@ export const getHotTopics = unstable_cache(
         try {
             const posts = await prisma.post.findMany({
                 where: { featured: true, published: true },
+                include: { author: { select: { image: true } } },
                 orderBy: { views: 'desc' },
                 take: limit
             });
@@ -78,6 +81,7 @@ export const getRecentPosts = unstable_cache(
         try {
             const posts = await prisma.post.findMany({
                 where: { published: true },
+                include: { author: { select: { image: true } } },
                 orderBy: { createdAt: 'desc' },
                 take: limit
             });
@@ -96,7 +100,8 @@ export const getPostBySlug = unstable_cache(
         if (!slug?.trim()) return null;
         try {
             const post = await prisma.post.findUnique({
-                where: { slug }
+                where: { slug },
+                include: { author: { select: { image: true } } }
             });
 
             if (!post || !post.published) return null;
@@ -134,6 +139,7 @@ export const getPostsByCategory = unstable_cache(
                     category: category.trim(),
                     published: true
                 },
+                include: { author: { select: { image: true } } },
                 orderBy: { date: 'desc' },
                 take: limit
             });
@@ -178,6 +184,7 @@ export const getFeaturedPosts = unstable_cache(
         try {
             const posts = await prisma.post.findMany({
                 where: { featured: true, published: true },
+                include: { author: { select: { image: true } } },
                 orderBy: { views: 'desc' },
                 take: limit
             });
@@ -197,6 +204,7 @@ export async function getAllPosts(): Promise<Post[]> {
             try {
                 const posts = await prisma.post.findMany({
                     where: { published: true },
+                    include: { author: { select: { image: true } } },
                     orderBy: { date: 'desc' }
                 });
                 return posts.map(mapPrismaPost);
@@ -214,6 +222,7 @@ export async function getAllPosts(): Promise<Post[]> {
 export async function getAllPostsForAdmin(): Promise<Post[]> {
     try {
         const posts = await prisma.post.findMany({
+            include: { author: { select: { image: true } } },
             orderBy: { createdAt: 'desc' }
         });
         return posts.map(mapPrismaPost);
@@ -244,6 +253,7 @@ export async function getPostsByCategories(
         const promises = cleanCategories.map(cat =>
             prisma.post.findMany({
                 where: { category: cat, published: true },
+                include: { author: { select: { image: true } } },
                 orderBy: { date: 'desc' },
                 take: limit
             })

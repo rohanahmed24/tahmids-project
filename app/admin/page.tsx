@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
     };
 
     return (
-        <main className="min-h-screen bg-black flex items-center justify-center px-6">
+        <main className="min-h-screen bg-bg-primary flex items-center justify-center px-6">
             {/* Background Effects */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <motion.div
@@ -81,10 +81,10 @@ export default function AdminLoginPage() {
                     transition={{ delay: 0.3 }}
                     className="text-center mb-8"
                 >
-                    <h1 className="text-3xl font-serif font-bold text-white mb-2">
+                    <h1 className="text-3xl font-serif font-bold text-text-primary mb-2">
                         Admin Access
                     </h1>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-text-secondary text-sm">
                         This area is restricted. Enter your credentials to continue.
                     </p>
                 </motion.div>
@@ -95,7 +95,7 @@ export default function AdminLoginPage() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
                     onSubmit={handleLogin}
-                    className="bg-gray-900/50 border border-gray-800 rounded-2xl p-8 backdrop-blur-xl"
+                    className="bg-bg-card/50 border border-border-primary rounded-2xl p-8 backdrop-blur-xl"
                 >
                     {/* Error Message */}
                     {error && (
@@ -111,23 +111,23 @@ export default function AdminLoginPage() {
 
                     {/* Password Field */}
                     <div className="mb-6">
-                        <label className="block text-gray-400 text-sm mb-2">
+                        <label className="block text-text-secondary text-sm mb-2">
                             Admin Password
                         </label>
                         <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
                             <input
                                 type={showPassword ? "text" : "password"}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Enter password..."
-                                className="w-full pl-12 pr-12 py-4 bg-black/50 border border-gray-700 rounded-xl text-white placeholder:text-gray-600 focus:border-purple-500 focus:outline-none transition-colors"
+                                className="w-full pl-12 pr-12 py-4 bg-bg-primary/50 border border-border-primary rounded-xl text-text-primary placeholder:text-text-muted focus:border-accent-main focus:outline-none transition-colors"
                                 required
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary transition-colors"
                             >
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
@@ -157,7 +157,7 @@ export default function AdminLoginPage() {
                     </motion.button>
 
                     {/* Security Notice */}
-                    <p className="text-center text-gray-600 text-xs mt-6">
+                    <p className="text-center text-text-muted text-xs mt-6">
                         🔒 256-bit encrypted connection
                     </p>
                 </motion.form>
@@ -171,7 +171,7 @@ export default function AdminLoginPage() {
                 >
                     <Link
                         href="/"
-                        className="text-gray-500 hover:text-white text-sm transition-colors"
+                        className="text-text-secondary hover:text-text-primary text-sm transition-colors"
                     >
                         ← Back to Website
                     </Link>
