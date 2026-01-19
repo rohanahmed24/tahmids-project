@@ -38,22 +38,22 @@ enum Role {
 
 model Post {
   id          Int      @id @default(autoincrement())
-  title       String   @db.VarChar(500)
-  slug        String   @unique @db.VarChar(500)
-  subtitle    String?  @db.VarChar(500)
+  title       String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  subtitle    String?  @db.VarChar(255)
   content     String?  @db.LongText
   excerpt     String?  @db.Text
-  category    String   @db.VarChar(100)
+  category    String?  @db.VarChar(255)
   authorId    Int?     @map("author_id")
-  authorName  String   @map("author") @db.VarChar(255)
-  featured    Boolean  @default(false)
-  published   Boolean  @default(true)
-  views       Int      @default(0)
-  coverImage  String?  @map("cover_image") @db.VarChar(500)
-  videoUrl    String?  @map("video_url") @db.VarChar(500)
-  topicSlug   String?  @map("topic_slug") @db.VarChar(500)
-  accentColor String?  @default("#3B82F6") @map("accent_color") @db.VarChar(7)
-  date        DateTime @db.Date
+  authorName  String?  @map("author") @db.VarChar(255)
+  featured    Boolean? @default(false)
+  published   Boolean? @default(true)
+  views       Int?     @default(0)
+  coverImage  String?  @db.VarChar(255)
+  videoUrl    String?  @db.VarChar(255)
+  topicSlug   String?  @map("topic_slug") @db.VarChar(255)
+  accentColor String?  @map("accent_color") @db.VarChar(255)
+  date        String?  @db.VarChar(255)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -66,6 +66,15 @@ model Post {
   @@index([date])
   @@fulltext([title, content, excerpt])
   @@map("posts")
+}
+
+model Asset {
+  id   Int     @id @default(autoincrement())
+  name String  @unique @db.VarChar(255)
+  url  String  @db.VarChar(255)
+  type String? @default("image") @db.VarChar(50)
+
+  @@map("assets")
 }
 
 model Media {
@@ -123,11 +132,23 @@ model Account {
 
 model Setting {
   id        Int      @id @default(autoincrement())
-  keyName   String   @unique @map("key_name") @db.VarChar(100)
-  value     String   @db.Text
+  keyName   String   @unique @map("key_name") @db.VarChar(255)
+  value     String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@index([keyName])
   @@map("settings")
+}
+
+model NavbarLink {
+  id        Int      @id @default(autoincrement())
+  label     String   @db.VarChar(100)
+  href      String   @db.VarChar(255)
+  order     Int      @default(0)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("navbar_links")
 }

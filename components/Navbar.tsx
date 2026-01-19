@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useSession, signOut } from "next-auth/react";
+import { getNavbarLinks } from "@/actions/navbar";
 
 export default function Navbar() {
     const { data: session, status } = useSession();
@@ -15,6 +16,17 @@ export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [navbarLinks, setNavbarLinks] = useState<{ id: number; label: string; href: string }[]>([]);
+
+    useEffect(() => {
+        const fetchNav = async () => {
+            const result = await getNavbarLinks();
+            if (result.success && result.links) {
+                setNavbarLinks(result.links);
+            }
+        };
+        fetchNav();
+    }, []);
 
     // Text color logic: 
     // Uses semantic primary text (Charcoal in Light, White in Dark)
@@ -252,39 +264,35 @@ export default function Navbar() {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-y-6 gap-x-4">
-                                    {/* Combining standard nav and topics for the 2-col layout */}
-                                    {[
-                                        { name: "Politics", href: "/topics/politics" },
-                                        { name: "Ideas", href: "/topics/ideas" },
-                                        { name: "Fiction", href: "/topics/fiction" },
-                                        { name: "Technology", href: "/topics/technology" },
-                                        { name: "Science", href: "/topics/science" },
-                                        { name: "Photo", href: "/topics/photo" },
-                                        { name: "Economy", href: "/topics/economy" },
-                                        { name: "Culture", href: "/topics/culture" },
-                                        { name: "Planet", href: "/topics/planet" },
-                                        { name: "Global", href: "/topics/global" },
-                                        { name: "Books", href: "/topics/books" },
-                                        { name: "AI Watchdog", href: "/topics/ai-watchdog" },
-                                        { name: "Health", href: "/topics/health" },
-                                        { name: "Education", href: "/topics/education" },
-                                        { name: "Projects", href: "/projects" },
-                                        { name: "Features", href: "/features" },
-                                        { name: "Family", href: "/topics/family" },
-                                        { name: "Events", href: "/events" },
-                                        // Fallbacks to existing routes if needed, but trying to match density
-                                        { name: "Home", href: "/" },
-                                        { name: "About", href: "/about" },
-                                    ].map((item) => (
-                                        <Link
-                                            key={item.name}
-                                            href={item.href}
-                                            onClick={() => setIsMenuOpen(false)}
-                                            className="text-lg font-sans text-text-primary hover:text-accent transition-colors"
-                                        >
-                                            {item.name}
-                                        </Link>
-                                    ))}
+                                    {navbarLinks.length > 0 ? (
+                                        navbarLinks.map((item) => (
+                                            <Link
+                                                key={item.id}
+                                                href={item.href}
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="text-lg font-sans text-text-primary hover:text-accent transition-colors"
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        ))
+                                    ) : (
+                                        [
+                                            { name: "Politics", href: "/topics/politics" },
+                                            { name: "Technology", href: "/topics/technology" },
+                                            { name: "Science", href: "/topics/science" },
+                                            { name: "Culture", href: "/topics/culture" },
+                                            { name: "About", href: "/about" },
+                                        ].map((item) => (
+                                            <Link
+                                                key={item.name}
+                                                href={item.href}
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="text-lg font-sans text-text-primary hover:text-accent transition-colors"
+                                            >
+                                                {item.name}
+                                            </Link>
+                                        ))
+                                    )}
                                 </div>
                             </div>
 

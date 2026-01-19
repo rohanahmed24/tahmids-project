@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { verifyAdmin } from "@/actions/admin-auth";
-import { Settings, Shield, Database, Palette, Bell } from "lucide-react";
+import { Settings, Shield, Database, Palette, Bell, Menu } from "lucide-react";
+import NavbarManager from "@/components/admin/NavbarManager";
 
 export default async function SettingsPage() {
     const session = await auth();
@@ -43,6 +44,10 @@ export default async function SettingsPage() {
                                 <a href="#notifications" className="flex items-center gap-2 lg:gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                                     <Bell className="w-4 h-4" />
                                     Notifications
+                                </a>
+                                <a href="#navigation" className="flex items-center gap-2 lg:gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
+                                    <Menu className="w-4 h-4" />
+                                    Navigation
                                 </a>
                                 <a href="#integrations" className="flex items-center gap-2 lg:gap-3 px-3 py-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                                     <Database className="w-4 h-4" />
@@ -158,6 +163,15 @@ export default async function SettingsPage() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Navigation Settings */}
+                        <div id="navigation" className="bg-bg-secondary rounded-xl border border-border-primary p-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <Menu className="w-5 h-5 text-accent-primary" />
+                                <h2 className="text-xl font-semibold text-text-primary">Navigation</h2>
+                            </div>
+                            <NavbarManager />
                         </div>
 
                         {/* Security Settings */}
