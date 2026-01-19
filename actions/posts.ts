@@ -4,10 +4,9 @@ import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { verifyAdmin } from "@/actions/admin-auth";
+import { verifyAdmin, getAdminSession } from "@/actions/admin-auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { auth } from "@/auth";
 
 async function handleFileUpload(file: File | null): Promise<string | undefined> {
     if (!file || file.size === 0) return undefined;
@@ -31,10 +30,10 @@ function generateSlug(title: string): string {
 }
 
 export async function createPost(formData: FormData) {
-    const session = await auth();
+    const session = await getAdminSession();
     const isAdmin = await verifyAdmin();
 
-    if (!session?.user?.name || !session?.user?.email) {
+    if (!session || !session.name || !session.email) {
         throw new Error("User not authenticated");
     }
 
@@ -45,7 +44,7 @@ export async function createPost(formData: FormData) {
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
     const category = formData.get("category") as string;
-    const authorName = session.user.name;
+    const authorName = session.name;
     const videoUrl = (formData.get("videoUrl") as string) || undefined;
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = (formData.get("topic_slug") as string) || undefined;
@@ -68,7 +67,7 @@ export async function createPost(formData: FormData) {
 
     // Find author id
     const user = await prisma.user.findUnique({
-        where: { email: session.user.email }
+        where: { email: session.email }
     });
 
     try {
