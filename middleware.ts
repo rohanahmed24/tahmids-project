@@ -11,11 +11,24 @@ export function middleware(request: NextRequest) {
     console.log("MW CHECK:", { url: request.url, forwardedHost });
 
     // Fix LiteSpeed duplicate headers (e.g. "thewisdomia.com, thewisdomia.com")
+    let modified = false;
+
     if (forwardedHost && forwardedHost.includes(",")) {
         console.log("MW FIXING HOST:", forwardedHost);
         const firstHost = forwardedHost.split(",")[0].trim();
         requestHeaders.set("x-forwarded-host", firstHost);
+        modified = true;
+    }
 
+    const origin = requestHeaders.get("origin");
+    if (origin && origin.includes(",")) {
+        console.log("MW FIXING ORIGIN:", origin);
+        const firstOrigin = origin.split(",")[0].trim();
+        requestHeaders.set("origin", firstOrigin);
+        modified = true;
+    }
+
+    if (modified) {
         // Re-create response with sanitized headers
         return NextResponse.next({
             request: {
