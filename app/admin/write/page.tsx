@@ -1,13 +1,12 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import { verifyAdmin } from "@/actions/admin-auth";
+import { verifyAdmin, getAdminSession } from "@/actions/admin-auth";
 import { createPost } from "@/actions/posts";
 import Editor from "@/app/admin/components/Editor";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default async function WritePage() {
-    const session = await auth();
+    const session = await getAdminSession();
     const isAdmin = await verifyAdmin();
 
     if (!session || !isAdmin) {
@@ -20,7 +19,7 @@ export default async function WritePage() {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link 
+                        <Link
                             href="/admin/dashboard"
                             className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
                         >
