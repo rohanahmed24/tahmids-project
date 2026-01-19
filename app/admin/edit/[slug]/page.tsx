@@ -1,7 +1,7 @@
 import { getPostBySlug } from "@/lib/posts";
 import { updatePost } from "@/actions/posts";
 import { verifyAdmin } from "@/actions/admin-auth";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import Editor from "@/app/admin/components/Editor";
 
 export default async function EditPage({ params }: { params: Promise<{ slug: string }> }) {
