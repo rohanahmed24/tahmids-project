@@ -6,6 +6,8 @@ export function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     const forwardedHost = requestHeaders.get("x-forwarded-host");
 
+    // Log all headers for debugging
+    console.log("MW ALL HEADERS:", JSON.stringify(Object.fromEntries(requestHeaders.entries())));
     console.log("MW CHECK:", { url: request.url, forwardedHost });
 
     // Fix LiteSpeed duplicate headers (e.g. "thewisdomia.com, thewisdomia.com")
