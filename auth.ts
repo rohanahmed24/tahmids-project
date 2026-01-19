@@ -6,7 +6,11 @@ import GitHub from "next-auth/providers/github"
 import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
 
+// Hardcode base path for production to avoid duplicate header issues from reverse proxy
+const baseUrl = process.env.AUTH_URL || "https://thewisdomia.com";
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+    basePath: "/api/auth",
     providers: [
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,
