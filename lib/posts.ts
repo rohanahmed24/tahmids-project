@@ -73,7 +73,7 @@ export const getHotTopics = unstable_cache(
         }
     },
     ['hot-topics'],
-    { revalidate: 7200, tags: ['posts', 'hot-topics'] }
+    { revalidate: 60, tags: ['posts', 'hot-topics'] }
 );
 
 export const getRecentPosts = unstable_cache(

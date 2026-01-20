@@ -30,11 +30,12 @@ conn.on('ready', () => {
 
             const commands = [
                 `cd ${projectPath}`,
-                'rm -rf .next/lock', // Force remove build lock
+                'rm -rf .next/lock .next/cache', // Force remove build lock and cache
                 'fuser -k 3000/tcp || true', // Kill existing server on port 3000
                 'git reset --hard', // Safety: discard local changes on server
                 'git pull',
                 'npm install',
+                'node scripts/cleanup-mocks.js', // Execute cleanup on remote
                 'npx prisma generate',
                 'npx prisma db push',
                 'npm run build',
