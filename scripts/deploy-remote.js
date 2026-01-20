@@ -30,8 +30,8 @@ conn.on('ready', () => {
 
             const commands = [
                 `cd ${projectPath}`,
-                'rm -rf .next/lock .next/cache', // Force remove build lock and cache
-                'fuser -k 3000/tcp || true', // Kill existing server on port 3000
+                'rm -rf .next', // Force clean build
+                'fuser -k 3001/tcp || true', // Kill existing server on port 3001
                 'git reset --hard', // Safety: discard local changes on server
                 'git pull',
                 'npm install',
@@ -39,8 +39,11 @@ conn.on('ready', () => {
                 'npx prisma generate',
                 'npx prisma db push',
                 'npm run build',
-                // Check if pm2 ecosystem exists, otherwise just restart valid process
-                'pm2 restart all || npm run start &'
+                'pm2 stop all || true',
+                'pm2 delete all || true',
+                // Start with PORT=3001
+                'PORT=3001 pm2 start npm --name "wisdomia" -- start',
+                'pm2 save'
             ].join(' && ');
 
             console.log('Executing deployment commands...');
