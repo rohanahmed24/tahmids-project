@@ -30,13 +30,13 @@ conn.on('ready', () => {
 
             const commands = [
                 `cd ${projectPath}`,
-                'rm -rf .next node_modules/.cache', // Force clean build
+                'rm -rf .next node_modules', // Force clean build and reinstall
                 'fuser -k 3001/tcp || true', // Kill existing server on port 3001
                 'git reset --hard', // Safety: discard local changes on server
                 'git pull',
-                'npm ci --legacy-peer-deps', // Clean install from lockfile
+                'npm install', // Fresh install
                 'node scripts/cleanup-mocks.js', // Execute cleanup on remote
-                'npx prisma generate --no-hints',
+                'npx prisma generate',
                 'npx prisma db push --skip-generate',
                 'npm run build',
                 // Sync public files to standalone build
