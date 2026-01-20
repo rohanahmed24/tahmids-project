@@ -99,6 +99,7 @@ export async function createPost(formData: FormData) {
     }
 
     revalidateTag('posts', 'max');
+    revalidateTag('stats');
     revalidateTag('hot-topics', 'max');
     revalidateTag('recent', 'max');
     revalidateTag('featured', 'max');
@@ -118,6 +119,7 @@ export async function deletePost(slug: string) {
             where: { slug }
         });
         revalidateTag('posts', 'max');
+        revalidateTag('stats');
         revalidateTag('hot-topics', 'max');
         revalidateTag('recent', 'max');
         revalidateTag('featured', 'max');
@@ -174,6 +176,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
         });
 
         revalidateTag('posts', 'max');
+        revalidateTag('stats');
         revalidateTag('hot-topics', 'max');
         revalidateTag('recent', 'max');
         revalidateTag('featured', 'max');
@@ -201,6 +204,7 @@ export async function togglePostStatus(slug: string, published: boolean) {
             data: { published }
         });
         revalidateTag('posts', 'max');
+        revalidateTag('stats');
         revalidateTag('hot-topics', 'max');
         revalidateTag('recent', 'max');
         revalidateTag('featured', 'max');

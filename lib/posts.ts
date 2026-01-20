@@ -296,7 +296,7 @@ export const getPostStats = unstable_cache(
         }
     },
     ['post-stats'],
-    { revalidate: 300, tags: ['posts', 'stats'] }
+    { revalidate: 60, tags: ['posts', 'stats'] }
 );
 
 export interface PostStats {
