@@ -52,6 +52,7 @@ export async function createPost(formData: FormData) {
     const accent_color = (formData.get("accent_color") as string) || "#3B82F6";
     const featured = formData.get("featured") === "true";
     const published = formData.get("published") !== "false";
+    const metaDescription = (formData.get("metaDescription") as string) || undefined;
 
     const excerpt = content ? content.substring(0, 200) + "..." : "";
 
@@ -89,7 +90,8 @@ export async function createPost(formData: FormData) {
                 topicSlug: topic_slug,
                 accentColor: accent_color,
                 featured,
-                published
+                published,
+                metaDescription
             }
         });
     } catch (error) {
@@ -149,6 +151,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     const accent_color = (formData.get("accent_color") as string) || "#3B82F6";
     const featured = formData.get("featured") === "true";
     const published = formData.get("published") !== "false";
+    const metaDescription = (formData.get("metaDescription") as string) || undefined;
 
     const excerpt = content ? content.substring(0, 200) + "..." : "";
 
@@ -175,7 +178,8 @@ export async function updatePost(originalSlug: string, formData: FormData) {
                 topicSlug: topic_slug,
                 accentColor: accent_color,
                 featured,
-                published
+                published,
+                metaDescription
             }
         });
 

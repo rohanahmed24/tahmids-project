@@ -50,6 +50,7 @@ model Post {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
   excerpt     String?
+  metaDescription String? @map("meta_description")
   published   Boolean? @default(true)
   authorId    Int?     @map("author_id")
   author      User?    @relation(fields: [authorId], references: [id])

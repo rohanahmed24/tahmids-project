@@ -47,6 +47,7 @@ interface EditorProps {
         featured?: boolean;
         published?: boolean;
         authorName?: string;
+        metaDescription?: string;
     };
     action: (formData: FormData) => Promise<void>;
 }
@@ -65,6 +66,7 @@ export default function Editor({ initialData, action }: EditorProps) {
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.coverImage || null);
     const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl || "");
     const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+    const [metaDescription, setMetaDescription] = useState(initialData?.metaDescription || "");
 
     // Premium Features State
     const [isFocusMode, setIsFocusMode] = useState(false);
@@ -705,6 +707,20 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
                                 />
                                 <p className="text-[10px] text-text-muted">Leave empty to use your profile name.</p>
+                            </div>
+
+                            <div className="space-y-2 pt-4 border-t border-gray-800">
+                                <label className="text-sm font-medium text-text-secondary">Meta Description</label>
+                                <textarea
+                                    name="metaDescription"
+                                    value={metaDescription}
+                                    onChange={(e) => setMetaDescription(e.target.value)}
+                                    placeholder="Brief description for search engines (160 characters recommended)"
+                                    maxLength={300}
+                                    rows={3}
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm resize-none"
+                                />
+                                <p className="text-[10px] text-text-muted">{metaDescription.length}/160 characters</p>
                             </div>
                         </div>
 

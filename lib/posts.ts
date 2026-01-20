@@ -26,6 +26,7 @@ export type Post = {
     created_at: string;
     updated_at: string;
     authorImage?: string | null;
+    metaDescription?: string | null;
 };
 
 // Mapper function to convert Prisma result to frontend Post type
@@ -52,7 +53,8 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         accent_color: post.accentColor,
         created_at: post.createdAt.toISOString(),
         updated_at: post.updatedAt.toISOString(),
-        authorImage: post.author?.image
+        authorImage: post.author?.image,
+        metaDescription: post.metaDescription
     };
 }
 

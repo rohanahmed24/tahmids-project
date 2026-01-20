@@ -42,7 +42,8 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                         accent_color: post.accent_color || undefined,
                         featured: post.featured,
                         published: post.published ?? true,
-                        authorName: post.authorName || undefined
+                        authorName: post.authorName || undefined,
+                        metaDescription: post.metaDescription || undefined
                     }}
                     action={updateAction}
                 />
