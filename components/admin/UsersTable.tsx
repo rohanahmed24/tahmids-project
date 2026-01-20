@@ -45,7 +45,7 @@ export function UsersTable({ users }: UsersTableProps) {
                                     <div className="flex items-center gap-2">
                                         <Shield className={`w-4 h-4 ${user.role === 'admin' ? 'text-red-500' : 'text-blue-500'
                                             }`} />
-                                        <span className={`text-sm capitalize ${user.role === 'admin' ? 'text-red-600' : 'text-blue-600'
+                                        <span className={`text-sm capitalize ${user.role === 'admin' ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'
                                             }`}>
                                             {user.role}
                                         </span>

@@ -45,6 +45,7 @@
   --bg-secondary: var(--color-base-cream-dark);
   --bg-card: var(--color-base-white);
   --bg-inverse: var(--color-base-charcoal);
+  --bg-tertiary: #E5E5E5;
 
   --text-primary: var(--color-base-charcoal);
   --text-secondary: var(--color-base-slate);
@@ -85,6 +86,7 @@
   --bg-secondary: var(--color-base-charcoal-dark);
   --bg-card: var(--color-base-slate-dark);
   --bg-inverse: var(--color-base-white-soft);
+  --bg-tertiary: #2A2A2A;
 
   --text-primary: var(--color-base-white-soft);
   --text-secondary: var(--color-base-gray-soft);
@@ -127,6 +129,7 @@
   --color-bg-secondary: var(--bg-secondary);
   --color-bg-card: var(--bg-card);
   --color-bg-inverse: var(--bg-inverse);
+  --color-bg-tertiary: var(--bg-tertiary);
 
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);

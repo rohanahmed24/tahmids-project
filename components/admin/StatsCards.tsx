@@ -53,10 +53,10 @@ export function StatsCards({ stats }: StatsCardsProps) {
 
     const getColorClasses = (color: string) => {
         const colors = {
-            blue: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-            green: "bg-green-500/10 text-green-600 border-green-500/20",
-            purple: "bg-purple-500/10 text-purple-600 border-purple-500/20",
-            orange: "bg-orange-500/10 text-orange-600 border-orange-500/20"
+            blue: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
+            green: "bg-green-500/10 text-green-700 dark:text-green-300 border-green-500/20",
+            purple: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
+            orange: "bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/20"
         };
         return colors[color as keyof typeof colors] || colors.blue;
     };
@@ -91,8 +91,8 @@ export function StatsCards({ stats }: StatsCardsProps) {
                                 {card.value}
                             </p>
                             <p className={`text-sm ${card.trend === "up" ? "text-green-600" :
-                                    card.trend === "down" ? "text-red-600" :
-                                        "text-text-tertiary"
+                                card.trend === "down" ? "text-red-600" :
+                                    "text-text-tertiary"
                                 }`}>
                                 {card.change}
                             </p>

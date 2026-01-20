@@ -30,11 +30,13 @@ conn.on('ready', () => {
 
             const commands = [
                 `cd ${projectPath}`,
-                'git reset --hard', // Safety: discard local changes on server to ensure pull works
+                'rm -rf .next/lock', // Force remove build lock
+                'fuser -k 3000/tcp || true', // Kill existing server on port 3000
+                'git reset --hard', // Safety: discard local changes on server
                 'git pull',
                 'npm install',
                 'npx prisma generate',
-                'npx prisma db push', // Apply schema changes
+                'npx prisma db push',
                 'npm run build',
                 // Check if pm2 ecosystem exists, otherwise just restart valid process
                 'pm2 restart all || npm run start &'

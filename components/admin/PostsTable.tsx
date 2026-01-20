@@ -140,10 +140,9 @@ export function PostsTable({ posts }: PostsTableProps) {
                                     <div className="flex items-center gap-2">
                                         <div className={`w-2 h-2 rounded-full ${post.published ? "bg-green-500" : "bg-yellow-500"
                                             }`} />
-                                        <span className={`text-sm ${post.published ? "text-green-600" : "text-yellow-600"
+                                        <span className={`text-sm ${post.published ? "text-green-600" : "text-yellow-700 dark:text-yellow-500"
                                             }`}>
-                                            {post.published ? "Published" : "Draft"}
-                                        </span>
+                                            {post.published ? "Published" : "Draft"}  </span>
                                     </div>
                                 </td>
                                 <td className="p-4">
