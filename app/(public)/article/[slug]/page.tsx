@@ -11,7 +11,7 @@ import { getPostBySlug, getAllPosts } from "@/lib/posts";
 import { notFound } from "next/navigation";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
 import { ArticleVideoPlayer } from "@/components/ArticleVideoPlayer";
-// import { GenerateVideoButton } from "@/components/GenerateVideoButton"; // Mock removed
+import { CustomAudioPlayer } from "@/components/ui/CustomAudioPlayer";
 
 export async function generateStaticParams() {
     const posts = await getAllPosts();
@@ -90,8 +90,8 @@ export default async function ArticlePage({
 
                         <ArticleContent>
                             <div className="prose prose-lg max-w-none text-text-main leading-relaxed prose-headings:font-serif prose-a:text-accent-main prose-img:rounded-xl">
-                                <ReactMarkdown 
-                                    remarkPlugins={[remarkGfm]} 
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
                                     rehypePlugins={[rehypeRaw]}
                                     components={{
                                         iframe: ({ node, ...props }) => (
@@ -100,6 +100,12 @@ export default async function ArticlePage({
                                                 className="w-full aspect-video rounded-xl my-6"
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                                 allowFullScreen
+                                            />
+                                        ),
+                                        audio: ({ node, ...props }) => (
+                                            <CustomAudioPlayer
+                                                src={props.src as string}
+                                                title="Audio Clip"
                                             />
                                         ),
                                     }}
