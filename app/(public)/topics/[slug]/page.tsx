@@ -137,7 +137,7 @@ export default function TopicPage() {
                             </Link>
                         </div>
                     </MotionWrapper>
-                    <StoriesGrid />
+                    <StoriesGrid category={topic.title} />
                 </div>
             </section>
 
