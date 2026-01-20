@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import Navbar from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { DevToolsBlocker } from "@/components/DevToolsBlocker";
 import { SessionProvider } from "next-auth/react";
 import { SessionSync } from "@/components/SessionSync";
@@ -48,9 +46,7 @@ export default function RootLayout({
           >
             <DevToolsBlocker />
             <SessionSync />
-            <Navbar />
             {children}
-            <Footer />
             <Toaster richColors position="top-center" />
           </ThemeProvider>
         </SessionProvider>
