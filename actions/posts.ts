@@ -99,7 +99,7 @@ export async function createPost(formData: FormData) {
     }
 
     revalidateTag('posts', 'max');
-    revalidateTag('stats');
+    revalidateTag('stats', 'max');
     revalidateTag('hot-topics', 'max');
     revalidateTag('recent', 'max');
     revalidateTag('featured', 'max');
