@@ -38,7 +38,7 @@ export async function createNavbarLink(data: { label: string; href: string; orde
             },
         });
         revalidatePath("/");
-        revalidateTag("navbar_links", "default");
+        revalidateTag("navbar_links");
         return { success: true, link };
     } catch (error) {
         console.error("Error creating navbar link:", error);
@@ -53,7 +53,7 @@ export async function updateNavbarLink(id: number, data: { label?: string; href?
             data,
         });
         revalidatePath("/");
-        revalidateTag("navbar_links", "default");
+        revalidateTag("navbar_links");
         return { success: true, link };
     } catch (error) {
         console.error("Error updating navbar link:", error);
@@ -67,7 +67,7 @@ export async function deleteNavbarLink(id: number) {
             where: { id },
         });
         revalidatePath("/");
-        revalidateTag("navbar_links", "default");
+        revalidateTag("navbar_links");
         return { success: true };
     } catch (error) {
         console.error("Error deleting navbar link:", error);
@@ -86,7 +86,7 @@ export async function reorderNavbarLinks(updates: { id: number; order: number }[
             )
         );
         revalidatePath("/");
-        revalidateTag("navbar_links", "default");
+        revalidateTag("navbar_links");
         return { success: true };
     } catch (error) {
         console.error("Error reordering navbar links:", error);

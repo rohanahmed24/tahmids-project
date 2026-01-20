@@ -100,11 +100,11 @@ export async function createPost(formData: FormData) {
         throw new Error("Failed to create post");
     }
 
-    revalidateTag('posts', 'default');
-    revalidateTag('stats', 'default');
-    revalidateTag('hot-topics', 'default');
-    revalidateTag('recent', 'default');
-    revalidateTag('featured', 'default');
+    revalidateTag('posts');
+    revalidateTag('stats');
+    revalidateTag('hot-topics');
+    revalidateTag('recent');
+    revalidateTag('featured');
     revalidatePath("/admin/dashboard");
     revalidatePath("/");
     redirect("/admin/dashboard");
@@ -120,11 +120,11 @@ export async function deletePost(slug: string) {
         await prisma.post.delete({
             where: { slug }
         });
-        revalidateTag('posts', 'default');
-        revalidateTag('stats', 'default');
-        revalidateTag('hot-topics', 'default');
-        revalidateTag('recent', 'default');
-        revalidateTag('featured', 'default');
+        revalidateTag('posts');
+        revalidateTag('stats');
+        revalidateTag('hot-topics');
+        revalidateTag('recent');
+        revalidateTag('featured');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {
@@ -179,11 +179,11 @@ export async function updatePost(originalSlug: string, formData: FormData) {
             }
         });
 
-        revalidateTag('posts', 'default');
-        revalidateTag('stats', 'default');
-        revalidateTag('hot-topics', 'default');
-        revalidateTag('recent', 'default');
-        revalidateTag('featured', 'default');
+        revalidateTag('posts');
+        revalidateTag('stats');
+        revalidateTag('hot-topics');
+        revalidateTag('recent');
+        revalidateTag('featured');
         revalidatePath(`/article/${originalSlug}`);
         revalidatePath(`/admin/edit/${originalSlug}`);
         revalidatePath("/admin/dashboard");
@@ -207,11 +207,11 @@ export async function togglePostStatus(slug: string, published: boolean) {
             where: { slug },
             data: { published }
         });
-        revalidateTag('posts', 'default');
-        revalidateTag('stats', 'default');
-        revalidateTag('hot-topics', 'default');
-        revalidateTag('recent', 'default');
-        revalidateTag('featured', 'default');
+        revalidateTag('posts');
+        revalidateTag('stats');
+        revalidateTag('hot-topics');
+        revalidateTag('recent');
+        revalidateTag('featured');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {
