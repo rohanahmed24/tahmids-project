@@ -139,7 +139,7 @@ export class PostService {
                     slug: postData.slug!,
                     title: postData.title,
                     subtitle: postData.subtitle,
-                    date: new Date(postData.date),
+                    date: postData.date,
                     authorName: postData.author, // Assuming authorName exists, or standardizing on authorId
                     category: postData.category,
                     content: postData.content,
@@ -181,6 +181,7 @@ export class PostService {
             };
 
             // Remove undefined keys
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             Object.keys(dataToUpdate).forEach(key => (dataToUpdate as any)[key] === undefined && delete (dataToUpdate as any)[key]);
 
             await prisma.post.update({

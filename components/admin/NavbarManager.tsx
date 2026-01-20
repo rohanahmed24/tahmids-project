@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Trash2, GripVertical, Check, X, Edit2, Save, Power } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Trash2, GripVertical, X, Edit2, Save, Power } from "lucide-react";
 import { motion, Reorder } from "framer-motion";
 import { getAllNavbarLinksAdmin, createNavbarLink, updateNavbarLink, deleteNavbarLink, reorderNavbarLinks } from "@/actions/navbar";
 import { toast } from "sonner";

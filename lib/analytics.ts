@@ -42,7 +42,10 @@ export async function getTopArticles(limit: number = 5): Promise<TopArticle[]> {
             orderBy: { views: 'desc' },
             take: limit
         });
-        return posts;
+        return posts.map(post => ({
+            ...post,
+            views: post.views ?? 0
+        }));
     } catch (error) {
         console.error("Error fetching top articles:", error);
         return [];

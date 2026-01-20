@@ -12,6 +12,7 @@ import { updateSettings } from "@/actions/settings";
 import { getApplications, updateApplicationStatus } from "@/actions/careers";
 import { getImages, uploadImage, deleteImage } from "@/actions/media";
 // import { RowDataPacket } from "mysql2"; // Removed
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RowDataPacket = any;
 // Import Sidebar and Header
 import { AdminSidebar, NavItem } from "../components/AdminSidebar";

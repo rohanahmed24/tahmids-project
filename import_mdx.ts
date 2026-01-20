@@ -33,7 +33,7 @@ async function importMdx() {
                     where: { slug },
                     data: {
                         title: data.title,
-                        date: new Date(data.date),
+                        date: new Date(data.date).toISOString(),
                         authorName: data.author,
                         category: data.category,
                         content: mdxContent,
@@ -47,7 +47,7 @@ async function importMdx() {
                     data: {
                         slug,
                         title: data.title,
-                        date: new Date(data.date),
+                        date: new Date(data.date).toISOString(),
                         authorName: data.author,
                         category: data.category,
                         content: mdxContent,

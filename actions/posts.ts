@@ -44,7 +44,7 @@ export async function createPost(formData: FormData) {
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
     const category = formData.get("category") as string;
-    const authorName = session.name;
+    const authorName = (formData.get("authorName") as string) || session.name;
     const videoUrl = (formData.get("videoUrl") as string) || undefined;
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = (formData.get("topic_slug") as string) || undefined;
@@ -63,7 +63,7 @@ export async function createPost(formData: FormData) {
     const uploadedImagePath = await handleFileUpload(coverImageFile);
     const coverImage = uploadedImagePath || (formData.get("coverImage") as string) || undefined;
 
-    const date = new Date();
+    const date = new Date().toISOString();
 
     // Find author id
     const user = await prisma.user.findUnique({

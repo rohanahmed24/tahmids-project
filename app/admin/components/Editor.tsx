@@ -20,7 +20,9 @@ import {
     Minimize2,
     Loader2,
     Clock,
-    AlignLeft
+    AlignLeft,
+    Music,
+    Youtube
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -41,6 +43,7 @@ interface EditorProps {
         accent_color?: string;
         featured?: boolean;
         published?: boolean;
+        authorName?: string;
     };
     action: (formData: FormData) => Promise<void>;
 }
@@ -54,6 +57,7 @@ export default function Editor({ initialData, action }: EditorProps) {
     const [category, setCategory] = useState(initialData?.category || "Technology");
     const [topicSlug, setTopicSlug] = useState(initialData?.topic_slug || "");
     const [published, setPublished] = useState(initialData?.published ?? true);
+    const [authorName, setAuthorName] = useState(initialData?.authorName || "");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.coverImage || null);
 
@@ -188,6 +192,46 @@ export default function Editor({ initialData, action }: EditorProps) {
         }
     };
 
+    const handleAudioUpload = async (file: File) => {
+        const id = toast.loading("Uploading audio...");
+        const placeholder = `\n![Audio Uploading...]()\n`;
+        insertAtCursor(placeholder);
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const result = await uploadImage(formData);
+            if (result.success && result.url) {
+                // Use a custom syntax or HTML audio tag that our markdown renderer can handle or just a link for now.
+                // Better approach: Use HTML 5 audio tag which standard markdown often allows, or a custom component syntax.
+                // Let's use a custom syntax that we will parse: [audio](url)
+                // Actually, standard markdown image syntax `![audio](url)` might be confused with images. 
+                // Let's use <audio controls src="..." /> which remark-gfm/rehype-raw can support if configured, 
+                // or just a custom code block?
+                // Simplest for now: HTML tag.
+                setContent(prev => prev.replace(placeholder, `\n<audio controls src="${result.url}"></audio>\n`));
+                toast.success("Audio uploaded", { id });
+            } else {
+                setContent(prev => prev.replace(placeholder, ""));
+                toast.error("Upload failed", { id });
+            }
+        } catch {
+            setContent(prev => prev.replace(placeholder, ""));
+            toast.error("Upload failed", { id });
+        }
+    };
+
+    const handleYoutubeInsert = () => {
+        const url = prompt("Enter YouTube URL:");
+        if (url) {
+            // Simple validation or extraction could go here
+            // We'll insert a custom component marker or iframe
+            const embed = `\n<iframe width="100%" height="400" src="${url.replace('watch?v=', 'embed/')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\n`;
+            insertAtCursor(embed);
+        }
+    };
+
     const handleBodyImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) handleUploadFile(file);
@@ -198,7 +242,7 @@ export default function Editor({ initialData, action }: EditorProps) {
         const items = e.clipboardData.items;
         for (const item of items) {
             if (item.type.startsWith("image/")) {
-                e.preventDefault();
+                e.preventDefault(); // Only prevent default if we're handling the file
                 const file = item.getAsFile();
                 if (file) {
                     await handleUploadFile(file);
@@ -206,6 +250,7 @@ export default function Editor({ initialData, action }: EditorProps) {
                 return;
             }
         }
+        // Do not block text paste!
     };
 
     const handleDrop = async (e: React.DragEvent) => {
@@ -291,6 +336,7 @@ export default function Editor({ initialData, action }: EditorProps) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         formData.set("published", String(published));
+        if (authorName) formData.set("authorName", authorName);
         // Ensure other states are set if not controlled inputs (they are mostly named inputs)
         handleSubmit(formData);
     };
@@ -443,6 +489,34 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     accept="image/*"
                                     onChange={handleBodyImageUpload}
                                 />
+                                <div className="w-px h-4 bg-border-primary mx-2" />
+                                <button
+                                    type="button"
+                                    onClick={() => document.getElementById('audioUpload')?.click()}
+                                    className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors"
+                                    title="Add Audio"
+                                >
+                                    <Music className="w-4 h-4" />
+                                </button>
+                                <input
+                                    type="file"
+                                    id="audioUpload"
+                                    className="hidden"
+                                    accept="audio/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleAudioUpload(file);
+                                        e.target.value = "";
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleYoutubeInsert}
+                                    className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                    title="Add YouTube Video"
+                                >
+                                    <Youtube className="w-4 h-4" />
+                                </button>
                             </div>
                         )}
 
@@ -467,7 +541,12 @@ export default function Editor({ initialData, action }: EditorProps) {
                             </div>
                         ) : (
                             <div className="flex-1 p-8 prose prose-invert max-w-none prose-headings:font-serif prose-a:text-purple-400 prose-img:rounded-xl">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                        // Custom renderers will be added here if needed, or rely on rehype-raw
+                                    }}
+                                >
                                     {content}
                                 </ReactMarkdown>
                             </div>
@@ -561,6 +640,19 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     className="w-4 h-4 rounded border-border-primary bg-bg-tertiary text-accent-main focus:ring-accent-main"
                                 />
                                 <label className="text-sm font-medium text-text-secondary">Featured Article</label>
+                            </div>
+
+                            <div className="space-y-2 pt-4 border-t border-gray-800">
+                                <label className="text-sm font-medium text-text-secondary">Author Name</label>
+                                <input
+                                    type="text"
+                                    name="authorName"
+                                    value={authorName}
+                                    onChange={(e) => setAuthorName(e.target.value)}
+                                    placeholder="e.g. Guest Writer"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                                <p className="text-[10px] text-text-muted">Leave empty to use your profile name.</p>
                             </div>
                         </div>
 

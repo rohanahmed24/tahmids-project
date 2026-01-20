@@ -1,5 +1,8 @@
 import { ArticleHeader } from "@/components/ArticleHeader";
 import { ArticleContent } from "@/components/ArticleContent";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { ArticleSidebar } from "@/components/ArticleSidebar";
 import { MotionWrapper } from "@/components/ui/MotionWrapper";
 import { DailyQuote } from "@/components/DailyQuote";
@@ -34,6 +37,11 @@ export default async function ArticlePage({
 
     const isWatchMode = mode === 'watch';
 
+    // Imports needed (adding to top of file in next step if not possible here, but let's try to replace the component usage)
+    // To do this properly I need to add imports to the file first.
+    // I will just return the content block here and add imports in a separate call or use multi_replace.
+    // Let's use multi_replace.
+    // Aborting this specific tool call to use multi_replace for clean import + usage update.
     return (
         <main className="min-h-screen bg-bg-primary selection:bg-bg-inverse selection:text-text-inverse">
             <article className="pb-20">
@@ -83,14 +91,10 @@ export default async function ArticlePage({
                         )}
 
                         <ArticleContent>
-                            <div className="prose prose-lg max-w-none">
-                                {(post.content || "").split('\n').map((paragraph, index) => (
-                                    paragraph.trim() ? (
-                                        <p key={index} className="mb-4 text-text-main leading-relaxed">
-                                            {paragraph}
-                                        </p>
-                                    ) : null
-                                ))}
+                            <div className="prose prose-lg max-w-none text-text-main leading-relaxed prose-headings:font-serif prose-a:text-accent-main prose-img:rounded-xl">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                                    {post.content || ""}
+                                </ReactMarkdown>
                             </div>
                         </ArticleContent>
                     </div>

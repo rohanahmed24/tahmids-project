@@ -27,7 +27,7 @@ export async function searchPosts(query: string): Promise<Post[]> {
         // Map Prisma result to Post type where necessary
         return posts.map(post => ({
             ...post,
-            date: post.date.toISOString(),
+            date: post.date || new Date().toISOString(),
             createdAt: post.createdAt.toISOString(),
             updatedAt: post.updatedAt.toISOString(),
             // Ensure compatibility with existing Post type which expects specific field names

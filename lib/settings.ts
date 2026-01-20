@@ -13,7 +13,7 @@ export async function getSettings(): Promise<SiteSettings> {
 
         const settings: Record<string, string> = {};
         rows.forEach((row) => {
-            settings[row.keyName] = row.value;
+            settings[row.keyName] = row.value || "";
         });
 
         return {
