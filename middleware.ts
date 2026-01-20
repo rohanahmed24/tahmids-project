@@ -1,10 +1,15 @@
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { auth } from "@/auth";
 
-export function middleware(request: NextRequest) {
+// Routes that require authentication
+const protectedRoutes = ["/dashboard"];
+
+export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     const forwardedHost = requestHeaders.get("x-forwarded-host");
+    const pathname = request.nextUrl.pathname;
 
     // Fix LiteSpeed duplicate headers (e.g. "thewisdomia.com, thewisdomia.com")
     let modified = false;
@@ -22,8 +27,20 @@ export function middleware(request: NextRequest) {
         modified = true;
     }
 
+    // Check if route requires authentication
+    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+
+    if (isProtectedRoute) {
+        const session = await auth();
+
+        if (!session?.user) {
+            const signInUrl = new URL("/signin", request.url);
+            signInUrl.searchParams.set("callbackUrl", pathname);
+            return NextResponse.redirect(signInUrl);
+        }
+    }
+
     if (modified) {
-        // Re-create response with sanitized headers
         return NextResponse.next({
             request: {
                 headers: requestHeaders,
@@ -35,5 +52,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: "/:path*",
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico|imgs|public).*)"],
 };

@@ -1,7 +1,8 @@
 "use server";
 
-import { verifyAdmin } from "@/actions/admin-auth";
+import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { verifyAdmin } from "./admin-auth";
 
 export async function updateSettings(formData: FormData) {
     const isAdmin = await verifyAdmin();
@@ -10,45 +11,36 @@ export async function updateSettings(formData: FormData) {
     }
 
     try {
-        // Extract settings from form data
-        // Extract settings from form data
-        // Unused variables removed for mock implementation
-        console.log("Updating settings:", Object.fromEntries(formData));
+        const settings = Array.from(formData.entries());
 
-        // In a real implementation, you would save these to a settings table
-        // For now, we'll just simulate success
+        for (const [key, value] of settings) {
+            // Skip Next.js internal fields if any
+            if (key.startsWith('$')) continue;
+
+            await prisma.setting.upsert({
+                where: { keyName: key },
+                update: { value: value as string },
+                create: { keyName: key, value: value as string }
+            });
+        }
 
         revalidatePath("/admin/settings");
-        return { success: true };
+        return { success: true, message: "Settings updated successfully" };
     } catch (error) {
         console.error("Failed to update settings:", error);
-        throw new Error("Failed to update settings");
+        return { success: false, message: "Failed to update settings" };
     }
 }
 
 export async function getSettings() {
-    const isAdmin = await verifyAdmin();
-    if (!isAdmin) {
-        throw new Error("Unauthorized");
-    }
-
     try {
-        // In a real implementation, you would fetch from a settings table
-        // For now, return default settings
-        return {
-            success: true,
-            settings: {
-                siteName: "Wisdomia",
-                siteTagline: "Your Digital Magazine",
-                siteDescription: "A platform dedicated to storytelling and editorial content across politics, mystery, crime, history, news, and science.",
-                defaultLanguage: "en",
-                timezone: "UTC",
-                theme: "dark",
-                primaryColor: "blue"
-            }
-        };
+        const settings = await prisma.setting.findMany();
+        return settings.reduce((acc, setting) => {
+            acc[setting.keyName] = setting.value || "";
+            return acc;
+        }, {} as Record<string, string>);
     } catch (error) {
-        console.error("Failed to get settings:", error);
-        return { success: false, error: "Failed to get settings" };
+        console.error("Failed to fetch settings:", error);
+        return {};
     }
 }

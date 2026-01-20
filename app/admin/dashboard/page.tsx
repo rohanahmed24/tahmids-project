@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { verifyAdmin, getAdminSession } from "@/actions/admin-auth";
 import { getAllUsers, getUserStats } from "@/lib/users";
 import { getAllPostsForAdmin, getPostStats } from "@/lib/posts";
+import { getRecentActivity } from "@/lib/activity";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { PostsTable } from "@/components/admin/PostsTable";
@@ -21,12 +22,19 @@ export default async function AdminDashboard() {
     }
 
     // Fetch all data in parallel
-    const [users, userStats, posts, postStats] = await Promise.all([
+    const [users, userStats, posts, postStats, activities] = await Promise.all([
         getAllUsers(),
         getUserStats(),
         getAllPostsForAdmin(),
-        getPostStats()
+        getPostStats(),
+        getRecentActivity()
     ]);
+
+    // Calculate growth (simple approximation)
+    const previousUsers = userStats.totalUsers - userStats.recentUsers;
+    const userGrowth = previousUsers > 0
+        ? Math.round((userStats.recentUsers / previousUsers) * 100)
+        : (userStats.totalUsers > 0 ? 100 : 0);
 
     const dashboardStats = {
         totalUsers: userStats.totalUsers,
@@ -34,9 +42,9 @@ export default async function AdminDashboard() {
         publishedArticles: postStats.published,
         draftArticles: postStats.drafts,
         totalViews: postStats.totalViews,
-        monthlyGrowth: 12.5, // This would come from analytics
-        engagementRate: 68.3, // This would come from analytics
-        avgReadTime: "4.2 min" // This would come from analytics
+        monthlyGrowth: userGrowth,
+        engagementRate: 0, // Placeholder as we don't track engagement yet
+        avgReadTime: "N/A" // Placeholder
     };
 
     return (
@@ -57,7 +65,7 @@ export default async function AdminDashboard() {
                     <div className="xl:col-span-2 space-y-8">
                         {/* Analytics Chart */}
                         <Suspense fallback={<div className="h-96 bg-bg-secondary rounded-xl animate-pulse" />}>
-                            <AnalyticsChart />
+                            <AnalyticsChart posts={posts} userCount={userStats.totalUsers} />
                         </Suspense>
 
                         {/* Posts Management */}
@@ -84,7 +92,7 @@ export default async function AdminDashboard() {
                     {/* Right Column - Users & Activity */}
                     <div className="space-y-8">
                         {/* Recent Activity */}
-                        <RecentActivity />
+                        <RecentActivity activities={activities} />
 
                         {/* Users Management */}
                         <div className="bg-bg-secondary rounded-xl border border-border-primary">

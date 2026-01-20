@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextIndex"]
 }
 
@@ -13,64 +10,58 @@ datasource db {
 
 model User {
   id            Int       @id @default(autoincrement())
-  email         String    @unique
   name          String
-  password      String?
+  email         String    @unique(map: "email")
   role          Role      @default(user)
-  image         String?   @db.VarChar(500)
-  emailVerified DateTime? @map("email_verified")
   createdAt     DateTime  @default(now()) @map("created_at")
+  emailVerified DateTime? @map("email_verified")
+  image         String?   @db.VarChar(500)
+  password      String?
   updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  posts    Post[]
-  sessions Session[]
-  accounts Account[]
+  accounts      Account[]
+  posts         Post[]
+  sessions      Session[]
 
   @@index([email])
   @@index([role])
   @@map("users")
 }
 
-enum Role {
-  user
-  admin
-}
-
 model Post {
   id          Int      @id @default(autoincrement())
+  slug        String   @unique(map: "slug") @db.VarChar(255)
   title       String   @db.VarChar(255)
-  slug        String   @unique @db.VarChar(255)
   subtitle    String?  @db.VarChar(255)
-  content     String?  @db.LongText
-  excerpt     String?  @db.Text
-  category    String?  @db.VarChar(255)
-  authorId    Int?     @map("author_id")
+  date        String?  @db.VarChar(255)
   authorName  String?  @map("author") @db.VarChar(255)
-  featured    Boolean? @default(false)
-  published   Boolean? @default(true)
-  views       Int?     @default(0)
+  category    String?  @db.VarChar(255)
+  content     String?  @db.LongText
   coverImage  String?  @db.VarChar(255)
   videoUrl    String?  @db.VarChar(255)
+  views       Int?     @default(0)
+  featured    Boolean? @default(false)
   topicSlug   String?  @map("topic_slug") @db.VarChar(255)
   accentColor String?  @map("accent_color") @db.VarChar(255)
-  date        String?  @db.VarChar(255)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
-
-  author User? @relation(fields: [authorId], references: [id])
+  excerpt     String?  @db.Text
+  published   Boolean? @default(true)
+  authorId    Int?     @map("author_id")
+  author      User?    @relation(fields: [authorId], references: [id])
 
   @@index([slug])
-  @@index([category])
-  @@index([featured])
-  @@index([published])
   @@index([date])
+  @@index([category], map: "idx_posts_category")
+  @@index([featured], map: "idx_posts_featured")
+  @@index([published], map: "idx_posts_published")
+  @@index([authorId], map: "posts_author_id_fkey")
   @@fulltext([title, content, excerpt])
   @@map("posts")
 }
 
 model Asset {
   id   Int     @id @default(autoincrement())
-  name String  @unique @db.VarChar(255)
+  name String  @unique(map: "name") @db.VarChar(255)
   url  String  @db.VarChar(255)
   type String? @default("image") @db.VarChar(50)
 
@@ -99,8 +90,7 @@ model Session {
   sessionToken String   @unique @map("session_token") @db.VarChar(255)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([sessionToken])
   @@index([userId])
@@ -122,8 +112,7 @@ model Account {
   sessionState      String?  @map("session_state") @db.VarChar(255)
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId], map: "unique_provider_account")
   @@index([userId])
@@ -132,7 +121,7 @@ model Account {
 
 model Setting {
   id        Int      @id @default(autoincrement())
-  keyName   String   @unique @map("key_name") @db.VarChar(255)
+  keyName   String   @unique(map: "key_name") @map("key_name") @db.VarChar(255)
   value     String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -151,4 +140,9 @@ model NavbarLink {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("navbar_links")
+}
+
+enum Role {
+  user
+  admin
 }

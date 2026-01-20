@@ -1,35 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { TrendingUp, Users, Eye, BarChart3 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { TrendingUp, Users, Eye, BarChart3, FileText } from "lucide-react";
+import { Post } from "@/lib/posts";
+import Image from "next/image";
 
-interface AnalyticsData {
-    date: string;
-    views: number;
-    users: number;
-    articles: number;
+interface AnalyticsChartProps {
+    posts: Post[];
+    userCount: number;
 }
 
-export function AnalyticsChart() {
+export function AnalyticsChart({ posts, userCount }: AnalyticsChartProps) {
     const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
-    // Mock analytics data - in real app this would come from database
-    const analyticsData: AnalyticsData[] = [
-        { date: "2024-01-01", views: 1200, users: 340, articles: 2 },
-        { date: "2024-01-02", views: 1450, users: 380, articles: 1 },
-        { date: "2024-01-03", views: 1100, users: 320, articles: 3 },
-        { date: "2024-01-04", views: 1680, users: 420, articles: 1 },
-        { date: "2024-01-05", views: 1890, users: 480, articles: 2 },
-        { date: "2024-01-06", views: 2100, users: 520, articles: 4 },
-        { date: "2024-01-07", views: 1950, users: 490, articles: 1 },
-    ];
+    // Calculate real stats
+    const totalViews = useMemo(() => posts.reduce((sum, post) => sum + (post.views || 0), 0), [posts]);
+    const totalArticles = posts.length;
+    const avgViews = totalArticles > 0 ? Math.round(totalViews / totalArticles) : 0;
 
-    const totalViews = analyticsData.reduce((sum, day) => sum + day.views, 0);
-    const totalUsers = analyticsData.reduce((sum, day) => sum + day.users, 0);
-    const avgViews = Math.round(totalViews / analyticsData.length);
-    const viewsGrowth = 12.5; // Mock growth percentage
+    // Top 5 posts by views
+    const topPosts = useMemo(() => {
+        return [...posts]
+            .sort((a, b) => (b.views || 0) - (a.views || 0))
+            .slice(0, 5);
+    }, [posts]);
 
-    const maxViews = Math.max(...analyticsData.map(d => d.views));
+    // Calculate max views for bar scale
+    const maxViews = topPosts.length > 0 ? topPosts[0].views : 100;
 
     return (
         <div className="bg-bg-secondary rounded-xl border border-border-primary">
@@ -38,19 +35,11 @@ export function AnalyticsChart() {
                     <div>
                         <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
                             <BarChart3 className="w-5 h-5" />
-                            Analytics Overview
+                            Content Performance
                         </h2>
-                        <p className="text-text-secondary mt-1">Track your content performance</p>
+                        <p className="text-text-secondary mt-1">Top performing articles by views</p>
                     </div>
-                    <select
-                        value={timeRange}
-                        onChange={(e) => setTimeRange(e.target.value as "7d" | "30d" | "90d")}
-                        className="px-3 py-2 bg-bg-primary border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary"
-                    >
-                        <option value="7d">Last 7 days</option>
-                        <option value="30d">Last 30 days</option>
-                        <option value="90d">Last 90 days</option>
-                    </select>
+                    {/* Time range selector hidden as we don't have historical data yet */}
                 </div>
             </div>
 
@@ -64,8 +53,7 @@ export function AnalyticsChart() {
                                 <p className="text-2xl font-bold text-text-primary">{totalViews.toLocaleString()}</p>
                             </div>
                             <div className="flex items-center gap-1 text-green-500">
-                                <TrendingUp className="w-4 h-4" />
-                                <span className="text-sm font-medium">+{viewsGrowth}%</span>
+                                <Eye className="w-4 h-4" />
                             </div>
                         </div>
                     </div>
@@ -73,12 +61,11 @@ export function AnalyticsChart() {
                     <div className="bg-bg-tertiary rounded-lg p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-text-secondary text-sm">Unique Visitors</p>
-                                <p className="text-2xl font-bold text-text-primary">{totalUsers.toLocaleString()}</p>
+                                <p className="text-text-secondary text-sm">Total Articles</p>
+                                <p className="text-2xl font-bold text-text-primary">{totalArticles.toLocaleString()}</p>
                             </div>
                             <div className="flex items-center gap-1 text-blue-500">
-                                <Users className="w-4 h-4" />
-                                <span className="text-sm font-medium">+8.2%</span>
+                                <FileText className="w-4 h-4" />
                             </div>
                         </div>
                     </div>
@@ -86,81 +73,59 @@ export function AnalyticsChart() {
                     <div className="bg-bg-tertiary rounded-lg p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-text-secondary text-sm">Avg. Daily Views</p>
+                                <p className="text-text-secondary text-sm">Avg. Views per Article</p>
                                 <p className="text-2xl font-bold text-text-primary">{avgViews.toLocaleString()}</p>
                             </div>
                             <div className="flex items-center gap-1 text-purple-500">
-                                <Eye className="w-4 h-4" />
-                                <span className="text-sm font-medium">+15.3%</span>
+                                <TrendingUp className="w-4 h-4" />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Chart */}
-                <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-text-primary">Daily Views Trend</h3>
-                    <div className="h-64 flex items-end justify-between gap-2">
-                        {analyticsData.map((day) => {
-                            const height = (day.views / maxViews) * 100;
+                {/* Top Content Chart */}
+                <div className="space-y-6">
+                    <h3 className="text-lg font-medium text-text-primary">Top 5 Trending Articles</h3>
+                    <div className="space-y-4">
+                        {topPosts.map((post) => {
+                            const widthPercent = Math.max((post.views / maxViews) * 100, 1);
                             return (
-                                <div key={day.date} className="flex-1 flex flex-col items-center gap-2">
-                                    <div className="relative group">
-                                        <div
-                                            className="bg-gradient-to-t from-accent-primary to-accent-primary/60 rounded-t-md transition-all duration-300 hover:from-accent-primary/80 hover:to-accent-primary/40 cursor-pointer"
-                                            style={{ height: `${height}%`, minHeight: '8px' }}
-                                        />
-                                        {/* Tooltip */}
-                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                            {day.views} views
-                                        </div>
+                                <div key={post.id} className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-text-primary font-medium truncate max-w-[70%]">{post.title}</span>
+                                        <span className="text-text-secondary">{post.views.toLocaleString()} views</span>
                                     </div>
-                                    <span className="text-xs text-text-tertiary">
-                                        {new Date(day.date).toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric'
-                                        })}
-                                    </span>
+                                    <div className="h-3 bg-bg-tertiary rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-accent-primary rounded-full transition-all duration-500"
+                                            style={{ width: `${widthPercent}%` }}
+                                        />
+                                    </div>
                                 </div>
                             );
                         })}
+                        {topPosts.length === 0 && (
+                            <div className="text-center py-8 text-text-secondary">
+                                No published articles yet.
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 {/* Additional Insights */}
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="mt-8 grid grid-cols-1 gap-6">
                     <div className="bg-bg-tertiary rounded-lg p-4">
-                        <h4 className="font-medium text-text-primary mb-3">Top Performing Content</h4>
+                        <h4 className="font-medium text-text-primary mb-3">Audience Insights</h4>
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                                <span className="text-text-secondary text-sm">Welcome to Wisdomia</span>
-                                <span className="text-text-primary font-medium">1,250 views</span>
+                                <span className="text-text-secondary text-sm">Registered Users</span>
+                                <span className="text-text-primary font-medium">{userCount.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-text-secondary text-sm">Future of Digital Journalism</span>
-                                <span className="text-text-primary font-medium">890 views</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-text-secondary text-sm">Ancient Civilizations</span>
-                                <span className="text-text-primary font-medium">1,456 views</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-bg-tertiary rounded-lg p-4">
-                        <h4 className="font-medium text-text-primary mb-3">Traffic Sources</h4>
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-text-secondary text-sm">Direct</span>
-                                <span className="text-text-primary font-medium">45%</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-text-secondary text-sm">Search Engines</span>
-                                <span className="text-text-primary font-medium">32%</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-text-secondary text-sm">Social Media</span>
-                                <span className="text-text-primary font-medium">23%</span>
+                                <span className="text-text-secondary text-sm">Conversion Rate</span>
+                                <span className="text-text-primary font-medium">
+                                    {totalViews > 0 ? ((userCount / totalViews) * 100).toFixed(2) : 0}%
+                                </span>
                             </div>
                         </div>
                     </div>

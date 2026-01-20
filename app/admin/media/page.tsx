@@ -1,12 +1,11 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
-import { auth } from "@/auth";
-import { verifyAdmin } from "@/actions/admin-auth";
+import { verifyAdmin, getAdminSession } from "@/actions/admin-auth";
 import { MediaLibrary } from "@/components/admin/MediaLibrary";
 import { MediaStatsCards } from "@/components/admin/MediaStatsCards";
 import { MediaErrorBoundary } from "@/components/admin/MediaErrorBoundary";
-import { getMediaStats } from "@/lib/media-service";
+import { getMediaStats, getAllMedia } from "@/lib/media-service";
 import { Upload, Folder } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -16,15 +15,18 @@ export const metadata: Metadata = {
 };
 
 export default async function MediaPage() {
-    const session = await auth();
+    const session = await getAdminSession();
     const isAdmin = await verifyAdmin();
 
     if (!session || !isAdmin) {
         redirect("/signin");
     }
 
-    // Fetch media stats with error handling
-    const mediaStats = await getMediaStats();
+    // Fetch media stats and media items with error handling
+    const [mediaStats, mediaItems] = await Promise.all([
+        getMediaStats(),
+        getAllMedia()
+    ]);
 
     return (
         <div className="min-h-screen bg-bg-primary">
@@ -40,7 +42,7 @@ export default async function MediaPage() {
                 {/* Media Library Component with Error Boundary */}
                 <MediaErrorBoundary>
                     <Suspense fallback={<MediaLibraryFallback />}>
-                        <MediaLibrary />
+                        <MediaLibrary initialMedia={mediaItems} />
                     </Suspense>
                 </MediaErrorBoundary>
             </div>
@@ -57,14 +59,14 @@ function MediaPageHeader() {
                 <p className="text-text-secondary mt-2">Manage your images, videos, and documents</p>
             </div>
             <div className="flex items-center gap-4">
-                <button 
+                <button
                     className="px-4 py-2 border border-border-primary rounded-lg hover:bg-bg-tertiary transition-colors focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2"
                     aria-label="Create new folder"
                 >
                     <Folder className="w-4 h-4 inline mr-2" />
                     New Folder
                 </button>
-                <button 
+                <button
                     className="px-6 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2"
                     aria-label="Upload media files"
                 >

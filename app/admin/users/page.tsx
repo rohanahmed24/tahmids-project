@@ -1,13 +1,12 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import { verifyAdmin } from "@/actions/admin-auth";
+import { verifyAdmin, getAdminSession } from "@/actions/admin-auth";
 import { getAllUsers, getUserStats } from "@/lib/users";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { UserPlus, Users, Shield, Clock, Search, Filter } from "lucide-react";
 
 export default async function UsersPage() {
-    const session = await auth();
+    const session = await getAdminSession();
     const isAdmin = await verifyAdmin();
 
     if (!session || !isAdmin) {

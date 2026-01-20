@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     turbopackUseSystemTlsCerts: true,
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
   },
   // Security headers
   async headers() {

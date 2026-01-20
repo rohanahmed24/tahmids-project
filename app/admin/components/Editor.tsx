@@ -583,10 +583,10 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     <option value="Politics">Politics</option>
                                     <option value="Mystery">Mystery</option>
                                     <option value="Crime">Crime</option>
-                                    <option value="Politics">Politics</option>
-                                    <option value="Mystery">Mystery</option>
-                                    <option value="Crime">Crime</option>
                                     <option value="News">News</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Health">Health</option>
+                                    <option value="Entertainment">Entertainment</option>
                                 </select>
                             </div>
 

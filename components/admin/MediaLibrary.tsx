@@ -1,93 +1,89 @@
 "use client";
 
-import { useState } from "react";
-import { Upload, Image as ImageIcon, Video, File, Search, Grid, List, Download, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Upload, Image as ImageIcon, Video, File, Search, Grid, List, Download, Trash2, Loader2 } from "lucide-react";
 import Image from "next/image";
 
 interface MediaItem {
     id: string;
-    name: string;
-    type: "image" | "video" | "document";
-    size: string;
-    url: string;
-    uploadDate: string;
-    dimensions?: string;
+    filename: string;
+    originalName: string;
+    mimeType: string;
+    size: number;
+    path: string;
+    altText?: string;
+    createdAt: string;
 }
 
-export function MediaLibrary() {
+interface MediaLibraryProps {
+    initialMedia?: MediaItem[];
+}
+
+export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [filter, setFilter] = useState<"all" | "image" | "video" | "document">("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const [mediaItems, setMediaItems] = useState<MediaItem[]>(initialMedia || []);
+    const [loading, setLoading] = useState(!initialMedia);
 
-    // Mock media data - in real app this would come from database
-    const mediaItems: MediaItem[] = [
-        {
-            id: "1",
-            name: "welcome-cover.jpg",
-            type: "image",
-            size: "2.4 MB",
-            url: "/images/welcome-cover.jpg",
-            uploadDate: "2024-01-12",
-            dimensions: "1920x1080"
-        },
-        {
-            id: "2",
-            name: "journalism-future.jpg",
-            type: "image",
-            size: "1.8 MB",
-            url: "/images/journalism-future.jpg",
-            uploadDate: "2024-01-11",
-            dimensions: "1600x900"
-        },
-        {
-            id: "3",
-            name: "ancient-mysteries.jpg",
-            type: "image",
-            size: "3.1 MB",
-            url: "/images/ancient-mysteries.jpg",
-            uploadDate: "2024-01-10",
-            dimensions: "2048x1152"
-        },
-        {
-            id: "4",
-            name: "interview-video.mp4",
-            type: "video",
-            size: "45.2 MB",
-            url: "/videos/interview.mp4",
-            uploadDate: "2024-01-09",
-            dimensions: "1920x1080"
-        },
-        {
-            id: "5",
-            name: "press-release.pdf",
-            type: "document",
-            size: "856 KB",
-            url: "/documents/press-release.pdf",
-            uploadDate: "2024-01-08"
+    // Fetch media from API if not provided
+    useEffect(() => {
+        if (!initialMedia) {
+            fetchMedia();
         }
-    ];
+    }, [initialMedia]);
 
-    const filteredItems = mediaItems.filter(item => {
-        const matchesFilter = filter === "all" || item.type === filter;
-        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesFilter && matchesSearch;
-    });
-
-    const getIcon = (type: string) => {
-        switch (type) {
-            case "image": return <ImageIcon className="w-4 h-4" />;
-            case "video": return <Video className="w-4 h-4" />;
-            case "document": return <File className="w-4 h-4" />;
-            default: return <File className="w-4 h-4" />;
+    const fetchMedia = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('/api/media');
+            if (res.ok) {
+                const data = await res.json();
+                setMediaItems(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch media:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const getTypeColor = (type: string) => {
+    const getMediaType = (mimeType: string): "image" | "video" | "document" => {
+        if (mimeType.startsWith("image/")) return "image";
+        if (mimeType.startsWith("video/")) return "video";
+        return "document";
+    };
+
+    const formatSize = (bytes: number): string => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    };
+
+    const filteredItems = mediaItems.filter(item => {
+        const type = getMediaType(item.mimeType);
+        const matchesFilter = filter === "all" || type === filter;
+        const matchesSearch = item.originalName.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesFilter && matchesSearch;
+    });
+
+    const getIcon = (mimeType: string) => {
+        const type = getMediaType(mimeType);
         switch (type) {
-            case "image": return "text-green-500";
-            case "video": return "text-blue-500";
-            case "document": return "text-purple-500";
-            default: return "text-gray-500";
+            case "image": return <ImageIcon className="w-6 h-6" />;
+            case "video": return <Video className="w-6 h-6" />;
+            case "document": return <File className="w-6 h-6" />;
+            default: return <File className="w-6 h-6" />;
+        }
+    };
+
+    const getTypeColor = (mimeType: string) => {
+        const type = getMediaType(mimeType);
+        switch (type) {
+            case "image": return "text-green-500 bg-green-500/10";
+            case "video": return "text-blue-500 bg-blue-500/10";
+            case "document": return "text-purple-500 bg-purple-500/10";
+            default: return "text-gray-500 bg-gray-500/10";
         }
     };
 
@@ -144,41 +140,53 @@ export function MediaLibrary() {
             </div>
 
             <div className="p-6">
-                {viewMode === "grid" ? (
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <Loader2 className="w-8 h-8 text-accent-primary animate-spin" />
+                        <span className="ml-3 text-text-secondary">Loading media...</span>
+                    </div>
+                ) : viewMode === "grid" ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {filteredItems.map((item) => (
                             <div key={item.id} className="group relative bg-bg-tertiary rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                                <div className="aspect-square bg-bg-primary flex items-center justify-center">
-                                    {item.type === "image" ? (
+                                <div className="aspect-square bg-bg-primary flex items-center justify-center relative">
+                                    {getMediaType(item.mimeType) === "image" ? (
                                         <Image
-                                            src={item.url}
-                                            alt={item.name}
+                                            src={item.path}
+                                            alt={item.altText || item.originalName}
                                             fill
                                             className="object-cover"
+                                            onError={(e) => {
+                                                // Fallback if image fails to load
+                                                const target = e.target as HTMLImageElement;
+                                                target.style.display = 'none';
+                                                target.parentElement?.classList.add('flex', 'items-center', 'justify-center');
+                                            }}
                                         />
                                     ) : (
-                                        <div className={`${getTypeColor(item.type)}`}>
-                                            {getIcon(item.type)}
+                                        <div className={`p-4 rounded-lg ${getTypeColor(item.mimeType)}`}>
+                                            {getIcon(item.mimeType)}
                                         </div>
                                     )}
                                 </div>
 
                                 <div className="p-3">
-                                    <h4 className="font-medium text-text-primary text-sm truncate">{item.name}</h4>
-                                    <p className="text-text-tertiary text-xs">{item.size}</p>
-                                    {item.dimensions && (
-                                        <p className="text-text-tertiary text-xs">{item.dimensions}</p>
-                                    )}
+                                    <h4 className="font-medium text-text-primary text-sm truncate">{item.originalName}</h4>
+                                    <p className="text-text-tertiary text-xs">{formatSize(item.size)}</p>
                                 </div>
 
                                 {/* Hover Actions */}
                                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <div className="flex gap-1">
-                                        <button className="p-1 bg-black/50 text-white rounded hover:bg-black/70">
-                                            <Download className="w-3 h-3" />
-                                        </button>
-                                        <button className="p-1 bg-black/50 text-white rounded hover:bg-black/70">
-                                            <Trash2 className="w-3 h-3" />
+                                        <a
+                                            href={item.path}
+                                            download={item.originalName}
+                                            className="p-1.5 bg-black/50 text-white rounded hover:bg-black/70"
+                                        >
+                                            <Download className="w-3.5 h-3.5" />
+                                        </a>
+                                        <button className="p-1.5 bg-black/50 text-white rounded hover:bg-red-600">
+                                            <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
                                 </div>
@@ -189,20 +197,23 @@ export function MediaLibrary() {
                     <div className="space-y-2">
                         {filteredItems.map((item) => (
                             <div key={item.id} className="flex items-center gap-4 p-3 bg-bg-tertiary rounded-lg hover:bg-bg-primary transition-colors">
-                                <div className={`${getTypeColor(item.type)}`}>
-                                    {getIcon(item.type)}
+                                <div className={`p-2 rounded-lg ${getTypeColor(item.mimeType)}`}>
+                                    {getIcon(item.mimeType)}
                                 </div>
                                 <div className="flex-1">
-                                    <h4 className="font-medium text-text-primary">{item.name}</h4>
+                                    <h4 className="font-medium text-text-primary">{item.originalName}</h4>
                                     <p className="text-text-tertiary text-sm">
-                                        {item.size} • {new Date(item.uploadDate).toLocaleDateString()}
-                                        {item.dimensions && ` • ${item.dimensions}`}
+                                        {formatSize(item.size)} • {new Date(item.createdAt).toLocaleDateString()}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button className="p-2 text-text-secondary hover:text-accent-primary transition-colors">
+                                    <a
+                                        href={item.path}
+                                        download={item.originalName}
+                                        className="p-2 text-text-secondary hover:text-accent-primary transition-colors"
+                                    >
                                         <Download className="w-4 h-4" />
-                                    </button>
+                                    </a>
                                     <button className="p-2 text-text-secondary hover:text-red-500 transition-colors">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -212,7 +223,7 @@ export function MediaLibrary() {
                     </div>
                 )}
 
-                {filteredItems.length === 0 && (
+                {!loading && filteredItems.length === 0 && (
                     <div className="text-center py-12">
                         <Upload className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
                         <h3 className="text-lg font-medium text-text-primary mb-2">No media found</h3>
