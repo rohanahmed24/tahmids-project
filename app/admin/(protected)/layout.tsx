@@ -13,6 +13,7 @@ const NAV_ITEMS: NavItem[] = [
     { id: "/admin/users", label: "Users", icon: Users },
     { id: "/admin/analytics", label: "Analytics", icon: BarChart3 },
     { id: "/admin/import", label: "Import", icon: Upload },
+    { id: "/admin/navbar", label: "Navbar", icon: Settings },
     { id: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
