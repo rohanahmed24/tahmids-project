@@ -33,8 +33,9 @@ conn.on('ready', () => {
         'echo "📁 Syncing public files..."',
         'cp -r public .next/standalone/public || true',
         'cp -r .next/static .next/standalone/.next/static || true',
-        'echo "🚀 Starting server on port 3001..."',
-        'PORT=3001 pm2 start npm --name "wisdomia" -- start',
+        'echo "🚀 Starting standalone server on port 3001..."',
+        'cd .next/standalone && PORT=3001 pm2 start server.js --name "wisdomia"',
+        'cd ../..',
         'pm2 save',
         'echo "✅ Deployment complete!"',
         'pm2 status'

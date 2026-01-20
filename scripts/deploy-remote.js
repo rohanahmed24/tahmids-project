@@ -44,8 +44,9 @@ conn.on('ready', () => {
                 'cp -r .next/static .next/standalone/.next/static || true',
                 'pm2 stop all || true',
                 'pm2 delete all || true',
-                // Start with PORT=3001
-                'PORT=3001 pm2 start npm --name "wisdomia" -- start',
+                // Start standalone server with PORT=3001
+                'cd .next/standalone && PORT=3001 pm2 start server.js --name "wisdomia"',
+                'cd ../..',
                 'pm2 save'
             ].join(' && ');
 

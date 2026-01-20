@@ -28,7 +28,8 @@ export default async function ArticlePage({
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     const { slug } = await params;
-    const { mode } = await searchParams;
+    const resolvedSearchParams = await searchParams;
+    const mode = resolvedSearchParams?.mode;
     const post = await getPostBySlug(slug);
 
     if (!post) {
