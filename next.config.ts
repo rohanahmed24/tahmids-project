@@ -3,7 +3,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
-    turbopackUseSystemTlsCerts: true,
     serverActions: {
       bodySizeLimit: "10mb",
     },
@@ -74,7 +73,6 @@ const nextConfig: NextConfig = {
         hostname: 'ui-avatars.com',
       },
     ],
-    unoptimized: true,
   },
 };
 
