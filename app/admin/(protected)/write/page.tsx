@@ -38,6 +38,5 @@ export default async function WritePage() {
                 <Editor action={createPost} />
             </div>
         </div>
-        </div >
     );
 }
