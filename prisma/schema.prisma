@@ -54,6 +54,11 @@ model Post {
   @@index([featured])
   @@index([published])
   @@index([authorId])
+  
+  // Composite indexes for specific queries
+  @@index([published, views(sort: Desc)]) // Hot Topics / Featured
+  @@index([published, createdAt(sort: Desc)]) // Recent Posts
+  @@index([published, category, date(sort: Desc)]) // Category Posts
   @@map("posts")
 }
 

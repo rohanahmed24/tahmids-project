@@ -123,7 +123,7 @@ async function main() {
                 category: p.category,
                 featured: Math.random() < 0.3, // Randomly feature some
                 published: true,
-                date: new Date(),
+                date: new Date().toISOString(),
                 authorId: admin.id,
                 authorName: p.author || admin.name,
                 coverImage: getImg(p.imgKey),

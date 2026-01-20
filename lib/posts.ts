@@ -73,7 +73,7 @@ export const getHotTopics = unstable_cache(
         }
     },
     ['hot-topics'],
-    { revalidate: 3600, tags: ['posts', 'hot-topics'] }
+    { revalidate: 7200, tags: ['posts', 'hot-topics'] }
 );
 
 export const getRecentPosts = unstable_cache(
@@ -92,7 +92,7 @@ export const getRecentPosts = unstable_cache(
         }
     },
     ['recent-posts'],
-    { revalidate: 60, tags: ['posts', 'recent'] }
+    { revalidate: 300, tags: ['posts', 'recent'] }
 );
 
 export const getPostBySlug = unstable_cache(
@@ -195,7 +195,7 @@ export const getFeaturedPosts = unstable_cache(
         }
     },
     ['featured-posts'],
-    { revalidate: 3600, tags: ['posts', 'featured'] }
+    { revalidate: 7200, tags: ['posts', 'featured'] }
 );
 
 export async function getAllPosts(): Promise<Post[]> {
@@ -214,7 +214,7 @@ export async function getAllPosts(): Promise<Post[]> {
             }
         },
         ['all-posts'],
-        { revalidate: 300, tags: ['posts'] }
+        { revalidate: 600, tags: ['posts'] }
     )();
 }
 

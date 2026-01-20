@@ -29,6 +29,7 @@ export function ArticleCard({ article, width }: ArticleCardProps) {
                     alt={article.title}
                     fill
                     sizes={width ? `${width}px` : "(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 350px"}
+                    quality={75}
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
             </div>
