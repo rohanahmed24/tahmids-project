@@ -40,6 +40,7 @@ interface EditorProps {
         content: string;
         coverImage?: string;
         videoUrl?: string;
+        audioUrl?: string;
         subtitle?: string;
         topic_slug?: string;
         accent_color?: string;
@@ -62,6 +63,8 @@ export default function Editor({ initialData, action }: EditorProps) {
     const [authorName, setAuthorName] = useState(initialData?.authorName || "");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.coverImage || null);
+    const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl || "");
+    const [isUploadingAudio, setIsUploadingAudio] = useState(false);
 
     // Premium Features State
     const [isFocusMode, setIsFocusMode] = useState(false);
@@ -72,6 +75,7 @@ export default function Editor({ initialData, action }: EditorProps) {
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const audioFileInputRef = useRef<HTMLInputElement>(null);
 
     // Initial Auto-save Recovery
     useEffect(() => {
@@ -226,9 +230,9 @@ export default function Editor({ initialData, action }: EditorProps) {
 
     const getYouTubeEmbedUrl = (url: string): string | null => {
         if (!url) return null;
-        
+
         let videoId = null;
-        
+
         // Handle various YouTube URL formats
         const patterns = [
             /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
@@ -237,7 +241,7 @@ export default function Editor({ initialData, action }: EditorProps) {
             /(?:youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
             /^([a-zA-Z0-9_-]{11})$/ // Just the video ID
         ];
-        
+
         for (const pattern of patterns) {
             const match = url.match(pattern);
             if (match) {
@@ -245,7 +249,7 @@ export default function Editor({ initialData, action }: EditorProps) {
                 break;
             }
         }
-        
+
         return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
     };
 
@@ -766,6 +770,83 @@ export default function Editor({ initialData, action }: EditorProps) {
                                         name="videoUrl"
                                         defaultValue={initialData?.videoUrl}
                                         placeholder="YouTube URL (optional)"
+                                        className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-xs placeholder:text-text-muted focus:border-accent-main focus:outline-none text-text-primary"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-sm font-medium text-text-secondary">Audio File</label>
+
+                                {/* Hidden Audio File Input */}
+                                <input
+                                    type="file"
+                                    ref={audioFileInputRef}
+                                    id="audioFileUpload"
+                                    accept="audio/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+                                        setIsUploadingAudio(true);
+                                        const id = toast.loading("Uploading audio...");
+                                        const formData = new FormData();
+                                        formData.append("file", file);
+                                        try {
+                                            const result = await uploadImage(formData);
+                                            if (result.success && result.url) {
+                                                setAudioUrl(result.url);
+                                                toast.success("Audio uploaded!", { id });
+                                            } else {
+                                                toast.error(result.error || "Upload failed", { id });
+                                            }
+                                        } catch {
+                                            toast.error("Upload failed", { id });
+                                        } finally {
+                                            setIsUploadingAudio(false);
+                                            if (audioFileInputRef.current) audioFileInputRef.current.value = "";
+                                        }
+                                    }}
+                                    className="hidden"
+                                />
+
+                                {/* Audio Upload Button / Preview */}
+                                {audioUrl ? (
+                                    <div className="space-y-2">
+                                        <audio controls className="w-full" src={audioUrl}>
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                        <button
+                                            type="button"
+                                            onClick={() => setAudioUrl("")}
+                                            className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                                        >
+                                            Remove Audio
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => audioFileInputRef.current?.click()}
+                                        disabled={isUploadingAudio}
+                                        className="w-full flex items-center justify-center gap-2 px-3 py-3 bg-bg-tertiary border border-dashed border-border-primary rounded-lg hover:border-accent-main/50 transition-colors text-text-secondary hover:text-text-primary disabled:opacity-50"
+                                    >
+                                        {isUploadingAudio ? (
+                                            <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
+                                        ) : (
+                                            <><Music className="w-4 h-4" /> Upload Audio File</>
+                                        )}
+                                    </button>
+                                )}
+
+                                {/* Audio URL Fallback */}
+                                <div className="relative">
+                                    <Music className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                                    <input
+                                        type="text"
+                                        name="audioUrl"
+                                        value={audioUrl}
+                                        onChange={(e) => setAudioUrl(e.target.value)}
+                                        placeholder="Or paste audio URL"
                                         className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-xs placeholder:text-text-muted focus:border-accent-main focus:outline-none text-text-primary"
                                     />
                                 </div>

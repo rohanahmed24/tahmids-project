@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Upload, Image as ImageIcon, Video, File, Search, Grid, List, Download, Trash2, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Upload, Image as ImageIcon, Video, File, Search, Grid, List, Download, Trash2, Loader2, Music, X, CheckCircle } from "lucide-react";
 import Image from "next/image";
+import { uploadImage, deleteMediaById } from "@/actions/media";
 
 interface MediaItem {
     id: string;
@@ -21,12 +22,15 @@ interface MediaLibraryProps {
 
 export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-    const [filter, setFilter] = useState<"all" | "image" | "video" | "document">("all");
+    const [filter, setFilter] = useState<"all" | "image" | "video" | "audio" | "document">("all");
     const [searchQuery, setSearchQuery] = useState("");
     const [mediaItems, setMediaItems] = useState<MediaItem[]>(initialMedia || []);
     const [loading, setLoading] = useState(!initialMedia);
+    const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+    const [showUploadModal, setShowUploadModal] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Fetch media from API if not provided
     useEffect(() => {
         if (!initialMedia) {
             fetchMedia();
@@ -48,9 +52,79 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
         }
     };
 
-    const getMediaType = (mimeType: string): "image" | "video" | "document" => {
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setUploading(true);
+        setUploadProgress("Uploading...");
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                setUploadProgress(`Uploading ${i + 1}/${files.length}: ${file.name}`);
+
+                const formData = new FormData();
+                formData.append("file", file);
+
+                const result = await uploadImage(formData);
+
+                if (result.success) {
+                    // Add to local state
+                    const newItem: MediaItem = {
+                        id: Date.now().toString(),
+                        filename: result.filename || file.name,
+                        originalName: file.name,
+                        mimeType: file.type,
+                        size: file.size,
+                        path: result.url || "",
+                        createdAt: new Date().toISOString()
+                    };
+                    setMediaItems(prev => [newItem, ...prev]);
+                } else {
+                    alert(`Failed to upload ${file.name}: ${result.error}`);
+                }
+            }
+            setUploadProgress("Upload complete!");
+            setTimeout(() => {
+                setUploadProgress(null);
+                setShowUploadModal(false);
+            }, 1500);
+        } catch (error) {
+            console.error("Upload failed:", error);
+            setUploadProgress("Upload failed!");
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        }
+    };
+
+    const handleDelete = async (item: MediaItem) => {
+        if (!confirm(`Delete "${item.originalName}"?`)) return;
+
+        try {
+            const result = await deleteMediaById(parseInt(item.id), item.filename);
+            if (result.success) {
+                setMediaItems(prev => prev.filter(m => m.id !== item.id));
+            } else {
+                alert("Failed to delete");
+            }
+        } catch (error) {
+            console.error("Delete failed:", error);
+        }
+    };
+
+    const copyToClipboard = (path: string) => {
+        navigator.clipboard.writeText(path);
+        alert("Path copied to clipboard!");
+    };
+
+    const getMediaType = (mimeType: string): "image" | "video" | "audio" | "document" => {
         if (mimeType.startsWith("image/")) return "image";
         if (mimeType.startsWith("video/")) return "video";
+        if (mimeType.startsWith("audio/")) return "audio";
         return "document";
     };
 
@@ -72,6 +146,7 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
         switch (type) {
             case "image": return <ImageIcon className="w-6 h-6" />;
             case "video": return <Video className="w-6 h-6" />;
+            case "audio": return <Music className="w-6 h-6" />;
             case "document": return <File className="w-6 h-6" />;
             default: return <File className="w-6 h-6" />;
         }
@@ -82,6 +157,7 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
         switch (type) {
             case "image": return "text-green-500 bg-green-500/10";
             case "video": return "text-blue-500 bg-blue-500/10";
+            case "audio": return "text-orange-500 bg-orange-500/10";
             case "document": return "text-purple-500 bg-purple-500/10";
             default: return "text-gray-500 bg-gray-500/10";
         }
@@ -93,7 +169,7 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold text-text-primary">Media Library</h2>
                     <button
-                        onClick={() => alert("Upload feature coming soon!")}
+                        onClick={() => setShowUploadModal(true)}
                         className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors flex items-center gap-2"
                     >
                         <Upload className="w-4 h-4" />
@@ -110,17 +186,18 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                             placeholder="Search media..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-bg-primary border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                            className="w-full pl-10 pr-4 py-2 bg-bg-primary border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary text-text-primary"
                         />
                     </div>
 
                     <select
                         value={filter}
-                        onChange={(e) => setFilter(e.target.value as "all" | "image" | "video" | "document")}
-                        className="px-3 py-2 bg-bg-primary border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                        onChange={(e) => setFilter(e.target.value as typeof filter)}
+                        className="px-3 py-2 bg-bg-primary border border-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-primary text-text-primary"
                     >
                         <option value="all">All Media</option>
                         <option value="image">Images</option>
+                        <option value="audio">Audio</option>
                         <option value="video">Videos</option>
                         <option value="document">Documents</option>
                     </select>
@@ -152,7 +229,10 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {filteredItems.map((item) => (
                             <div key={item.id} className="group relative bg-bg-tertiary rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                                <div className="aspect-square bg-bg-primary flex items-center justify-center relative">
+                                <div
+                                    className="aspect-square bg-bg-primary flex items-center justify-center relative cursor-pointer"
+                                    onClick={() => copyToClipboard(item.path)}
+                                >
                                     {getMediaType(item.mimeType) === "image" ? (
                                         <Image
                                             src={item.path}
@@ -160,12 +240,19 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                                             fill
                                             className="object-cover"
                                             onError={(e) => {
-                                                // Fallback if image fails to load
                                                 const target = e.target as HTMLImageElement;
                                                 target.style.display = 'none';
-                                                target.parentElement?.classList.add('flex', 'items-center', 'justify-center');
                                             }}
                                         />
+                                    ) : getMediaType(item.mimeType) === "audio" ? (
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className={`p-4 rounded-full ${getTypeColor(item.mimeType)}`}>
+                                                <Music className="w-8 h-8" />
+                                            </div>
+                                            <audio controls className="w-full px-2" preload="metadata">
+                                                <source src={item.path} type={item.mimeType} />
+                                            </audio>
+                                        </div>
                                     ) : (
                                         <div className={`p-4 rounded-lg ${getTypeColor(item.mimeType)}`}>
                                             {getIcon(item.mimeType)}
@@ -185,10 +272,14 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                                             href={item.path}
                                             download={item.originalName}
                                             className="p-1.5 bg-black/50 text-white rounded hover:bg-black/70"
+                                            onClick={(e) => e.stopPropagation()}
                                         >
                                             <Download className="w-3.5 h-3.5" />
                                         </a>
-                                        <button className="p-1.5 bg-black/50 text-white rounded hover:bg-red-600">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
+                                            className="p-1.5 bg-black/50 text-white rounded hover:bg-red-600"
+                                        >
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
@@ -199,7 +290,11 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                 ) : (
                     <div className="space-y-2">
                         {filteredItems.map((item) => (
-                            <div key={item.id} className="flex items-center gap-4 p-3 bg-bg-tertiary rounded-lg hover:bg-bg-primary transition-colors">
+                            <div
+                                key={item.id}
+                                className="flex items-center gap-4 p-3 bg-bg-tertiary rounded-lg hover:bg-bg-primary transition-colors cursor-pointer"
+                                onClick={() => copyToClipboard(item.path)}
+                            >
                                 <div className={`p-2 rounded-lg ${getTypeColor(item.mimeType)}`}>
                                     {getIcon(item.mimeType)}
                                 </div>
@@ -209,15 +304,24 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                                         {formatSize(item.size)} • {new Date(item.createdAt).toLocaleDateString()}
                                     </p>
                                 </div>
+                                {getMediaType(item.mimeType) === "audio" && (
+                                    <audio controls className="w-48" preload="metadata" onClick={(e) => e.stopPropagation()}>
+                                        <source src={item.path} type={item.mimeType} />
+                                    </audio>
+                                )}
                                 <div className="flex items-center gap-2">
                                     <a
                                         href={item.path}
                                         download={item.originalName}
                                         className="p-2 text-text-secondary hover:text-accent-primary transition-colors"
+                                        onClick={(e) => e.stopPropagation()}
                                     >
                                         <Download className="w-4 h-4" />
                                     </a>
-                                    <button className="p-2 text-text-secondary hover:text-red-500 transition-colors">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
+                                        className="p-2 text-text-secondary hover:text-red-500 transition-colors"
+                                    >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -234,7 +338,7 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                             {searchQuery ? "No media matches your search" : "Upload your first media file to get started"}
                         </p>
                         <button
-                            onClick={() => alert("Upload feature coming soon!")}
+                            onClick={() => setShowUploadModal(true)}
                             className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors"
                         >
                             Upload Media
@@ -242,6 +346,75 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                     </div>
                 )}
             </div>
+
+            {/* Upload Modal */}
+            {showUploadModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-bg-secondary rounded-xl p-6 w-full max-w-md mx-4 border border-border-primary">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-text-primary">Upload Media</h3>
+                            <button
+                                onClick={() => setShowUploadModal(false)}
+                                className="p-1 text-text-secondary hover:text-text-primary"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="border-2 border-dashed border-border-primary rounded-xl p-8 text-center hover:border-accent-primary transition-colors">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                multiple
+                                accept="image/*,audio/*,video/*"
+                                onChange={handleUpload}
+                                className="hidden"
+                                id="file-upload"
+                                disabled={uploading}
+                            />
+                            <label
+                                htmlFor="file-upload"
+                                className="cursor-pointer"
+                            >
+                                {uploading ? (
+                                    <div className="flex flex-col items-center gap-3">
+                                        <Loader2 className="w-12 h-12 text-accent-primary animate-spin" />
+                                        <p className="text-text-secondary">{uploadProgress}</p>
+                                    </div>
+                                ) : uploadProgress === "Upload complete!" ? (
+                                    <div className="flex flex-col items-center gap-3">
+                                        <CheckCircle className="w-12 h-12 text-green-500" />
+                                        <p className="text-green-500 font-medium">{uploadProgress}</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Upload className="w-12 h-12 text-text-tertiary mx-auto mb-4" />
+                                        <p className="text-text-primary font-medium mb-2">Click to upload</p>
+                                        <p className="text-text-tertiary text-sm">
+                                            Images, Audio, or Video (max 20MB)
+                                        </p>
+                                        <div className="flex items-center justify-center gap-4 mt-4">
+                                            <div className="flex items-center gap-1 text-xs text-text-tertiary">
+                                                <ImageIcon className="w-4 h-4" /> Images
+                                            </div>
+                                            <div className="flex items-center gap-1 text-xs text-text-tertiary">
+                                                <Music className="w-4 h-4" /> Audio
+                                            </div>
+                                            <div className="flex items-center gap-1 text-xs text-text-tertiary">
+                                                <Video className="w-4 h-4" /> Video
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </label>
+                        </div>
+
+                        <p className="text-xs text-text-tertiary mt-4 text-center">
+                            Click on any media item to copy its path
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

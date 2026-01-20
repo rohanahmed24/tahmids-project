@@ -10,12 +10,14 @@ export type Post = {
     subtitle?: string | null;
     date: string;
     author: string;
+    authorName?: string | null;
     authorId?: number | null;
     category: string;
     content?: string | null;
     excerpt?: string | null;
     coverImage?: string | null;
     videoUrl?: string | null;
+    audioUrl?: string | null;
     views: number;
     featured: boolean;
     published: boolean;
@@ -35,12 +37,14 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         subtitle: post.subtitle,
         date: post.date ? String(post.date) : new Date().toISOString(),
         author: post.authorName || "Anonymous",
+        authorName: post.authorName,
         authorId: post.authorId,
         category: post.category || "Uncategorized",
         content: post.content,
         excerpt: post.excerpt,
         coverImage: post.coverImage,
         videoUrl: post.videoUrl,
+        audioUrl: post.audioUrl,
         views: post.views || 0,
         featured: post.featured || false,
         published: post.published || false,

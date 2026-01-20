@@ -36,10 +36,13 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                         content: post.content || "",
                         coverImage: post.coverImage || undefined,
                         videoUrl: post.videoUrl || undefined,
+                        audioUrl: post.audioUrl || undefined,
                         subtitle: post.subtitle || undefined,
                         topic_slug: post.topic_slug || undefined,
                         accent_color: post.accent_color || undefined,
-                        featured: post.featured
+                        featured: post.featured,
+                        published: post.published ?? true,
+                        authorName: post.authorName || undefined
                     }}
                     action={updateAction}
                 />

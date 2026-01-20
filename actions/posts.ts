@@ -46,6 +46,7 @@ export async function createPost(formData: FormData) {
     const category = formData.get("category") as string;
     const authorName = (formData.get("authorName") as string) || session.name;
     const videoUrl = (formData.get("videoUrl") as string) || undefined;
+    const audioUrl = (formData.get("audioUrl") as string) || undefined;
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = (formData.get("topic_slug") as string) || undefined;
     const accent_color = (formData.get("accent_color") as string) || "#3B82F6";
@@ -84,6 +85,7 @@ export async function createPost(formData: FormData) {
                 excerpt,
                 coverImage,
                 videoUrl,
+                audioUrl,
                 topicSlug: topic_slug,
                 accentColor: accent_color,
                 featured,
@@ -98,11 +100,11 @@ export async function createPost(formData: FormData) {
         throw new Error("Failed to create post");
     }
 
-    revalidateTag('posts');
-    revalidateTag('stats');
-    revalidateTag('hot-topics');
-    revalidateTag('recent');
-    revalidateTag('featured');
+    revalidateTag('posts', 'default');
+    revalidateTag('stats', 'default');
+    revalidateTag('hot-topics', 'default');
+    revalidateTag('recent', 'default');
+    revalidateTag('featured', 'default');
     revalidatePath("/admin/dashboard");
     revalidatePath("/");
     redirect("/admin/dashboard");
@@ -118,11 +120,11 @@ export async function deletePost(slug: string) {
         await prisma.post.delete({
             where: { slug }
         });
-        revalidateTag('posts');
-        revalidateTag('stats');
-        revalidateTag('hot-topics');
-        revalidateTag('recent');
-        revalidateTag('featured');
+        revalidateTag('posts', 'default');
+        revalidateTag('stats', 'default');
+        revalidateTag('hot-topics', 'default');
+        revalidateTag('recent', 'default');
+        revalidateTag('featured', 'default');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {
@@ -141,6 +143,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     const content = formData.get("content") as string;
     const category = formData.get("category") as string;
     const videoUrl = (formData.get("videoUrl") as string) || undefined;
+    const audioUrl = (formData.get("audioUrl") as string) || undefined;
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = (formData.get("topic_slug") as string) || undefined;
     const accent_color = (formData.get("accent_color") as string) || "#3B82F6";
@@ -168,6 +171,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
                 excerpt,
                 coverImage,
                 videoUrl,
+                audioUrl,
                 topicSlug: topic_slug,
                 accentColor: accent_color,
                 featured,
@@ -175,11 +179,11 @@ export async function updatePost(originalSlug: string, formData: FormData) {
             }
         });
 
-        revalidateTag('posts');
-        revalidateTag('stats');
-        revalidateTag('hot-topics');
-        revalidateTag('recent');
-        revalidateTag('featured');
+        revalidateTag('posts', 'default');
+        revalidateTag('stats', 'default');
+        revalidateTag('hot-topics', 'default');
+        revalidateTag('recent', 'default');
+        revalidateTag('featured', 'default');
         revalidatePath(`/article/${originalSlug}`);
         revalidatePath(`/admin/edit/${originalSlug}`);
         revalidatePath("/admin/dashboard");
@@ -203,11 +207,11 @@ export async function togglePostStatus(slug: string, published: boolean) {
             where: { slug },
             data: { published }
         });
-        revalidateTag('posts');
-        revalidateTag('stats');
-        revalidateTag('hot-topics');
-        revalidateTag('recent');
-        revalidateTag('featured');
+        revalidateTag('posts', 'default');
+        revalidateTag('stats', 'default');
+        revalidateTag('hot-topics', 'default');
+        revalidateTag('recent', 'default');
+        revalidateTag('featured', 'default');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {
