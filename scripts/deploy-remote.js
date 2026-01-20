@@ -39,6 +39,9 @@ conn.on('ready', () => {
                 'npx prisma generate',
                 'npx prisma db push',
                 'npm run build',
+                // Sync public files to standalone build
+                'cp -r public .next/standalone/public || true',
+                'cp -r .next/static .next/standalone/.next/static || true',
                 'pm2 stop all || true',
                 'pm2 delete all || true',
                 // Start with PORT=3001

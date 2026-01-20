@@ -14,33 +14,18 @@ conn.on('ready', () => {
     
     const commands = [
         'cd /root/tahmids-project',
-        'echo "📦 Stopping PM2 processes..."',
-        'pm2 stop all || true',
-        'pm2 delete all || true',
-        'echo "🧹 Cleaning old build..."',
-        'rm -rf .next',
-        'rm -rf node_modules/.cache',
-        'echo "�� Pulling latest code..."',
-        'git reset --hard',
-        'git pull',
-        'echo "📦 Installing dependencies..."',
-        'npm install',
-        'echo "🗄️ Setting up database..."',
-        'npx prisma generate',
-        'npx prisma db push --accept-data-loss || true',
-        'echo "🏗️ Building application..."',
-        'NODE_ENV=production npm run build',
-        'echo "📁 Syncing public files..."',
+        'echo "📁 Syncing public files to standalone build..."',
+        // Copy public folder to standalone build
         'cp -r public .next/standalone/public || true',
+        // Copy static files
         'cp -r .next/static .next/standalone/.next/static || true',
-        'echo "🚀 Starting server on port 3001..."',
-        'PORT=3001 pm2 start npm --name "wisdomia" -- start',
-        'pm2 save',
-        'echo "✅ Deployment complete!"',
+        'echo "✅ Public files synced!"',
+        'echo "🔄 Restarting server..."',
+        'pm2 restart wisdomia',
         'pm2 status'
     ].join(' && ');
 
-    console.log('🚀 Starting deployment...\n');
+    console.log('🚀 Syncing public files...\n');
 
     conn.exec(commands, (err, stream) => {
         if (err) {
@@ -52,10 +37,9 @@ conn.on('ready', () => {
         stream.on('close', (code, signal) => {
             console.log('\n📊 Process finished with code:', code);
             if (code === 0) {
-                console.log('✅ Deployment successful!');
-                console.log('🌐 Website should be live at: http://76.13.5.200:3000');
+                console.log('✅ Public files synced successfully!');
             } else {
-                console.log('❌ Deployment failed with code:', code);
+                console.log('❌ Failed with code:', code);
             }
             conn.end();
         }).on('data', (data) => {
