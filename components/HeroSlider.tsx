@@ -74,7 +74,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
             {/* Embla Carousel Viewport */}
             <div className="overflow-hidden h-full" ref={emblaRef}>
                 <div className="flex h-full touch-pan-y">
-                    {validItems.map((item) => (
+                    {validItems.map((item, index) => (
                         <div key={item.slug} className="relative flex-[0_0_100%] min-w-0 h-full">
                             <Image
                                 src={item.coverImage || '/placeholder.jpg'}
@@ -83,7 +83,8 @@ export function HeroSlider({ items }: HeroSliderProps) {
                                 sizes="100vw"
                                 quality={85}
                                 className="object-cover"
-                                priority
+                                priority={index === 0}
+                                loading={index === 0 ? "eager" : "lazy"}
                             />
                             {/* Gradient Overlays */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
@@ -206,6 +207,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
                             fill
                             sizes="120px"
                             className="object-cover"
+                            loading="lazy"
                         />
                     </button>
                 ))}

@@ -96,51 +96,17 @@ export default function Navbar() {
                         <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
                             <div className="absolute inset-0 bg-bg-primary/90 backdrop-blur-3xl z-10" /> {/* Subtle overlay to soften */}
 
-                            {/* Bubble 1 */}
-                            <motion.div
-                                animate={{
-                                    x: [0, 50, 0],
-                                    y: [0, -30, 0],
-                                    scale: [1, 1.1, 1]
-                                }}
-                                transition={{
-                                    duration: 15,
-                                    repeat: Infinity,
-                                    ease: "linear"
-                                }}
-                                className="absolute -top-20 -left-20 w-80 h-80 bg-purple-500/30 rounded-full filter blur-3xl"
-                            />
+                            {/* Bubble 1 - CSS animation for better performance */}
+                            <div className="absolute -top-20 -left-20 w-80 h-80 bg-purple-500/30 rounded-full filter blur-3xl animate-[bubble1_15s_linear_infinite]" />
 
                             {/* Bubble 2 */}
-                            <motion.div
-                                animate={{
-                                    x: [0, -50, 0],
-                                    y: [0, 40, 0],
-                                    scale: [1, 1.05, 1]
-                                }}
-                                transition={{
-                                    duration: 18,
-                                    repeat: Infinity,
-                                    ease: "linear",
-                                    delay: 2
-                                }}
-                                className="absolute top-1/2 -right-20 w-80 h-80 bg-indigo-500/30 rounded-full filter blur-3xl"
+                            <div
+                                className="absolute top-1/2 -right-20 w-80 h-80 bg-indigo-500/30 rounded-full filter blur-3xl animate-[bubble2_18s_linear_infinite_2s]"
                             />
 
                             {/* Bubble 3 */}
-                            <motion.div
-                                animate={{
-                                    x: [0, 30, 0],
-                                    y: [0, 30, 0],
-                                    scale: [1, 1.1, 1]
-                                }}
-                                transition={{
-                                    duration: 20,
-                                    repeat: Infinity,
-                                    ease: "linear",
-                                    delay: 4
-                                }}
-                                className="absolute -bottom-40 left-1/3 w-64 h-64 bg-pink-500/30 rounded-full filter blur-3xl"
+                            <div
+                                className="absolute -bottom-40 left-1/3 w-64 h-64 bg-pink-500/30 rounded-full filter blur-3xl animate-[bubble3_20s_linear_infinite_4s]"
                             />
                         </div>
 
