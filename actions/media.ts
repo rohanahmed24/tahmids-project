@@ -6,10 +6,10 @@ import { verifyAdmin } from "@/actions/admin-auth";
 import { prisma } from "@/lib/db";
 
 export async function uploadImage(formData: FormData) {
-    // const isAdmin = await verifyAdmin();
-    // if (!isAdmin) {
-    //     throw new Error("Unauthorized");
-    // }
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) {
+        throw new Error("Unauthorized");
+    }
 
     const file = formData.get("file") as File;
     if (!file || file.size === 0) {

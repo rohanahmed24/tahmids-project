@@ -52,10 +52,10 @@ export async function getMediaStats(): Promise<MediaStats> {
         console.error("Error fetching media stats:", error);
         // Fallback data
         return {
-            totalImages: 156,
-            totalVideos: 23,
-            totalDocuments: 89,
-            totalStorageUsed: "2.4 GB"
+            totalImages: 0,
+            totalVideos: 0,
+            totalDocuments: 0,
+            totalStorageUsed: "0 GB"
         };
     }
 }
