@@ -12,6 +12,10 @@ export type User = {
     image?: string | null;
     email_verified?: string | null;
     article_count?: number;
+    title?: string | null;
+    bio?: string | null;
+    isFeatured?: boolean;
+    featuredOrder?: number;
 };
 
 function mapPrismaUser(user: PrismaUser & { _count?: { posts: number } }): User {
@@ -24,7 +28,11 @@ function mapPrismaUser(user: PrismaUser & { _count?: { posts: number } }): User 
         updated_at: user.updatedAt.toISOString(),
         image: user.image,
         email_verified: user.emailVerified?.toISOString() || null,
-        article_count: user._count?.posts || 0
+        article_count: user._count?.posts || 0,
+        title: user.title,
+        bio: user.bio,
+        isFeatured: user.isFeatured,
+        featuredOrder: user.featuredOrder
     };
 }
 
@@ -41,6 +49,24 @@ export async function getAllUsers(): Promise<User[]> {
         return users.map(mapPrismaUser);
     } catch (error) {
         console.error("Error fetching users:", error);
+        return [];
+    }
+}
+
+export async function getFeaturedWriters(): Promise<User[]> {
+    try {
+        const users = await prisma.user.findMany({
+            where: { isFeatured: true },
+            orderBy: { featuredOrder: 'asc' },
+            include: {
+                _count: {
+                    select: { posts: true }
+                }
+            }
+        });
+        return users.map(mapPrismaUser);
+    } catch (error) {
+        console.error("Error fetching featured writers:", error);
         return [];
     }
 }

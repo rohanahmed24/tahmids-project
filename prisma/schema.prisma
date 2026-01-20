@@ -16,6 +16,10 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
   password      String?
+  title         String?   @map("title")
+  bio           String?   @map("bio")
+  isFeatured    Boolean   @default(false) @map("is_featured")
+  featuredOrder Int       @default(0) @map("featured_order")
   updatedAt     DateTime  @updatedAt @map("updated_at")
   accounts      Account[]
   posts         Post[]
@@ -23,6 +27,7 @@ model User {
 
   @@index([email])
   @@index([role])
+  @@index([isFeatured])
   @@map("users")
 }
 
