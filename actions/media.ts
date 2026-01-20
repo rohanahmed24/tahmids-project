@@ -43,6 +43,9 @@ export async function uploadImage(formData: FormData) {
         const filePath = path.join(uploadDir, filename);
         await writeFile(filePath, buffer);
 
+        // Use API route for serving (works in standalone mode)
+        const apiPath = `/api/uploads/${filename}`;
+
         // Store in database
         try {
             await prisma.media.create({
@@ -51,7 +54,7 @@ export async function uploadImage(formData: FormData) {
                     originalName: file.name,
                     mimeType: file.type,
                     size: file.size,
-                    path: `/imgs/uploads/${filename}`
+                    path: apiPath
                 }
             });
         } catch (dbError) {
@@ -61,7 +64,7 @@ export async function uploadImage(formData: FormData) {
 
         return {
             success: true,
-            url: `/imgs/uploads/${filename}`,
+            url: apiPath,
             filename
         };
     } catch (error) {

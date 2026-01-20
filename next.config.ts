@@ -62,6 +62,15 @@ const nextConfig: NextConfig = {
   },
   // Disable X-Powered-By header
   poweredByHeader: false,
+  // Rewrite uploaded images to API route (for standalone mode)
+  async rewrites() {
+    return [
+      {
+        source: '/imgs/uploads/:path*',
+        destination: '/api/uploads/:path*',
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
