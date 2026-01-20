@@ -98,11 +98,11 @@ export async function createPost(formData: FormData) {
         throw new Error("Failed to create post");
     }
 
-    revalidateTag('posts', 'max');
-    revalidateTag('stats', 'max');
-    revalidateTag('hot-topics', 'max');
-    revalidateTag('recent', 'max');
-    revalidateTag('featured', 'max');
+    revalidateTag('posts');
+    revalidateTag('stats');
+    revalidateTag('hot-topics');
+    revalidateTag('recent');
+    revalidateTag('featured');
     revalidatePath("/admin/dashboard");
     revalidatePath("/");
     redirect("/admin/dashboard");
@@ -175,11 +175,11 @@ export async function updatePost(originalSlug: string, formData: FormData) {
             }
         });
 
-        revalidateTag('posts', 'max');
-        revalidateTag('stats', 'max');
-        revalidateTag('hot-topics', 'max');
-        revalidateTag('recent', 'max');
-        revalidateTag('featured', 'max');
+        revalidateTag('posts');
+        revalidateTag('stats');
+        revalidateTag('hot-topics');
+        revalidateTag('recent');
+        revalidateTag('featured');
         revalidatePath(`/article/${originalSlug}`);
         revalidatePath(`/admin/edit/${originalSlug}`);
         revalidatePath("/admin/dashboard");
@@ -203,11 +203,11 @@ export async function togglePostStatus(slug: string, published: boolean) {
             where: { slug },
             data: { published }
         });
-        revalidateTag('posts', 'max');
-        revalidateTag('stats', 'max');
-        revalidateTag('hot-topics', 'max');
-        revalidateTag('recent', 'max');
-        revalidateTag('featured', 'max');
+        revalidateTag('posts');
+        revalidateTag('stats');
+        revalidateTag('hot-topics');
+        revalidateTag('recent');
+        revalidateTag('featured');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {
