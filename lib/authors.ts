@@ -28,5 +28,14 @@ export const authors = [
 ];
 
 export function getAuthorByName(name: string) {
-    return authors.find(author => author.name === name) || authors[0];
+    const found = authors.find(author => author.name.toLowerCase() === name.toLowerCase());
+    if (found) return found;
+    
+    // Return dynamic author object for custom author names
+    return {
+        name: name || "Anonymous",
+        role: "Contributor",
+        bio: "A valued contributor to Wisdomia.",
+        img: "/imgs/default-avatar.svg"
+    };
 }

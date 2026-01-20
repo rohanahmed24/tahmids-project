@@ -35,7 +35,25 @@ export function HeroSlider({ items }: HeroSliderProps) {
     const scrollTo = useCallback((index: number) => emblaApi && emblaApi.scrollTo(index), [emblaApi]);
 
     if (validItems.length === 0) {
-        return null;
+        return (
+            <section className="relative w-full h-[50vh] md:h-screen overflow-hidden bg-gradient-to-br from-purple-900 via-indigo-900 to-black">
+                <div className="absolute inset-0 bg-[url('/imgs/pattern.svg')] opacity-10" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                    <div className="flex items-center gap-2 bg-orange-500/80 backdrop-blur-md rounded-full px-4 py-2 mb-6">
+                        <Flame className="w-4 h-4 text-white" />
+                        <span className="text-xs font-bold uppercase tracking-widest text-white">
+                            Welcome to Wisdomia
+                        </span>
+                    </div>
+                    <h1 className="text-4xl md:text-7xl font-serif font-bold text-white mb-4 max-w-4xl">
+                        Your Source for <span className="italic text-purple-300">Timeless Wisdom</span>
+                    </h1>
+                    <p className="text-lg md:text-xl text-white/80 max-w-2xl">
+                        Discover thought-provoking articles, insights, and stories that inspire and enlighten.
+                    </p>
+                </div>
+            </section>
+        );
     }
 
     const currentTopic = validItems[selectedIndex];

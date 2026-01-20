@@ -305,3 +305,23 @@ export interface PostStats {
     drafts: number;
     totalViews: number;
 }
+
+export async function getRelatedPosts(category: string, currentSlug: string, limit: number = 4): Promise<Post[]> {
+    if (!category?.trim()) return [];
+    try {
+        const posts = await prisma.post.findMany({
+            where: {
+                category: category.trim(),
+                published: true,
+                slug: { not: currentSlug }
+            },
+            include: { author: { select: { image: true } } },
+            orderBy: { createdAt: 'desc' },
+            take: limit
+        });
+        return posts.map(mapPrismaPost);
+    } catch (error) {
+        console.error("Failed to fetch related posts:", error);
+        return [];
+    }
+}

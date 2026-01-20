@@ -101,12 +101,14 @@ export async function updateUserProfile(userId: number, formData: FormData) {
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const role = formData.get("role") as 'user' | 'admin';
+    const image = formData.get("image") as string;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: Record<string, any> = {};
     if (name) updates.name = name;
     if (email) updates.email = email;
     if (role) updates.role = role;
+    if (image) updates.image = image;
 
     try {
         const updatedUser = await updateUser(userId, updates);
@@ -120,5 +122,26 @@ export async function updateUserProfile(userId: number, formData: FormData) {
     } catch (error) {
         console.error("Failed to update user:", error);
         throw new Error("Failed to update user");
+    }
+}
+
+export async function updateUserImage(userId: number, imagePath: string) {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        const updatedUser = await updateUser(userId, { image: imagePath });
+        if (!updatedUser) {
+            throw new Error("Failed to update user image");
+        }
+
+        revalidatePath("/admin/users");
+        revalidatePath("/admin/dashboard");
+        return { success: true, user: updatedUser };
+    } catch (error) {
+        console.error("Failed to update user image:", error);
+        throw new Error("Failed to update user image");
     }
 }

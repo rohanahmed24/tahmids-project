@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { TrendingUp, Users, Eye, BarChart3, FileText } from "lucide-react";
+import { useMemo } from "react";
+import { TrendingUp, Eye, BarChart3, FileText } from "lucide-react";
 import { Post } from "@/lib/posts";
-import Image from "next/image";
 
 interface AnalyticsChartProps {
     posts: Post[];
@@ -11,7 +10,6 @@ interface AnalyticsChartProps {
 }
 
 export function AnalyticsChart({ posts, userCount }: AnalyticsChartProps) {
-    const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
     // Calculate real stats
     const totalViews = useMemo(() => posts.reduce((sum, post) => sum + (post.views || 0), 0), [posts]);

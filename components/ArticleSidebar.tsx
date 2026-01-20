@@ -1,16 +1,24 @@
-import { Assets } from "@/lib/assets";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { getAuthorByName } from "@/lib/authors";
+import { getRelatedPosts } from "@/lib/posts";
 
 interface ArticleSidebarProps {
     authorName: string;
+    category: string;
+    currentSlug: string;
 }
 
-export function ArticleSidebar({ authorName }: ArticleSidebarProps) {
+export async function ArticleSidebar({ authorName, category, currentSlug }: ArticleSidebarProps) {
     const author = getAuthorByName(authorName);
+    const relatedPosts = await getRelatedPosts(category, currentSlug, 4);
+
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
 
     return (
         <aside className="space-y-12 shrink-0">
@@ -46,35 +54,40 @@ export function ArticleSidebar({ authorName }: ArticleSidebarProps) {
                 </h4>
                 {/* Mobile: 2 columns, PC: 1 column (larger cards look better) */}
                 <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
-                    {[
-                        { slug: "creative-process", title: "The Creative Process Unveiled", category: "Design", date: "Dec 12", image: Assets.imgStoryCulture },
-                        { slug: "science-sleep", title: "The Science of Sleep", category: "Science", date: "Dec 9", image: Assets.imgStoryScience },
-                        { slug: "future-cities", title: "Cities of Tomorrow: Reimagining Urban Life", category: "Future Tech", date: "Dec 14", image: Assets.imgStoryArt },
-                        { slug: "philosophy-simplicity", title: "The Philosophy of Simplicity", category: "Minimalism", date: "Dec 10", image: Assets.imgStoryHistory },
-                    ].map((story) => (
-                        <Link href={`/article/${story.slug}`} key={story.slug} className="group block space-y-3">
-                            {/* Mobile: square aspect, PC: 3:2 aspect for larger display */}
-                            <div className="relative w-full aspect-square md:aspect-[3/2] overflow-hidden rounded-sm">
-                                <Image
-                                    src={story.image}
-                                    alt={story.title}
-                                    fill
-                                    sizes="(max-width: 768px) 50vw, 350px"
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <p className="text-[11px] font-bold uppercase tracking-widest text-text-secondary">
-                                    <span>{story.category}</span>
-                                    <span className="mx-1.5">•</span>
-                                    <span>{story.date}</span>
-                                </p>
-                                <h5 className="font-serif text-sm md:text-base leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary dark:text-gray-200 line-clamp-2">
-                                    {story.title}
-                                </h5>
-                            </div>
-                        </Link>
-                    ))}
+                    {relatedPosts.length > 0 ? (
+                        relatedPosts.map((post) => (
+                            <Link href={`/article/${post.slug}`} key={post.slug} className="group block space-y-3" data-testid={`link-related-post-${post.slug}`}>
+                                {/* Mobile: square aspect, PC: 3:2 aspect for larger display */}
+                                <div className="relative w-full aspect-square md:aspect-[3/2] overflow-hidden rounded-sm bg-bg-secondary">
+                                    {post.coverImage ? (
+                                        <Image
+                                            src={post.coverImage}
+                                            alt={post.title}
+                                            fill
+                                            sizes="(max-width: 768px) 50vw, 350px"
+                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-text-tertiary text-xs">
+                                            No image
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <p className="text-[11px] font-bold uppercase tracking-widest text-text-secondary">
+                                        <span>{post.category}</span>
+                                        <span className="mx-1.5">•</span>
+                                        <span>{formatDate(post.date)}</span>
+                                    </p>
+                                    <h5 className="font-serif text-sm md:text-base leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary dark:text-gray-200 line-clamp-2">
+                                        {post.title}
+                                    </h5>
+                                </div>
+                            </Link>
+                        ))
+                    ) : (
+                        <p className="text-sm text-text-tertiary col-span-2">No related stories yet.</p>
+                    )}
                 </div>
             </div>
         </aside>

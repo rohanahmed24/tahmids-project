@@ -12,7 +12,7 @@ async function handleFileUpload(file: File | null): Promise<string | undefined> 
     if (!file || file.size === 0) return undefined;
 
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const buffer = new Uint8Array(bytes);
     const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
     const uploadDir = path.join(process.cwd(), "public/imgs/uploads");
 
@@ -98,7 +98,10 @@ export async function createPost(formData: FormData) {
         throw new Error("Failed to create post");
     }
 
-    revalidateTag('posts', 'default');
+    revalidateTag('posts', 'max');
+    revalidateTag('hot-topics', 'max');
+    revalidateTag('recent', 'max');
+    revalidateTag('featured', 'max');
     revalidatePath("/admin/dashboard");
     revalidatePath("/");
     redirect("/admin/dashboard");
@@ -114,7 +117,10 @@ export async function deletePost(slug: string) {
         await prisma.post.delete({
             where: { slug }
         });
-        revalidateTag('posts', 'default');
+        revalidateTag('posts', 'max');
+        revalidateTag('hot-topics', 'max');
+        revalidateTag('recent', 'max');
+        revalidateTag('featured', 'max');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {
@@ -167,7 +173,10 @@ export async function updatePost(originalSlug: string, formData: FormData) {
             }
         });
 
-        revalidateTag('posts', 'default');
+        revalidateTag('posts', 'max');
+        revalidateTag('hot-topics', 'max');
+        revalidateTag('recent', 'max');
+        revalidateTag('featured', 'max');
         revalidatePath(`/article/${originalSlug}`);
         revalidatePath(`/admin/edit/${originalSlug}`);
         revalidatePath("/admin/dashboard");
@@ -191,7 +200,10 @@ export async function togglePostStatus(slug: string, published: boolean) {
             where: { slug },
             data: { published }
         });
-        revalidateTag('posts', 'default');
+        revalidateTag('posts', 'max');
+        revalidateTag('hot-topics', 'max');
+        revalidateTag('recent', 'max');
+        revalidateTag('featured', 'max');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {

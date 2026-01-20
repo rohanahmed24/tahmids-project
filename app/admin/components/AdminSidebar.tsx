@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, LogOut, X, LayoutDashboard, LucideIcon } from "lucide-react";
+import { Shield, LogOut, X, LucideIcon } from "lucide-react";
 
 export interface NavItem {
     id: string;

@@ -26,9 +26,11 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { uploadImage } from "@/actions/media";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 interface EditorProps {
     initialData?: {
@@ -222,13 +224,42 @@ export default function Editor({ initialData, action }: EditorProps) {
         }
     };
 
+    const getYouTubeEmbedUrl = (url: string): string | null => {
+        if (!url) return null;
+        
+        let videoId = null;
+        
+        // Handle various YouTube URL formats
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
+            /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+            /(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+            /(?:youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
+            /^([a-zA-Z0-9_-]{11})$/ // Just the video ID
+        ];
+        
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match) {
+                videoId = match[1];
+                break;
+            }
+        }
+        
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    };
+
     const handleYoutubeInsert = () => {
-        const url = prompt("Enter YouTube URL:");
+        const url = prompt("Enter YouTube URL (e.g., youtube.com/watch?v=... or youtu.be/...):");
         if (url) {
-            // Simple validation or extraction could go here
-            // We'll insert a custom component marker or iframe
-            const embed = `\n<iframe width="100%" height="400" src="${url.replace('watch?v=', 'embed/')}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\n`;
-            insertAtCursor(embed);
+            const embedUrl = getYouTubeEmbedUrl(url.trim());
+            if (embedUrl) {
+                const embed = `\n<iframe width="100%" height="400" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>\n`;
+                insertAtCursor(embed);
+                toast.success("YouTube video added!");
+            } else {
+                toast.error("Invalid YouTube URL. Please use a valid YouTube link.");
+            }
         }
     };
 
@@ -323,7 +354,16 @@ export default function Editor({ initialData, action }: EditorProps) {
             if (!initialData) {
                 localStorage.removeItem("draft_new_post");
             }
-        } catch (error) {
+        } catch (error: unknown) {
+            // Check if this is a Next.js redirect (which throws NEXT_REDIRECT)
+            if (isRedirectError(error)) {
+                // This is a redirect, not an error - clear the toast
+                toast.dismiss(id);
+                if (!initialData) {
+                    localStorage.removeItem("draft_new_post");
+                }
+                return;
+            }
             console.error("Submission failed", error);
             toast.error("Failed to save article", { id });
         } finally {
@@ -543,8 +583,16 @@ export default function Editor({ initialData, action }: EditorProps) {
                             <div className="flex-1 p-8 prose prose-invert max-w-none prose-headings:font-serif prose-a:text-purple-400 prose-img:rounded-xl">
                                 <ReactMarkdown
                                     remarkPlugins={[remarkGfm]}
+                                    rehypePlugins={[rehypeRaw]}
                                     components={{
-                                        // Custom renderers will be added here if needed, or rely on rehype-raw
+                                        iframe: ({ node, ...props }) => (
+                                            <iframe
+                                                {...props}
+                                                className="w-full aspect-video rounded-xl my-4"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowFullScreen
+                                            />
+                                        ),
                                     }}
                                 >
                                     {content}

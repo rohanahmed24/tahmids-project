@@ -90,7 +90,20 @@ export default async function ArticlePage({
 
                         <ArticleContent>
                             <div className="prose prose-lg max-w-none text-text-main leading-relaxed prose-headings:font-serif prose-a:text-accent-main prose-img:rounded-xl">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                                <ReactMarkdown 
+                                    remarkPlugins={[remarkGfm]} 
+                                    rehypePlugins={[rehypeRaw]}
+                                    components={{
+                                        iframe: ({ node, ...props }) => (
+                                            <iframe
+                                                {...props}
+                                                className="w-full aspect-video rounded-xl my-6"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                allowFullScreen
+                                            />
+                                        ),
+                                    }}
+                                >
                                     {post.content || ""}
                                 </ReactMarkdown>
                             </div>
@@ -99,7 +112,7 @@ export default async function ArticlePage({
 
                     <aside className="w-full lg:w-[350px] 2xl:w-[400px] flex-shrink-0">
                         <div className="sticky top-32">
-                            <ArticleSidebar authorName={post.author} />
+                            <ArticleSidebar authorName={post.author} category={post.category} currentSlug={post.slug} />
                         </div>
                     </aside>
                 </div>

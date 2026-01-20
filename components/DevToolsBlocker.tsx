@@ -4,8 +4,21 @@ import { useEffect } from "react";
 
 export function DevToolsBlocker() {
     useEffect(() => {
-        // Disable right-click context menu
+        // Disable right-click context menu (except on form elements for copy/paste)
         const handleContextMenu = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            const tagName = target.tagName.toLowerCase();
+            
+            // Allow context menu on form elements for copy/paste functionality
+            if (tagName === 'input' || tagName === 'textarea' || target.isContentEditable) {
+                return; // Don't block on input/textarea elements
+            }
+            
+            // Allow context menu on admin pages
+            if (window.location.pathname.startsWith('/admin')) {
+                return;
+            }
+            
             e.preventDefault();
         };
 

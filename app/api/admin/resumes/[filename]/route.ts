@@ -6,7 +6,7 @@ import { auth } from "@/auth";
 import { cookies } from "next/headers";
 
 export async function GET(
-    request: NextRequest,
+    _request: NextRequest,
     { params }: { params: Promise<{ filename: string }> }
 ) {
     // Security check: Ensure user is admin
