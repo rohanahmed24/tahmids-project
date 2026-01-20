@@ -30,10 +30,16 @@ conn.on('ready', () => {
 
             const commands = [
                 `cd ${projectPath}`,
+                // Backup uploads before reset
+                'mkdir -p /tmp/uploads_backup',
+                'cp -r public/imgs/uploads/* /tmp/uploads_backup/ 2>/dev/null || true',
                 'rm -rf .next node_modules', // Force clean build and reinstall
                 'fuser -k 3001/tcp || true', // Kill existing server on port 3001
                 'git reset --hard', // Safety: discard local changes on server
                 'git pull',
+                // Restore uploads after pull
+                'mkdir -p public/imgs/uploads',
+                'cp -r /tmp/uploads_backup/* public/imgs/uploads/ 2>/dev/null || true',
                 'npm install', // Fresh install
                 'node scripts/cleanup-mocks.js', // Execute cleanup on remote
                 'npx prisma generate',

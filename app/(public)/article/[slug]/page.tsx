@@ -13,6 +13,9 @@ import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
 import { ArticleVideoPlayer } from "@/components/ArticleVideoPlayer";
 import { CustomAudioPlayer } from "@/components/ui/CustomAudioPlayer";
 
+// Force dynamic rendering since we use searchParams
+export const dynamic = 'force-dynamic';
+
 export async function generateStaticParams() {
     const posts = await getAllPosts();
     return posts.map((post) => ({
