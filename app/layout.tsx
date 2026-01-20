@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     description: "Explore stories that matter across politics, mystery, crime, history, news, and science.",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://thewisdomia.com/og-image.png",
         width: 1200,
         height: 630,
         alt: "Wisdomia - Your Digital Magazine"
