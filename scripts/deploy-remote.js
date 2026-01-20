@@ -30,9 +30,10 @@ conn.on('ready', () => {
 
             const commands = [
                 `cd ${projectPath}`,
-                // Backup uploads before reset
+                // Backup uploads from BOTH source and standalone directories
                 'mkdir -p /tmp/uploads_backup',
                 'cp -r public/imgs/uploads/* /tmp/uploads_backup/ 2>/dev/null || true',
+                'cp -r .next/standalone/public/imgs/uploads/* /tmp/uploads_backup/ 2>/dev/null || true',
                 'rm -rf .next node_modules', // Force clean build and reinstall
                 'fuser -k 3001/tcp || true', // Kill existing server on port 3001
                 'git reset --hard', // Safety: discard local changes on server
