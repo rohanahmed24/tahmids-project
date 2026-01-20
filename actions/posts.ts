@@ -118,11 +118,11 @@ export async function deletePost(slug: string) {
         await prisma.post.delete({
             where: { slug }
         });
-        revalidateTag('posts', 'max');
-        revalidateTag('stats', 'max');
-        revalidateTag('hot-topics', 'max');
-        revalidateTag('recent', 'max');
-        revalidateTag('featured', 'max');
+        revalidateTag('posts');
+        revalidateTag('stats');
+        revalidateTag('hot-topics');
+        revalidateTag('recent');
+        revalidateTag('featured');
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
     } catch (error) {
