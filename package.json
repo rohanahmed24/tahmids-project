@@ -31,6 +31,7 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.7",
+    "ssh2": "^1.17.0",
     "tailwind-merge": "^3.4.0",
     "turndown": "^7.2.2"
   },

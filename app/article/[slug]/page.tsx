@@ -11,7 +11,7 @@ import { getPostBySlug, getAllPosts } from "@/lib/posts";
 import { notFound } from "next/navigation";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
 import { ArticleVideoPlayer } from "@/components/ArticleVideoPlayer";
-import { GenerateVideoButton } from "@/components/GenerateVideoButton";
+// import { GenerateVideoButton } from "@/components/GenerateVideoButton"; // Mock removed
 
 export async function generateStaticParams() {
     const posts = await getAllPosts();
@@ -67,9 +67,8 @@ export default async function ArticlePage({
                                     <div className="aspect-video flex flex-col items-center justify-center bg-bg-secondary rounded-xl border border-border-subtle gap-4 p-8 text-center">
                                         <div className="space-y-1">
                                             <h3 className="text-lg font-semibold text-text-primary">No video available</h3>
-                                            <p className="text-sm text-text-tertiary">Generate an AI-powered video summary for this article.</p>
+                                            <p className="text-sm text-text-tertiary">Video content is not available for this article yet.</p>
                                         </div>
-                                        <GenerateVideoButton slug={post.slug} />
                                     </div>
                                 )}
                             </div>
@@ -82,9 +81,8 @@ export default async function ArticlePage({
                                 {!post.videoUrl && (
                                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-bg-secondary rounded-xl border border-border-subtle">
                                         <div className="text-sm text-text-secondary">
-                                            <span className="font-medium text-text-primary">New:</span> Watch this article as a video explanation.
+                                            <span className="font-medium text-text-primary">Note:</span> Video explanation coming soon.
                                         </div>
-                                        <GenerateVideoButton slug={post.slug} />
                                     </div>
                                 )}
                             </div>

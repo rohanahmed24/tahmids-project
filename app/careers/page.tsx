@@ -15,7 +15,7 @@ import {
     Globe,
     X
 } from "lucide-react";
-import { submitJobApplication } from "@/actions/careers";
+// import { submitJobApplication } from "@/actions/careers";
 
 const departments = ["All", "Engineering", "Design", "Content", "Marketing", "Operations"];
 
@@ -196,7 +196,10 @@ export default function CareersPage() {
         }
 
         try {
-            const result = await submitJobApplication(formData);
+            // Simulated submission (Server action removed)
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            const result = { success: true, message: "Application received" };
+
             if (result.success) {
                 setIsSubmitted(true);
                 form.reset();

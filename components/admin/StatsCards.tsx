@@ -20,8 +20,8 @@ export function StatsCards({ stats }: StatsCardsProps) {
         {
             title: "Total Users",
             value: stats.totalUsers.toLocaleString(),
-            change: `+${stats.monthlyGrowth}%`,
-            trend: "up",
+            change: stats.monthlyGrowth > 0 ? `+${stats.monthlyGrowth}%` : "No change",
+            trend: stats.monthlyGrowth > 0 ? "up" : "neutral",
             icon: Users,
             color: "blue"
         },
@@ -36,16 +36,16 @@ export function StatsCards({ stats }: StatsCardsProps) {
         {
             title: "Total Views",
             value: stats.totalViews.toLocaleString(),
-            change: `+${stats.engagementRate}% engagement`,
-            trend: "up",
+            change: stats.engagementRate > 0 ? `+${stats.engagementRate}% engagement` : "No engagement data",
+            trend: stats.engagementRate > 0 ? "up" : "neutral",
             icon: Eye,
             color: "purple"
         },
         {
             title: "Avg. Read Time",
             value: stats.avgReadTime,
-            change: "+0.3 min from last month",
-            trend: "up",
+            change: "Based on word count", // Replaced hardcoded +0.3
+            trend: "neutral",
             icon: Clock,
             color: "orange"
         }
@@ -65,8 +65,8 @@ export function StatsCards({ stats }: StatsCardsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {cards.map((card, index) => {
                 const Icon = card.icon;
-                const TrendIcon = card.trend === "up" ? TrendingUp : 
-                                card.trend === "down" ? TrendingDown : null;
+                const TrendIcon = card.trend === "up" ? TrendingUp :
+                    card.trend === "down" ? TrendingDown : null;
 
                 return (
                     <div
@@ -78,9 +78,8 @@ export function StatsCards({ stats }: StatsCardsProps) {
                                 <Icon className="w-6 h-6" />
                             </div>
                             {TrendIcon && (
-                                <TrendIcon className={`w-4 h-4 ${
-                                    card.trend === "up" ? "text-green-500" : "text-red-500"
-                                }`} />
+                                <TrendIcon className={`w-4 h-4 ${card.trend === "up" ? "text-green-500" : "text-red-500"
+                                    }`} />
                             )}
                         </div>
 
@@ -91,11 +90,10 @@ export function StatsCards({ stats }: StatsCardsProps) {
                             <p className="text-2xl font-bold text-text-primary mb-1">
                                 {card.value}
                             </p>
-                            <p className={`text-sm ${
-                                card.trend === "up" ? "text-green-600" :
-                                card.trend === "down" ? "text-red-600" :
-                                "text-text-tertiary"
-                            }`}>
+                            <p className={`text-sm ${card.trend === "up" ? "text-green-600" :
+                                    card.trend === "down" ? "text-red-600" :
+                                        "text-text-tertiary"
+                                }`}>
                                 {card.change}
                             </p>
                         </div>
