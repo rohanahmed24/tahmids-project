@@ -34,6 +34,7 @@ conn.on('ready', () => {
                 'git pull',
                 'npm install',
                 'npx prisma generate',
+                'npx prisma db push', // Apply schema changes
                 'npm run build',
                 // Check if pm2 ecosystem exists, otherwise just restart valid process
                 'pm2 restart all || npm run start &'

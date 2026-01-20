@@ -2,9 +2,11 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, LogOut, X, LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export interface NavItem {
-    id: string;
+    id: string; // Used as href now
     label: string;
     icon: LucideIcon;
 }
@@ -13,8 +15,6 @@ interface AdminSidebarProps {
     isOpen: boolean;
     onClose: () => void;
     navItems: NavItem[];
-    activeTab: string;
-    setActiveTab: (id: string) => void;
     handleLogout: () => void;
     siteName: string;
 }
@@ -23,8 +23,6 @@ export function AdminSidebar({
     isOpen,
     onClose,
     navItems,
-    activeTab,
-    setActiveTab,
     handleLogout,
     siteName
 }: AdminSidebarProps) {
@@ -35,8 +33,6 @@ export function AdminSidebar({
             <aside className="hidden lg:flex w-72 bg-bg-secondary border-r border-border-primary flex-col fixed inset-y-0 z-40">
                 <SidebarContent
                     navItems={navItems}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
                     handleLogout={handleLogout}
                     siteName={siteName}
                     onClose={onClose}
@@ -74,8 +70,6 @@ export function AdminSidebar({
 
                             <SidebarContent
                                 navItems={navItems}
-                                activeTab={activeTab}
-                                setActiveTab={setActiveTab}
                                 handleLogout={handleLogout}
                                 siteName={siteName}
                                 onClose={onClose}
@@ -90,14 +84,14 @@ export function AdminSidebar({
 
 interface SidebarContentProps {
     navItems: NavItem[];
-    activeTab: string;
-    setActiveTab: (id: string) => void;
     handleLogout: () => void;
     siteName: string;
     onClose: () => void;
 }
 
-function SidebarContent({ navItems, activeTab, setActiveTab, handleLogout, siteName, onClose }: SidebarContentProps) {
+function SidebarContent({ navItems, handleLogout, siteName, onClose }: SidebarContentProps) {
+    const pathname = usePathname();
+
     return (
         <div className="flex flex-col h-full text-text-primary">
             {/* Logo */}
@@ -116,14 +110,18 @@ function SidebarContent({ navItems, activeTab, setActiveTab, handleLogout, siteN
             {/* Navigation */}
             <nav className="flex-1 p-4 space-y-1 overflow-y-auto hide-scrollbar">
                 {navItems.map((item) => {
-                    const isActive = activeTab === item.id;
+                    // Check active state: exact match or starts with (for nested routes)
+                    // Excluding exact match for Dashboard to avoid highlighting everything
+                    const isActive = item.id === '/admin/dashboard'
+                        ? pathname === item.id
+                        : pathname.startsWith(item.id);
                     const Icon = item.icon;
 
                     return (
-                        <button
+                        <Link
                             key={item.id}
+                            href={item.id}
                             onClick={() => {
-                                setActiveTab(item.id);
                                 if (window.innerWidth < 1024) onClose();
                             }}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative ${isActive
@@ -142,7 +140,7 @@ function SidebarContent({ navItems, activeTab, setActiveTab, handleLogout, siteN
                             )}
                             <Icon className={`w-5 h-5 ${isActive ? "text-accent-main" : "text-text-muted group-hover:text-text-primary"}`} />
                             <span className="relative z-10">{item.label}</span>
-                        </button>
+                        </Link>
                     );
                 })}
             </nav>
@@ -160,3 +158,4 @@ function SidebarContent({ navItems, activeTab, setActiveTab, handleLogout, siteN
         </div>
     );
 }
+
