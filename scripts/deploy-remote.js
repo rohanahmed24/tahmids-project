@@ -41,7 +41,7 @@ conn.on('ready', () => {
                 'mkdir -p public/imgs/uploads',
                 'cp -r /tmp/uploads_backup/* public/imgs/uploads/ 2>/dev/null || true',
                 'npm install', // Fresh install
-                'node scripts/cleanup-mocks.js', // Execute cleanup on remote
+                // NOTE: Removed cleanup-mocks.js - it was deleting all posts!
                 'npx prisma generate',
                 'npx prisma db push --skip-generate',
                 'npm run build',
