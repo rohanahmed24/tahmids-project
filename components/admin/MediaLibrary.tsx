@@ -92,7 +92,10 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
             <div className="p-6 border-b border-border-primary">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold text-text-primary">Media Library</h2>
-                    <button className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors flex items-center gap-2">
+                    <button
+                        onClick={() => alert("Upload feature coming soon!")}
+                        className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors flex items-center gap-2"
+                    >
                         <Upload className="w-4 h-4" />
                         Upload
                     </button>
@@ -230,7 +233,10 @@ export function MediaLibrary({ initialMedia }: MediaLibraryProps) {
                         <p className="text-text-secondary mb-4">
                             {searchQuery ? "No media matches your search" : "Upload your first media file to get started"}
                         </p>
-                        <button className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors">
+                        <button
+                            onClick={() => alert("Upload feature coming soon!")}
+                            className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors"
+                        >
                             Upload Media
                         </button>
                     </div>

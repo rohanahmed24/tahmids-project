@@ -2,6 +2,7 @@
 
 import { User } from "@/lib/users";
 import { Shield } from "lucide-react";
+import Link from "next/link";
 
 interface UsersTableProps {
     users: User[];
@@ -68,9 +69,9 @@ export function UsersTable({ users }: UsersTableProps) {
 
             {users.length > 10 && (
                 <div className="p-4 text-center border-t border-border-primary">
-                    <button className="text-accent-primary hover:text-accent-primary/80 text-sm font-medium">
+                    <Link href="/admin/users" className="text-accent-primary hover:text-accent-primary/80 text-sm font-medium">
                         View All Users ({users.length})
-                    </button>
+                    </Link>
                 </div>
             )}
         </div>

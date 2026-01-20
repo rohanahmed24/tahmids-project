@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, Search, Settings, LogOut } from "lucide-react";
+import Link from "next/link";
 import { logoutAdmin } from "@/actions/admin-auth";
 import { useState } from "react";
 
@@ -43,16 +44,19 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 </div>
 
                 <div className="flex items-center justify-end w-full md:w-auto gap-4 md:gap-2 border-b md:border-0 border-border-primary pb-4 md:pb-0">
-                    {/* Notifications */}
-                    <button className="relative p-2 text-text-secondary hover:text-text-primary transition-colors">
+                    {/* Notifications - Disabled for now */}
+                    <button className="relative p-2 text-text-tertiary cursor-not-allowed" title="Notifications (Coming Soon)">
                         <Bell className="w-5 h-5" />
-                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
                     </button>
 
                     {/* Settings */}
-                    <button className="p-2 text-text-secondary hover:text-text-primary transition-colors">
+                    <Link
+                        href="/admin/settings"
+                        className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+                        title="Settings"
+                    >
                         <Settings className="w-5 h-5" />
-                    </button>
+                    </Link>
 
                     {/* User Menu */}
                     <div className="flex items-center gap-3">
