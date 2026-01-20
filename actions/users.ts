@@ -49,6 +49,39 @@ export async function createNewUser(formData: FormData) {
     return { success: true };
 }
 
+export async function updateUserRole(userId: number, role: 'user' | 'admin') {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) {
+        throw new Error("Unauthorized");
+    }
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: { role }
+    });
+
+    revalidatePath("/admin/users");
+    
+    return { success: true };
+}
+
+export async function updateUserImage(userId: number, imagePath: string) {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) {
+        throw new Error("Unauthorized");
+    }
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: { image: imagePath }
+    });
+
+    revalidatePath("/admin/users");
+    revalidatePath("/"); // Update homepage if user is featured
+    
+    return { success: true };
+}
+
 export async function updateUserProfile(formData: FormData) {
     const isAdmin = await verifyAdmin();
     if (!isAdmin) {
