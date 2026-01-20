@@ -54,9 +54,9 @@ export default function Navbar() {
                     : 'border-transparent py-4 md:py-6'
                     }`}
             >
-                <div className="max-w-[1800px] mx-auto px-6 md:px-12 flex justify-between items-center gap-4">
-                    {/* Left: Menu & Search */}
-                    <div className={`flex items-center gap-4 md:gap-6 ${textColorClass}`}>
+                <div className="max-w-[1800px] mx-auto px-6 md:px-12 flex justify-between items-center gap-4 relative">
+                    {/* Left: Menu Only */}
+                    <div className={`flex items-center justify-start flex-1 ${textColorClass}`}>
                         <button
                             onClick={() => setIsMenuOpen(true)}
                             className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
@@ -64,88 +64,21 @@ export default function Navbar() {
                             <Menu className="w-5 h-5" />
                             <span className="hidden md:block">Menu</span>
                         </button>
-
-                        <div className="relative group hidden md:block">
-                            <form action="/search" className="relative flex items-center">
-                                <label htmlFor="search-input" className="sr-only">Search</label>
-                                <Search className="w-5 h-5 absolute left-0 pointer-events-none group-focus-within:text-purple-400 transition-colors" />
-                                <input
-                                    id="search-input"
-                                    name="q"
-                                    type="text"
-                                    placeholder="Search..."
-                                    className="bg-transparent border-b border-transparent focus:border-purple-400 pl-8 pr-4 py-1 outline-none w-24 focus:w-48 transition-all duration-300 placeholder:text-transparent focus:placeholder:text-gray-500/50"
-                                />
-                            </form>
-                        </div>
                     </div>
 
-                    {/* Center: Logo */}
-                    <div className={`flex items-center justify-center ${textColorClass} absolute left-[40%] -translate-x-1/2`}>
+                    {/* Center: Logo (Absolute Centered) */}
+                    <div className={`absolute left-1/2 -translate-x-1/2 ${textColorClass} text-center`}>
                         <Link href="/" className="block">
-                            <h1 className="font-serif text-center leading-none transition-colors">
+                            <h1 className="font-serif leading-none transition-colors">
                                 <span className="block text-[10px] md:text-xs font-medium tracking-widest uppercase opacity-60 mb-[-2px]">The</span>
                                 <span className="block text-2xl md:text-3xl font-black tracking-tighter">WISDOMIA</span>
                             </h1>
                         </Link>
                     </div>
 
-                    {/* Right: Actions */}
-                    <div className={`flex items-center justify-end gap-3 md:gap-8 w-auto ${textColorClass}`}>
-                        {isLoading ? (
-                            <Loader2 className="w-4 h-4 animate-spin opacity-50" />
-                        ) : user ? (
-                            <div className="relative">
-                                <button
-                                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                                    className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
-                                >
-                                    {user?.name?.split(' ')[0] || 'User'}
-                                    <User className="w-4 h-4" />
-                                </button>
-                                {/* Mobile User Icon only if needed, but keeping hidden md:flex layout for consistency with previous buttons, though user might want access. Leaving user menu behavior as is for now unless requested, focusing on theme bar. */}
-                                <button
-                                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                                    className="md:hidden flex items-center hover:opacity-60 transition-opacity"
-                                >
-                                    <User className="w-5 h-5" />
-                                </button>
-
-                                <AnimatePresence>
-                                    {isUserMenuOpen && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            className="absolute right-0 top-full mt-4 w-48 bg-bg-secondary border border-border rounded-xl shadow-xl overflow-hidden"
-                                        >
-                                            <div className="p-4 border-b border-border">
-                                                <p className="font-bold text-sm truncate">{user.name}</p>
-                                                <p className="text-xs text-text-muted truncate">{user.email}</p>
-                                            </div>
-                                            <button
-                                                onClick={handleLogout}
-                                                className="w-full text-left px-4 py-3 text-sm hover:bg-bg-primary transition-colors flex items-center gap-2 text-red-500"
-                                            >
-                                                <LogOut className="w-4 h-4" />
-                                                Sign Out
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        ) : (
-                            <Link href="/signin" className="hidden md:flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity whitespace-nowrap">
-                                Sign In
-                            </Link>
-                        )}
-
-
-
-                        {/* Language/Region Selector */}
-                        <div className="flex items-center">
-                            <LanguageToggle />
-                        </div>
+                    {/* Right: Language Toggle Only */}
+                    <div className={`flex items-center justify-end flex-1 ${textColorClass}`}>
+                        <LanguageToggle />
                     </div>
                 </div>
             </motion.nav>
@@ -215,8 +148,8 @@ export default function Navbar() {
                         <div className="flex-1 overflow-y-auto relative z-20">
 
 
-                            {/* Top Bar: Close (Left) | Sign In, Subscribe (Right) */}
-                            <div className="flex justify-between items-center px-4 py-4 border-b border-border">
+                            {/* Top Bar: Close (Left) | Auth & Theme (Right) */}
+                            <div className="flex justify-between items-center px-6 py-6 border-b border-border">
                                 <button
                                     onClick={() => setIsMenuOpen(false)}
                                     className="text-text-secondary hover:text-text-primary transition-colors"
@@ -224,21 +157,29 @@ export default function Navbar() {
                                     <X className="w-8 h-8 font-light" />
                                 </button>
 
-                                <div className="flex items-center gap-6">
-                                    <Link
-                                        href="/signin"
-                                        onClick={() => setIsMenuOpen(false)}
-                                        className="text-base font-sans text-text-primary hover:text-accent transition-colors"
-                                    >
-                                        Sign In
-                                    </Link>
-                                    <Link
-                                        href="/subscribe"
-                                        onClick={() => setIsMenuOpen(false)}
-                                        className="text-base font-sans text-accent font-medium hover:opacity-70"
-                                    >
-                                        Subscribe
-                                    </Link>
+                                <div className="flex items-center gap-4">
+                                    <ThemeToggle />
+                                    {isLoading ? (
+                                        <Loader2 className="w-4 h-4 animate-spin opacity-50" />
+                                    ) : user ? (
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-sm font-bold uppercase tracking-widest">{user.name?.split(' ')[0]}</span>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="text-text-secondary hover:text-red-500 transition-colors"
+                                            >
+                                                <LogOut className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <Link
+                                            href="/signin"
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="text-sm font-bold uppercase tracking-widest bg-accent-primary text-white px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
+                                        >
+                                            Sign In
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
 
@@ -256,7 +197,7 @@ export default function Navbar() {
                             </div>
 
                             {/* Main Content */}
-                            <div className="p-6">
+                            <div className="p-8">
                                 <div className="mb-6">
                                     <span className="text-accent font-bold uppercase tracking-wider text-sm">
                                         SECTIONS
@@ -296,9 +237,8 @@ export default function Navbar() {
                                 </div>
                             </div>
 
-                            {/* Footer Utility (Optional, kept at bottom) */}
+                            {/* Footer Utility */}
                             <div className="mt-auto p-6 border-t border-border flex justify-between items-center text-text-muted">
-                                <ThemeToggle />
                                 <div className="text-xs">
                                     &copy; {new Date().getFullYear()} Wisdomia
                                 </div>
