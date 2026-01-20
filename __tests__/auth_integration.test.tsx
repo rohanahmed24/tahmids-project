@@ -1,8 +1,8 @@
 
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import RegisterPage from "@/app/register/page";
-import SignInPage from "@/app/signin/page";
+import RegisterPage from "@/app/(public)/register/page";
+import SignInPage from "@/app/(public)/signin/page";
 import { signIn } from "next-auth/react";
 
 // Mock next-auth/react

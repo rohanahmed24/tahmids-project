@@ -2,6 +2,7 @@
 
 import { User } from "@/lib/users";
 import { Shield, Sparkles, Edit2, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { updateUserProfile } from "@/actions/users";
@@ -34,7 +35,13 @@ export function UsersTable({ users }: UsersTableProps) {
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 bg-accent-primary rounded-full flex items-center justify-center overflow-hidden">
                                             {user.image ? (
-                                                <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                                                <Image
+                                                    src={user.image}
+                                                    alt={user.name}
+                                                    fill
+                                                    className="object-cover"
+                                                    unoptimized
+                                                />
                                             ) : (
                                                 <span className="text-white text-sm font-medium">
                                                     {user.name.charAt(0).toUpperCase()}

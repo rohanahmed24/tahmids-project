@@ -166,7 +166,6 @@ export async function createUser(userData: {
 export async function updateUser(id: number, updates: Partial<User>): Promise<User | null> {
     try {
         // Filter out fields that shouldn't be updated directly or map them
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id: _id, created_at, article_count, role, ...cleanUpdates } = updates;
 
         const data: Prisma.UserUpdateInput = { ...cleanUpdates };

@@ -2,7 +2,8 @@
 
 import { prisma } from "@/lib/db";
 import { Prisma } from "@prisma/client";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { revalidateTag } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { verifyAdmin, getAdminSession } from "@/actions/admin-auth";
 import { writeFile, mkdir } from "fs/promises";

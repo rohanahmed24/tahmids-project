@@ -1,7 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { revalidateTag } from "@/lib/cache";
 
 export async function getNavbarLinks() {
     try {

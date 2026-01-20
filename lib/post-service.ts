@@ -181,7 +181,6 @@ export class PostService {
             };
 
             // Remove undefined keys
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             Object.keys(dataToUpdate).forEach(key => (dataToUpdate as any)[key] === undefined && delete (dataToUpdate as any)[key]);
 
             await prisma.post.update({
