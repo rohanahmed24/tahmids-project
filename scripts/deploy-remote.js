@@ -30,7 +30,7 @@ conn.on('ready', () => {
 
             const commands = [
                 `cd ${projectPath}`,
-                'rm -rf .next', // Force clean build
+                'rm -rf .next node_modules/.cache', // Force clean build
                 'fuser -k 3001/tcp || true', // Kill existing server on port 3001
                 'git reset --hard', // Safety: discard local changes on server
                 'git pull',
