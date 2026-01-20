@@ -34,10 +34,10 @@ conn.on('ready', () => {
                 'fuser -k 3001/tcp || true', // Kill existing server on port 3001
                 'git reset --hard', // Safety: discard local changes on server
                 'git pull',
-                'npm install',
+                'npm ci --legacy-peer-deps', // Clean install from lockfile
                 'node scripts/cleanup-mocks.js', // Execute cleanup on remote
-                'npx prisma generate',
-                'npx prisma db push',
+                'npx prisma generate --no-hints',
+                'npx prisma db push --skip-generate',
                 'npm run build',
                 // Sync public files to standalone build
                 'cp -r public .next/standalone/public || true',
