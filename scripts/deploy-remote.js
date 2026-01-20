@@ -45,9 +45,11 @@ conn.on('ready', () => {
                 'npx prisma generate',
                 'npx prisma db push --skip-generate',
                 'npm run build',
-                // Sync public files to standalone build
-                'cp -r public .next/standalone/public || true',
-                'cp -r .next/static .next/standalone/.next/static || true',
+                // Sync public files to standalone build (remove first to ensure clean copy)
+                'rm -rf .next/standalone/public',
+                'cp -r public .next/standalone/',
+                'mkdir -p .next/standalone/.next',
+                'cp -r .next/static .next/standalone/.next/',
                 'pm2 stop all || true',
                 'pm2 delete all || true',
                 // Start standalone server with PORT=3001

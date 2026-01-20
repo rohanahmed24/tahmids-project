@@ -3,6 +3,9 @@ import { ArticleCard } from "@/components/ArticleCard";
 import { Search } from "lucide-react";
 import Link from "next/link";
 
+// Force dynamic rendering since we use searchParams
+export const dynamic = 'force-dynamic';
+
 export default async function SearchPage({
     searchParams,
 }: {
