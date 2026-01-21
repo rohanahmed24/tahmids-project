@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://thewisdomia.com/sitemap.xml
+
+# Disallow admin areas from indexing
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/
