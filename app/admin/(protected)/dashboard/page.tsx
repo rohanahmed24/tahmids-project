@@ -48,7 +48,7 @@ export default async function AdminDashboard() {
     };
 
     return (
-        <div className="max-w-[1600px] mx-auto p-6 space-y-8">
+        <div className="max-w-[1800px] mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 md:space-y-8">
             {/* Header */}
             <DashboardHeader user={session} />
 
@@ -58,27 +58,36 @@ export default async function AdminDashboard() {
             {/* Quick Actions */}
             <QuickActions />
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                {/* Left Column - Posts & Analytics */}
-                <div className="xl:col-span-2 space-y-8">
+            {/* Main Content Grid - Responsive with intermediate breakpoints */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+                {/* Left Column - Posts & Analytics (spans 2 on xl) */}
+                <div className="lg:col-span-2 xl:col-span-2 space-y-4 sm:space-y-6 md:space-y-8 order-2 lg:order-1">
                     {/* Analytics Chart */}
-                    <Suspense fallback={<div className="h-96 bg-bg-secondary rounded-xl animate-pulse" />}>
+                    <Suspense fallback={
+                        <div className="h-64 sm:h-80 md:h-96 bg-bg-secondary rounded-xl sm:rounded-2xl animate-pulse" />
+                    }>
                         <AnalyticsChart posts={posts} userCount={userStats.totalUsers} />
                     </Suspense>
 
                     {/* Posts Management */}
-                    <div className="bg-bg-secondary rounded-xl border border-border-primary">
-                        <div className="p-6 border-b border-border-primary">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-semibold text-text-primary">
-                                    Content Management
-                                </h2>
-                                <div className="flex gap-2">
-                                    <button className="px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-accent-primary/90 transition-colors">
+                    <div className="bg-bg-secondary rounded-xl sm:rounded-2xl border border-border-primary overflow-hidden shadow-sm">
+                        <div className="p-4 sm:p-5 md:p-6 border-b border-border-primary bg-gradient-to-r from-bg-secondary to-bg-tertiary/30">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                <div>
+                                    <h2 className="text-lg sm:text-xl font-semibold text-text-primary">
+                                        Content Management
+                                    </h2>
+                                    <p className="text-xs sm:text-sm text-text-secondary mt-0.5 hidden sm:block">
+                                        Manage all your articles and drafts
+                                    </p>
+                                </div>
+                                <div className="flex gap-2 w-full sm:w-auto">
+                                    <button className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-accent-primary text-white rounded-lg
+                                        hover:bg-accent-primary/90 transition-all text-sm font-medium shadow-sm hover:shadow-md">
                                         New Article
                                     </button>
-                                    <button className="px-4 py-2 border border-border-primary rounded-lg hover:bg-bg-tertiary transition-colors">
+                                    <button className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-border-primary rounded-lg
+                                        hover:bg-bg-tertiary transition-colors text-sm font-medium text-text-secondary">
                                         Import
                                     </button>
                                 </div>
@@ -89,24 +98,30 @@ export default async function AdminDashboard() {
                 </div>
 
                 {/* Right Column - Users & Activity */}
-                <div className="space-y-8">
+                <div className="lg:col-span-2 xl:col-span-1 space-y-4 sm:space-y-6 md:space-y-8 order-1 lg:order-2">
                     {/* Recent Activity */}
                     <RecentActivity activities={activities} />
 
-                    {/* Users Management */}
-                    <div className="bg-bg-secondary rounded-xl border border-border-primary">
-                        <div className="p-6 border-b border-border-primary">
-                            <h2 className="text-xl font-semibold text-text-primary">
-                                User Management
-                            </h2>
+                    {/* Two-column grid on lg, single on xl */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-1 gap-4 sm:gap-6 md:gap-8">
+                        {/* Users Management */}
+                        <div className="bg-bg-secondary rounded-xl sm:rounded-2xl border border-border-primary overflow-hidden shadow-sm">
+                            <div className="p-4 sm:p-5 md:p-6 border-b border-border-primary bg-gradient-to-r from-bg-secondary to-bg-tertiary/30">
+                                <h2 className="text-lg sm:text-xl font-semibold text-text-primary">
+                                    User Management
+                                </h2>
+                                <p className="text-xs sm:text-sm text-text-secondary mt-0.5 hidden sm:block">
+                                    View and manage registered users
+                                </p>
+                            </div>
+                            <UsersTable users={users} />
                         </div>
-                        <UsersTable users={users} />
-                    </div>
 
-                    {/* Media Library Preview */}
-                    <MediaLibrary />
+                        {/* Media Library Preview */}
+                        <MediaLibrary />
+                    </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 }
