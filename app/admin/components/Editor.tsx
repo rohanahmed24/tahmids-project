@@ -11,11 +11,6 @@ import {
     ArrowLeft,
     Video,
     UploadCloud,
-    Bold,
-    Italic,
-    List,
-    Quote,
-    Code,
     Maximize2,
     Minimize2,
     Loader2,
@@ -24,13 +19,11 @@ import {
     Music,
     Youtube
 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
 import { uploadImage } from "@/actions/media";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 interface EditorProps {
     initialData?: {
@@ -491,119 +484,25 @@ export default function Editor({ initialData, action }: EditorProps) {
 
                     {/* Content Editor / Preview */}
                     <div className="min-h-[70vh] bg-bg-card border border-border-primary rounded-2xl overflow-hidden flex flex-col relative group">
-                        {/* Toolbar */}
-                        {activeTab === "write" && (
-                            <div className="flex items-center gap-1 p-3 border-b border-border-primary bg-bg-card/50 sticky top-0 z-10 backdrop-blur-sm overflow-x-auto hide-scrollbar whitespace-nowrap">
-                                <button type="button" onClick={() => handleFormat('bold')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Bold"><Bold className="w-4 h-4" /></button>
-                                <button type="button" onClick={() => handleFormat('italic')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Italic"><Italic className="w-4 h-4" /></button>
-                                <div className="w-px h-4 bg-border-primary mx-2" />
-                                <button type="button" onClick={() => handleFormat('list')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="List"><List className="w-4 h-4" /></button>
-                                <button type="button" onClick={() => handleFormat('quote')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Quote"><Quote className="w-4 h-4" /></button>
-                                <button type="button" onClick={() => handleFormat('code')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Code"><Code className="w-4 h-4" /></button>
-                                <button type="button" onClick={() => handleFormat('link')} className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors" title="Link"><LinkIcon className="w-4 h-4" /></button>
-                                <div className="w-px h-4 bg-border-primary mx-2" />
-                                <button
-                                    type="button"
-                                    onClick={() => document.getElementById('docImport')?.click()}
-                                    className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors flex items-center gap-2 flex-shrink-0"
-                                    title="Import Document (.docx, .md, .txt)"
-                                >
-                                    <UploadCloud className="w-4 h-4" />
-                                    <span className="text-xs font-bold hidden xl:block">Import</span>
-                                </button>
-                                <input
-                                    type="file"
-                                    id="docImport"
-                                    className="hidden"
-                                    accept=".docx,.md,.txt"
-                                    onChange={handleDocImport}
-                                />
-                                <div className="w-px h-4 bg-border-primary mx-2" />
-                                <button
-                                    type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="p-2 text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 rounded-lg flex items-center gap-2 transition-colors flex-shrink-0"
-                                    title="Insert Image"
-                                >
-                                    <ImageIcon className="w-4 h-4" />
-                                    <span className="text-xs font-bold">Add Image</span>
-                                </button>
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={handleBodyImageUpload}
-                                />
-                                <div className="w-px h-4 bg-border-primary mx-2" />
-                                <button
-                                    type="button"
-                                    onClick={() => document.getElementById('audioUpload')?.click()}
-                                    className="p-2 text-text-secondary hover:text-text-primary hover:bg-bg-tertiary rounded-lg transition-colors"
-                                    title="Add Audio"
-                                >
-                                    <Music className="w-4 h-4" />
-                                </button>
-                                <input
-                                    type="file"
-                                    id="audioUpload"
-                                    className="hidden"
-                                    accept="audio/*"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) handleAudioUpload(file);
-                                        e.target.value = "";
-                                    }}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleYoutubeInsert}
-                                    className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                                    title="Add YouTube Video"
-                                >
-                                    <Youtube className="w-4 h-4" />
-                                </button>
-                            </div>
-                        )}
-
                         {activeTab === "write" ? (
                             <div className="flex-1 relative">
-                                <textarea
-                                    ref={textareaRef}
-                                    name="content"
-                                    value={content}
-                                    onChange={(e) => setContent(e.target.value)}
-                                    onPaste={handlePaste}
-                                    onDrop={handleDrop}
-                                    placeholder="Tell your story... (Drag & Drop images enabled)"
-                                    className="w-full min-h-[70vh] bg-transparent p-6 resize-y focus:outline-none font-mono text-base leading-relaxed text-text-primary placeholder:text-text-muted"
-                                    spellCheck={false}
+                                <RichTextEditor
+                                    content={content}
+                                    onChange={setContent}
+                                    placeholder="Tell your story..."
                                 />
+                                <input type="hidden" name="content" value={content} />
                                 {/* Bottom Status Bar */}
-                                <div className="absolute bottom-4 right-4 flex items-center gap-4 text-xs text-text-muted bg-bg-primary/80 backdrop-blur px-3 py-1.5 rounded-full border border-border-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute bottom-4 right-4 flex items-center gap-4 text-xs text-text-muted bg-bg-primary/80 backdrop-blur px-3 py-1.5 rounded-full border border-border-primary opacity-0 group-hover:opacity-100 transition-opacity z-50">
                                     <span className="flex items-center gap-1"><AlignLeft className="w-3 h-3" /> {wordCount} words</span>
                                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {readTime} min read</span>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex-1 p-8 prose prose-invert max-w-none prose-headings:font-serif prose-a:text-purple-400 prose-img:rounded-xl">
-                                <ReactMarkdown
-                                    remarkPlugins={[remarkGfm]}
-                                    rehypePlugins={[rehypeRaw]}
-                                    components={{
-                                        iframe: ({ node, ...props }) => (
-                                            <iframe
-                                                {...props}
-                                                className="w-full aspect-video rounded-xl my-4"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                allowFullScreen
-                                            />
-                                        ),
-                                    }}
-                                >
-                                    {content}
-                                </ReactMarkdown>
-                            </div>
+                            <div
+                                className="flex-1 p-8 prose prose-invert max-w-none prose-headings:font-serif prose-a:text-purple-400 prose-img:rounded-xl"
+                                dangerouslySetInnerHTML={{ __html: content }}
+                            />
                         )}
                     </div>
                 </div>
