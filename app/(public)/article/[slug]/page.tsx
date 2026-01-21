@@ -60,7 +60,7 @@ export default async function ArticlePage({
                     />
                 </MotionWrapper>
 
-                <div className="max-w-[1440px] mx-auto px-6 md:px-16 2xl:px-32 mt-12 md:mt-20 flex flex-col lg:flex-row gap-12 2xl:gap-24 relative">
+                <div id="article-content" className="max-w-[1440px] mx-auto px-6 md:px-16 2xl:px-32 mt-12 md:mt-20 flex flex-col lg:flex-row gap-12 2xl:gap-24 relative">
                     <div className="flex-1 min-w-0"> {/* Main Content */}
                         {/* Video Player (Watch Mode) - or Generator if missing */}
                         {isWatchMode && (

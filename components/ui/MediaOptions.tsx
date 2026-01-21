@@ -18,19 +18,19 @@ export function MediaOptions({ slug, variant = "default", className = "" }: Medi
             id: "read",
             label: "Read",
             icon: BookOpen,
-            href: `/article/${slug}`,
+            href: `/article/${slug}#article-content`,
         },
         {
             id: "listen",
             label: "Listen",
             icon: Headphones,
-            href: `/article/${slug}?mode=listen`,
+            href: `/article/${slug}?mode=listen#article-content`,
         },
         {
             id: "watch",
             label: "Watch",
             icon: Play,
-            href: `/article/${slug}?mode=watch`,
+            href: `/article/${slug}?mode=watch#article-content`,
         },
     ];
 
@@ -38,6 +38,14 @@ export function MediaOptions({ slug, variant = "default", className = "" }: Medi
         e.preventDefault();
         e.stopPropagation();
         router.push(href);
+
+        // Smooth scroll to content section after a short delay for navigation
+        setTimeout(() => {
+            const contentSection = document.getElementById('article-content');
+            if (contentSection) {
+                contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
     };
 
     // Prominent variant - Labeled icons for mobile hero/sliders
