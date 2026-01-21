@@ -81,7 +81,12 @@ export default async function ArticlePage({
                         {/* Audio Player (Default/Listen Mode) */}
                         {!isWatchMode && (
                             <div className="mb-8 space-y-4">
-                                <ArticleAudioPlayer title={post.title} content={post.content || ""} />
+                                {/* Use uploaded audio if available, otherwise fall back to text-to-speech */}
+                                {post.audioUrl ? (
+                                    <CustomAudioPlayer src={post.audioUrl} title={`Listen to: ${post.title}`} />
+                                ) : (
+                                    <ArticleAudioPlayer title={post.title} content={post.content || ""} />
+                                )}
                                 {!post.videoUrl && (
                                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-bg-secondary rounded-xl border border-border-subtle">
                                         <div className="text-sm text-text-secondary">
