@@ -7,6 +7,7 @@ import { ArticleSidebar } from "@/components/ArticleSidebar";
 import { MotionWrapper } from "@/components/ui/MotionWrapper";
 import { DailyQuote } from "@/components/DailyQuote";
 import { Subscription } from "@/components/Subscription";
+import { SubscriptionPopup } from "@/components/SubscriptionPopup";
 import { getPostBySlug, getAllPosts } from "@/lib/posts";
 import { notFound } from "next/navigation";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
@@ -140,6 +141,7 @@ export default async function ArticlePage({
 
             <DailyQuote />
             <Subscription />
+            <SubscriptionPopup delay={15000} />
         </main>
     );
 }

@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 
 interface CustomAudioPlayerProps {
     src?: string;
     title?: string;
-    // Standard audio props that might be passed by markdown renderer
     controls?: boolean;
     loop?: boolean;
     muted?: boolean;
@@ -21,14 +20,17 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     const [isMuted, setIsMuted] = useState(false);
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
 
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
 
         const updateTime = () => {
-            setCurrentTime(audio.currentTime);
-            setProgress((audio.currentTime / audio.duration) * 100);
+            if (!isDragging) {
+                setCurrentTime(audio.currentTime);
+                setProgress((audio.currentTime / audio.duration) * 100);
+            }
         };
 
         const updateDuration = () => {
@@ -50,7 +52,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
             audio.removeEventListener("loadedmetadata", updateDuration);
             audio.removeEventListener("ended", onEnded);
         };
-    }, []);
+    }, [isDragging]);
 
     const togglePlay = () => {
         if (!audioRef.current) return;
@@ -69,26 +71,80 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
         setIsMuted(!isMuted);
     };
 
-    const handleSeek = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-        if (!audioRef.current || !progressBarRef.current) return;
-
+    const calculateProgress = useCallback((clientX: number) => {
+        if (!progressBarRef.current) return 0;
         const rect = progressBarRef.current.getBoundingClientRect();
-        let clientX: number;
+        const clickPosition = (clientX - rect.left) / rect.width;
+        return Math.max(0, Math.min(100, clickPosition * 100));
+    }, []);
 
-        if ('touches' in e) {
-            clientX = e.touches[0].clientX;
-        } else {
-            clientX = e.clientX;
+    const seekToPosition = useCallback((progressPercent: number) => {
+        if (!audioRef.current || !duration) return;
+        const time = (progressPercent / 100) * duration;
+        audioRef.current.currentTime = time;
+        setCurrentTime(time);
+    }, [duration]);
+
+    // Mouse events for PC
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        setIsDragging(true);
+        const newProgress = calculateProgress(e.clientX);
+        setProgress(newProgress);
+        seekToPosition(newProgress);
+    };
+
+    const handleMouseMove = useCallback((e: MouseEvent) => {
+        if (!isDragging) return;
+        const newProgress = calculateProgress(e.clientX);
+        setProgress(newProgress);
+    }, [isDragging, calculateProgress]);
+
+    const handleMouseUp = useCallback((e: MouseEvent) => {
+        if (!isDragging) return;
+        const newProgress = calculateProgress(e.clientX);
+        seekToPosition(newProgress);
+        setIsDragging(false);
+    }, [isDragging, calculateProgress, seekToPosition]);
+
+    // Touch events for mobile
+    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+        setIsDragging(true);
+        const newProgress = calculateProgress(e.touches[0].clientX);
+        setProgress(newProgress);
+        seekToPosition(newProgress);
+    };
+
+    const handleTouchMove = useCallback((e: TouchEvent) => {
+        if (!isDragging) return;
+        const newProgress = calculateProgress(e.touches[0].clientX);
+        setProgress(newProgress);
+    }, [isDragging, calculateProgress]);
+
+    const handleTouchEnd = useCallback((e: TouchEvent) => {
+        if (!isDragging) return;
+        if (e.changedTouches.length > 0) {
+            const newProgress = calculateProgress(e.changedTouches[0].clientX);
+            seekToPosition(newProgress);
+        }
+        setIsDragging(false);
+    }, [isDragging, calculateProgress, seekToPosition]);
+
+    // Global event listeners for drag
+    useEffect(() => {
+        if (isDragging) {
+            window.addEventListener("mousemove", handleMouseMove);
+            window.addEventListener("mouseup", handleMouseUp);
+            window.addEventListener("touchmove", handleTouchMove);
+            window.addEventListener("touchend", handleTouchEnd);
         }
 
-        const clickPosition = (clientX - rect.left) / rect.width;
-        const clampedPosition = Math.max(0, Math.min(1, clickPosition));
-        const time = clampedPosition * duration;
-
-        audioRef.current.currentTime = time;
-        setProgress(clampedPosition * 100);
-        setCurrentTime(time);
-    };
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            window.removeEventListener("mouseup", handleMouseUp);
+            window.removeEventListener("touchmove", handleTouchMove);
+            window.removeEventListener("touchend", handleTouchEnd);
+        };
+    }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
     const formatTime = (time: number) => {
         if (isNaN(time)) return "0:00";
@@ -100,7 +156,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     if (!src) return null;
 
     return (
-        <div className="w-full my-6 bg-bg-secondary border border-border-subtle rounded-xl p-4 shadow-sm">
+        <div className="w-full my-6 bg-bg-secondary border border-border-subtle rounded-xl p-4 shadow-sm select-none">
             <audio ref={audioRef} src={src} preload="metadata" />
 
             {/* Title */}
@@ -110,25 +166,28 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
                 </p>
             )}
 
-            {/* Progress Bar - Full Width, Clickable */}
+            {/* Progress Bar - Full Width, Draggable */}
             <div
                 ref={progressBarRef}
                 className="relative w-full h-8 flex items-center cursor-pointer touch-none mb-3"
-                onClick={handleSeek}
-                onTouchStart={handleSeek}
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
             >
                 {/* Track Background */}
                 <div className="absolute inset-x-0 h-2 bg-border-subtle rounded-full">
                     {/* Progress Fill */}
                     <div
-                        className="h-full bg-accent-primary rounded-full transition-all duration-100"
-                        style={{ width: `${progress}%` }}
+                        className="h-full bg-accent-primary rounded-full"
+                        style={{ width: `${progress}%`, transition: isDragging ? 'none' : 'width 0.1s' }}
                     />
                 </div>
-                {/* Thumb/Handle */}
+                {/* Thumb/Handle - Always visible */}
                 <div
-                    className="absolute w-4 h-4 bg-accent-primary rounded-full shadow-md border-2 border-white"
-                    style={{ left: `calc(${progress}% - 8px)` }}
+                    className="absolute w-4 h-4 bg-accent-primary rounded-full shadow-md border-2 border-white pointer-events-none"
+                    style={{
+                        left: `calc(${progress}% - 8px)`,
+                        transition: isDragging ? 'none' : 'left 0.1s'
+                    }}
                 />
             </div>
 
