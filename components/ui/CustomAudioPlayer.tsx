@@ -15,9 +15,9 @@ interface CustomAudioPlayerProps {
 
 export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const progressBarRef = useRef<HTMLDivElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
@@ -69,11 +69,25 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
         setIsMuted(!isMuted);
     };
 
-    const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!audioRef.current) return;
-        const time = (parseFloat(e.target.value) / 100) * duration;
+    const handleSeek = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+        if (!audioRef.current || !progressBarRef.current) return;
+
+        const rect = progressBarRef.current.getBoundingClientRect();
+        let clientX: number;
+
+        if ('touches' in e) {
+            clientX = e.touches[0].clientX;
+        } else {
+            clientX = e.clientX;
+        }
+
+        const clickPosition = (clientX - rect.left) / rect.width;
+        const clampedPosition = Math.max(0, Math.min(1, clickPosition));
+        const time = clampedPosition * duration;
+
         audioRef.current.currentTime = time;
-        setProgress(parseFloat(e.target.value));
+        setProgress(clampedPosition * 100);
+        setCurrentTime(time);
     };
 
     const formatTime = (time: number) => {
@@ -86,50 +100,63 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     if (!src) return null;
 
     return (
-        <div className="w-full my-8 bg-bg-secondary border border-border-subtle rounded-xl p-4 flex items-center gap-4 shadow-sm group hover:border-accent-primary/30 transition-colors">
+        <div className="w-full my-6 bg-bg-secondary border border-border-subtle rounded-xl p-4 shadow-sm">
             <audio ref={audioRef} src={src} preload="metadata" />
 
-            <button
-                onClick={togglePlay}
-                className="w-12 h-12 bg-accent-primary text-white rounded-full flex items-center justify-center flex-shrink-0 hover:bg-accent-primary/90 transition-transform active:scale-95"
+            {/* Title */}
+            {title && (
+                <p className="text-sm font-semibold text-text-primary mb-3 line-clamp-2">
+                    {title}
+                </p>
+            )}
+
+            {/* Progress Bar - Full Width, Clickable */}
+            <div
+                ref={progressBarRef}
+                className="relative w-full h-8 flex items-center cursor-pointer touch-none mb-3"
+                onClick={handleSeek}
+                onTouchStart={handleSeek}
             >
-                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-            </button>
-
-            <div className="flex-1 space-y-1">
-                {title && <p className="text-xs font-semibold text-text-primary truncate">{title}</p>}
-
-                <div className="flex items-center gap-3">
-                    <span className="text-xs text-text-muted w-10 text-right font-mono">{formatTime(currentTime)}</span>
-
-                    <div className="relative flex-1 h-3 group/slider">
-                        <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={progress || 0}
-                            onChange={handleSeek}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        />
-                        <div className="absolute inset-y-0 left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-border-subtle rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-accent-primary transition-all duration-100"
-                                style={{ width: `${progress}%` }}
-                            />
-                        </div>
-                        <div
-                            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md transition-all duration-100 opacity-0 group-hover/slider:opacity-100"
-                            style={{ left: `${progress}%`, transform: 'translate(-50%, -50%)' }}
-                        />
-                    </div>
-
-                    <span className="text-xs text-text-muted w-10 font-mono">{formatTime(duration)}</span>
+                {/* Track Background */}
+                <div className="absolute inset-x-0 h-2 bg-border-subtle rounded-full">
+                    {/* Progress Fill */}
+                    <div
+                        className="h-full bg-accent-primary rounded-full transition-all duration-100"
+                        style={{ width: `${progress}%` }}
+                    />
                 </div>
+                {/* Thumb/Handle */}
+                <div
+                    className="absolute w-4 h-4 bg-accent-primary rounded-full shadow-md border-2 border-white"
+                    style={{ left: `calc(${progress}% - 8px)` }}
+                />
             </div>
 
-            <button onClick={toggleMute} className="text-text-muted hover:text-text-primary transition-colors p-2">
-                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </button>
+            {/* Controls Row */}
+            <div className="flex items-center gap-4">
+                {/* Play/Pause Button */}
+                <button
+                    onClick={togglePlay}
+                    className="w-12 h-12 bg-accent-primary text-white rounded-full flex items-center justify-center flex-shrink-0 hover:bg-accent-primary/90 transition-transform active:scale-95"
+                >
+                    {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+                </button>
+
+                {/* Time Display */}
+                <div className="flex-1 flex items-center justify-center gap-2">
+                    <span className="text-sm font-mono text-text-primary">{formatTime(currentTime)}</span>
+                    <span className="text-text-muted">/</span>
+                    <span className="text-sm font-mono text-text-muted">{formatTime(duration)}</span>
+                </div>
+
+                {/* Mute Button */}
+                <button
+                    onClick={toggleMute}
+                    className="w-10 h-10 flex items-center justify-center text-text-muted hover:text-text-primary transition-colors rounded-full hover:bg-bg-tertiary"
+                >
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </button>
+            </div>
         </div>
     );
 }
