@@ -29,6 +29,13 @@ export type Post = {
     metaDescription?: string | null;
 };
 
+// Helper function to format date nicely (date only, no time)
+function formatDate(dateInput: Date | string | null): string {
+    if (!dateInput) return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 // Mapper function to convert Prisma result to frontend Post type
 function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | null }): Post {
     return {
@@ -36,7 +43,7 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         slug: post.slug,
         title: post.title,
         subtitle: post.subtitle,
-        date: post.date ? String(post.date) : new Date().toISOString(),
+        date: formatDate(post.date),
         author: post.authorName || "Anonymous",
         authorName: post.authorName,
         authorId: post.authorId,

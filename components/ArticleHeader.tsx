@@ -72,24 +72,20 @@ export function ArticleHeader({
 
                 {/* Author section below image */}
                 <div className="bg-bg-primary px-4 py-3">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-bg-tertiary overflow-hidden relative border-2 border-border-subtle">
-                            <Image src={Assets.imgAuthorSarah} alt="Author" fill sizes="40px" className="object-cover" />
-                        </div>
-                        <div>
-                            <span
-                                className="block font-medium text-text-primary"
-                                style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)' }}
-                            >
-                                by {author}
-                            </span>
-                            <span
-                                className="block text-text-muted"
-                                style={{ fontSize: 'clamp(0.625rem, 2vw, 0.75rem)' }}
-                            >
-                                {date}
-                            </span>
-                        </div>
+                    <div className="flex items-center gap-2">
+                        <span
+                            className="font-medium text-text-primary"
+                            style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)' }}
+                        >
+                            by {author}
+                        </span>
+                        <span className="text-text-muted">•</span>
+                        <span
+                            className="text-text-muted"
+                            style={{ fontSize: 'clamp(0.625rem, 2vw, 0.75rem)' }}
+                        >
+                            {date}
+                        </span>
                     </div>
                 </div>
             </header>
@@ -142,29 +138,24 @@ export function ArticleHeader({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.3 }}
                             className="font-serif font-bold text-white leading-tight"
-                            style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)' }}
+                            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
                         >
                             {title}
                         </motion.h1>
 
-                        {/* Author Info */}
+                        {/* Author Info - No picture */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.5 }}
-                            className="flex items-center gap-4"
+                            className="flex items-center gap-2"
                         >
-                            <div className="w-12 h-12 rounded-full bg-white/10 overflow-hidden relative border-2 border-white/20">
-                                <Image src={Assets.imgAuthorSarah} alt="Author" fill sizes="48px" className="object-cover" />
-                            </div>
-                            <div>
-                                <span
-                                    className="block font-medium text-white"
-                                    style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
-                                >
-                                    {author}
-                                </span>
-                            </div>
+                            <span
+                                className="font-medium text-white"
+                                style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
+                            >
+                                by {author}
+                            </span>
                         </motion.div>
 
                         {/* Media Options - Read, Listen, Watch */}
