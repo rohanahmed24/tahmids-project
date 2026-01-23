@@ -166,12 +166,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
         <div className="w-full my-6 bg-[#F5F5F4] border border-[#E7E5E4] rounded-xl p-4 shadow-sm select-none">
             <audio ref={audioRef} src={src} preload="metadata" />
 
-            {/* Title */}
-            {title && (
-                <p className="text-sm font-semibold text-[#1C1917] mb-3 line-clamp-2">
-                    {title}
-                </p>
-            )}
+
 
             {/* Progress Bar - Full Width, Draggable */}
             <div
