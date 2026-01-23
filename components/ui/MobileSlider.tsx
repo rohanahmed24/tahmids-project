@@ -189,7 +189,7 @@ export function MobileSlider({
                             key={index}
                             onClick={() => scrollToIndex(index)}
                             className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
-                                ? "bg-accent w-6"
+                                ? "bg-accent scale-125"
                                 : "bg-white/30 hover:bg-white/50"
                                 }`}
                             aria-label={`Go to slide ${index + 1}`}
