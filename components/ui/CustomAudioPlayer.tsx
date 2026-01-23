@@ -108,14 +108,17 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
 
     // Touch events for mobile
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-        setIsDragging(true);
+        setIsDragging(true); // Start dragging
         const newProgress = calculateProgress(e.touches[0].clientX);
         setProgress(newProgress);
-        seekToPosition(newProgress);
+        // Important: Don't seek immediately on touch start if it prevents scrolling, 
+        // but here we want instant feedback.
     };
 
     const handleTouchMove = useCallback((e: TouchEvent) => {
         if (!isDragging) return;
+        // Prevent default browser scrolling when dragging the slider
+        e.preventDefault();
         const newProgress = calculateProgress(e.touches[0].clientX);
         setProgress(newProgress);
     }, [isDragging, calculateProgress]);
@@ -132,16 +135,17 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     // Global event listeners for drag
     useEffect(() => {
         if (isDragging) {
+            // Add non-passive listener for touchmove to prevent scroll
+            window.addEventListener("touchmove", handleTouchMove, { passive: false });
             window.addEventListener("mousemove", handleMouseMove);
             window.addEventListener("mouseup", handleMouseUp);
-            window.addEventListener("touchmove", handleTouchMove);
             window.addEventListener("touchend", handleTouchEnd);
         }
 
         return () => {
+            window.removeEventListener("touchmove", handleTouchMove);
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
-            window.removeEventListener("touchmove", handleTouchMove);
             window.removeEventListener("touchend", handleTouchEnd);
         };
     }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
@@ -155,13 +159,16 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
 
     if (!src) return null;
 
+    // Custom brown accent color
+    const accentColor = "#4A3428"; // Dark brown
+
     return (
-        <div className="w-full my-6 bg-bg-secondary border border-border-subtle rounded-xl p-4 shadow-sm select-none">
+        <div className="w-full my-6 bg-[#F5F5F4] border border-[#E7E5E4] rounded-xl p-4 shadow-sm select-none">
             <audio ref={audioRef} src={src} preload="metadata" />
 
             {/* Title */}
             {title && (
-                <p className="text-sm font-semibold text-text-primary mb-3 line-clamp-2">
+                <p className="text-sm font-semibold text-[#1C1917] mb-3 line-clamp-2">
                     {title}
                 </p>
             )}
@@ -174,18 +181,23 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
                 onTouchStart={handleTouchStart}
             >
                 {/* Track Background */}
-                <div className="absolute inset-x-0 h-2 bg-border-subtle rounded-full">
+                <div className="absolute inset-x-0 h-2 bg-[#D6D3D1] rounded-full overflow-hidden">
                     {/* Progress Fill */}
                     <div
-                        className="h-full bg-accent-primary rounded-full"
-                        style={{ width: `${progress}%`, transition: isDragging ? 'none' : 'width 0.1s' }}
+                        className="h-full rounded-full"
+                        style={{
+                            width: `${progress}%`,
+                            backgroundColor: accentColor,
+                            transition: isDragging ? 'none' : 'width 0.1s'
+                        }}
                     />
                 </div>
-                {/* Thumb/Handle - Always visible */}
+                {/* Thumb/Handle - Always visible, larger hit area */}
                 <div
-                    className="absolute w-4 h-4 bg-accent-primary rounded-full shadow-md border-2 border-white pointer-events-none"
+                    className="absolute w-5 h-5 rounded-full shadow-md border-2 border-white pointer-events-none z-10"
                     style={{
-                        left: `calc(${progress}% - 8px)`,
+                        left: `calc(${progress}% - 10px)`, // Center the larger thumb
+                        backgroundColor: accentColor,
                         transition: isDragging ? 'none' : 'left 0.1s'
                     }}
                 />
@@ -196,22 +208,23 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
                 {/* Play/Pause Button */}
                 <button
                     onClick={togglePlay}
-                    className="w-12 h-12 bg-accent-primary text-white rounded-full flex items-center justify-center flex-shrink-0 hover:bg-accent-primary/90 transition-transform active:scale-95"
+                    className="w-12 h-12 text-white rounded-full flex items-center justify-center flex-shrink-0 hover:opacity-90 transition-transform active:scale-95 shadow-md"
+                    style={{ backgroundColor: accentColor }}
                 >
                     {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
                 </button>
 
                 {/* Time Display */}
-                <div className="flex-1 flex items-center justify-center gap-2">
-                    <span className="text-sm font-mono text-text-primary">{formatTime(currentTime)}</span>
-                    <span className="text-text-muted">/</span>
-                    <span className="text-sm font-mono text-text-muted">{formatTime(duration)}</span>
+                <div className="flex-1 flex items-center justify-center gap-2 text-xs sm:text-sm font-mono text-[#57534E]">
+                    <span>{formatTime(currentTime)}</span>
+                    <span className="text-[#A8A29E]">/</span>
+                    <span>{formatTime(duration)}</span>
                 </div>
 
                 {/* Mute Button */}
                 <button
                     onClick={toggleMute}
-                    className="w-10 h-10 flex items-center justify-center text-text-muted hover:text-text-primary transition-colors rounded-full hover:bg-bg-tertiary"
+                    className="w-10 h-10 flex items-center justify-center text-[#57534E] hover:text-[#1C1917] transition-colors rounded-full hover:bg-[#E7E5E4]"
                 >
                     {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </button>
