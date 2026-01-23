@@ -67,7 +67,7 @@ export default async function ArticlePage({
                         {/* Video Player (Watch Mode) - or Generator if missing */}
                         {isWatchMode && (
                             <div className="mb-8">
-                                {post.videoUrl ? (
+                                {post.videoUrl && post.videoUrl.length > 5 ? (
                                     <ArticleVideoPlayer videoUrl={post.videoUrl} title={post.title} />
                                 ) : (
                                     <div className="aspect-video flex flex-col items-center justify-center bg-bg-secondary rounded-xl border border-border-subtle gap-4 p-8 text-center">
