@@ -88,7 +88,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
                             />
                             {/* Gradient Overlays */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                            <div className={`absolute inset-0 bg-gradient-to-r ${item.accent_color || 'from-blue-600/80 to-purple-600/80'} mix-blend-multiply opacity-60`} />
+                            <div className={`absolute inset-0 bg-gradient-to-r ${item.accent_color || 'from-blue-600/30 to-purple-600/30'} mix-blend-soft-light opacity-50`} />
                         </div>
                     ))}
                 </div>
