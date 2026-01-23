@@ -52,7 +52,7 @@ function FeaturedHorizontalSlider({ items }: { items: Post[] }) {
                                 <h3 className="font-serif leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary line-clamp-3 text-base">
                                     {item.title}
                                 </h3>
-                                <MediaOptions slug={item.slug} variant="compact" className="mt-2" />
+                                <MediaOptions slug={item.slug} hasVideo={!!item.videoUrl} variant="compact" className="mt-2" />
                             </div>
                         </Link>
                     ))}

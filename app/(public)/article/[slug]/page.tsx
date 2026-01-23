@@ -58,6 +58,7 @@ export default async function ArticlePage({
                         category={post.category}
                         coverImage={post.coverImage || undefined}
                         slug={post.slug}
+                        videoUrl={post.videoUrl}
                     />
                 </MotionWrapper>
 

@@ -6,11 +6,12 @@ import { BookOpen, Headphones, Play } from "lucide-react";
 
 interface MediaOptionsProps {
     slug: string;
+    hasVideo?: boolean;
     variant?: "default" | "compact" | "overlay" | "minimal" | "prominent";
     className?: string;
 }
 
-export function MediaOptions({ slug, variant = "default", className = "" }: MediaOptionsProps) {
+export function MediaOptions({ slug, hasVideo = false, variant = "default", className = "" }: MediaOptionsProps) {
     const router = useRouter();
 
     const options = [
@@ -26,12 +27,12 @@ export function MediaOptions({ slug, variant = "default", className = "" }: Medi
             icon: Headphones,
             href: `/article/${slug}?mode=listen#article-content`,
         },
-        {
+        ...(hasVideo ? [{
             id: "watch",
             label: "Watch",
             icon: Play,
             href: `/article/${slug}?mode=watch#article-content`,
-        },
+        }] : []),
     ];
 
     const handleClick = (e: React.MouseEvent, href: string) => {
