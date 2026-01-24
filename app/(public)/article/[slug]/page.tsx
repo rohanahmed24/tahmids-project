@@ -48,7 +48,7 @@ export default async function ArticlePage({
     // Let's use multi_replace.
     // Aborting this specific tool call to use multi_replace for clean import + usage update.
     return (
-        <main className="min-h-screen bg-bg-primary selection:bg-bg-inverse selection:text-text-inverse">
+        <main className="min-h-screen bg-bg-primary selection:bg-bg-inverse selection:text-text-inverse w-full overflow-x-hidden">
             <article className="pb-20">
                 <MotionWrapper type="fade-in" delay={0.1}>
                     <ArticleHeader

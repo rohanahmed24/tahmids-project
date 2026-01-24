@@ -21,20 +21,31 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
+    const isDraggingRef = useRef(false);
 
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
 
+        // Force update duration if already loaded
+        if (audio.duration && !isNaN(audio.duration) && audio.duration !== Infinity) {
+            setDuration(audio.duration);
+        }
+
         const updateTime = () => {
-            if (!isDragging) {
+            // Check REF immediately, not state
+            if (!isDraggingRef.current) {
                 setCurrentTime(audio.currentTime);
-                setProgress((audio.currentTime / audio.duration) * 100);
+                if (audio.duration) {
+                    setProgress((audio.currentTime / audio.duration) * 100);
+                }
             }
         };
 
         const updateDuration = () => {
-            setDuration(audio.duration);
+            if (audio.duration && !isNaN(audio.duration) && audio.duration !== Infinity) {
+                setDuration(audio.duration);
+            }
         };
 
         const onEnded = () => {
@@ -44,6 +55,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
         };
 
         audio.addEventListener("timeupdate", updateTime);
+        // We also add onLoadedMetadata to the element, but keeping listener for safety
         audio.addEventListener("loadedmetadata", updateDuration);
         audio.addEventListener("ended", onEnded);
 
@@ -52,7 +64,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
             audio.removeEventListener("loadedmetadata", updateDuration);
             audio.removeEventListener("ended", onEnded);
         };
-    }, [isDragging]);
+    }, []); // Empty dependency array - logic relies on refs/closures
 
     const togglePlay = () => {
         if (!audioRef.current) return;
@@ -81,77 +93,55 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     const seekToPosition = useCallback((progressPercent: number) => {
         if (!audioRef.current || !duration) return;
         const time = (progressPercent / 100) * duration;
-        audioRef.current.currentTime = time;
-        setCurrentTime(time);
+        if (!isNaN(time) && isFinite(time)) {
+            audioRef.current.currentTime = time;
+            setCurrentTime(time);
+        }
     }, [duration]);
 
-    // Mouse events for PC
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-        setIsDragging(true);
-        const newProgress = calculateProgress(e.clientX);
-        setProgress(newProgress);
-        seekToPosition(newProgress);
-    };
-
-    const handleMouseMove = useCallback((e: MouseEvent) => {
-        if (!isDragging) return;
-        const newProgress = calculateProgress(e.clientX);
-        setProgress(newProgress);
-    }, [isDragging, calculateProgress]);
-
-    const handleMouseUp = useCallback((e: MouseEvent) => {
-        if (!isDragging) return;
-        const newProgress = calculateProgress(e.clientX);
-        seekToPosition(newProgress);
-        setIsDragging(false);
-    }, [isDragging, calculateProgress, seekToPosition]);
-
-    // Touch events for mobile
-    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-        setIsDragging(true); // Start dragging
-        const newProgress = calculateProgress(e.touches[0].clientX);
-        setProgress(newProgress);
-        // Important: Don't seek immediately on touch start if it prevents scrolling, 
-        // but here we want instant feedback.
-    };
-
-    const handleTouchMove = useCallback((e: TouchEvent) => {
-        if (!isDragging) return;
-        // Prevent default browser scrolling when dragging the slider
+    // Unified Pointer Events
+    const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+        // Prevent default to avoid selection/scroll actions
         e.preventDefault();
-        const newProgress = calculateProgress(e.touches[0].clientX);
+
+        // Update REF state immediately to block timeupdates
+        isDraggingRef.current = true;
+        setIsDragging(true);
+
+        if (progressBarRef.current) {
+            progressBarRef.current.setPointerCapture(e.pointerId);
+        }
+
+        const newProgress = calculateProgress(e.clientX);
         setProgress(newProgress);
-    }, [isDragging, calculateProgress]);
+        // Optional: Seek immediately on click
+        // seekToPosition(newProgress); 
+    };
 
-    const handleTouchEnd = useCallback((e: TouchEvent) => {
-        if (!isDragging) return;
-        if (e.changedTouches.length > 0) {
-            const newProgress = calculateProgress(e.changedTouches[0].clientX);
-            seekToPosition(newProgress);
-        }
+    const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!isDraggingRef.current) return;
+
+        e.preventDefault();
+        const newProgress = calculateProgress(e.clientX);
+        setProgress(newProgress);
+    };
+
+    const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (!isDraggingRef.current) return;
+
+        isDraggingRef.current = false;
         setIsDragging(false);
-    }, [isDragging, calculateProgress, seekToPosition]);
 
-    // Global event listeners for drag
-    useEffect(() => {
-        if (isDragging) {
-            // Add non-passive listener for touchmove to prevent scroll
-            window.addEventListener("touchmove", handleTouchMove, { passive: false });
-            window.addEventListener("mousemove", handleMouseMove);
-            window.addEventListener("mouseup", handleMouseUp);
-            window.addEventListener("touchend", handleTouchEnd);
+        if (progressBarRef.current) {
+            progressBarRef.current.releasePointerCapture(e.pointerId);
         }
 
-        return () => {
-            window.removeEventListener("touchmove", handleTouchMove);
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
-            window.removeEventListener("touchend", handleTouchEnd);
-        };
-    }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
+        const newProgress = calculateProgress(e.clientX);
+        seekToPosition(newProgress);
+    };
 
     const formatTime = (time: number) => {
-        if (isNaN(time)) return "0:00";
+        if (isNaN(time) || !isFinite(time)) return "0:00";
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60);
         return `${minutes}:${seconds.toString().padStart(2, "0")}`;
@@ -163,20 +153,30 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     const accentColor = "#4A3428"; // Dark brown
 
     return (
-        <div className="w-full my-6 bg-[#F5F5F4] border border-[#E7E5E4] rounded-xl p-4 shadow-sm select-none">
-            <audio ref={audioRef} src={src} preload="metadata" />
-
-
+        <div className="w-full max-w-full overflow-hidden my-6 bg-[#F5F5F4] border border-[#E7E5E4] rounded-xl p-4 shadow-sm select-none">
+            <audio
+                ref={audioRef}
+                src={src}
+                preload="metadata"
+                onLoadedMetadata={(e) => {
+                    const audio = e.currentTarget;
+                    if (audio.duration && !isNaN(audio.duration) && audio.duration !== Infinity) {
+                        setDuration(audio.duration);
+                    }
+                }}
+            />
 
             {/* Progress Bar - Full Width, Draggable */}
             <div
                 ref={progressBarRef}
-                className="relative w-full h-8 flex items-center cursor-pointer touch-none mb-3"
-                onMouseDown={handleMouseDown}
-                onTouchStart={handleTouchStart}
+                className="relative w-full h-12 flex items-center cursor-pointer mb-3 touch-none" // touch-none is CRITICAL for pointer events
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerLeave={handlePointerUp} // Safety fallback
             >
-                {/* Track Background */}
-                <div className="absolute inset-x-0 h-2 bg-[#D6D3D1] rounded-full overflow-hidden">
+                {/* Track Background - Visual Only */}
+                <div className="absolute inset-x-0 h-2 bg-[#D6D3D1] rounded-full overflow-hidden pointer-events-none">
                     {/* Progress Fill */}
                     <div
                         className="h-full rounded-full"
@@ -187,11 +187,11 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
                         }}
                     />
                 </div>
-                {/* Thumb/Handle - Always visible, larger hit area */}
+                {/* Thumb/Handle - Visual Only */}
                 <div
                     className="absolute w-5 h-5 rounded-full shadow-md border-2 border-white pointer-events-none z-10"
                     style={{
-                        left: `calc(${progress}% - 10px)`, // Center the larger thumb
+                        left: `calc(${progress}% - 10px)`,
                         backgroundColor: accentColor,
                         transition: isDragging ? 'none' : 'left 0.1s'
                     }}

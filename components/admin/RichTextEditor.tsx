@@ -7,7 +7,9 @@ import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
+import { uploadImage } from "@/actions/media";
 import {
     Bold,
     Italic,
@@ -38,6 +40,9 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ content, onChange, placeholder = "Start writing your article..." }: RichTextEditorProps) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isUploading, setIsUploading] = useState(false);
+
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -75,6 +80,31 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
         },
     });
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !editor) return;
+
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const result = await uploadImage(formData);
+            if (result.success && result.url) {
+                editor.chain().focus().setImage({ src: result.url }).run();
+                toast.success("Image uploaded successfully");
+            } else {
+                toast.error(result.error || "Failed to upload image");
+            }
+        } catch (error) {
+            toast.error("An unexpected error occurred");
+        } finally {
+            setIsUploading(false);
+            // Reset input so same file can be selected again
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
     // Sync external content changes
     useEffect(() => {
         if (editor && content !== editor.getHTML()) {
@@ -83,11 +113,8 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
     }, [content, editor]);
 
     const addImage = useCallback(() => {
-        const url = window.prompt("Enter image URL:");
-        if (url && editor) {
-            editor.chain().focus().setImage({ src: url }).run();
-        }
-    }, [editor]);
+        fileInputRef.current?.click();
+    }, []);
 
     const addLink = useCallback(() => {
         const url = window.prompt("Enter link URL:");
@@ -132,6 +159,14 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
 
     return (
         <div className="border border-border-subtle rounded-xl overflow-hidden bg-bg-secondary">
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={isUploading}
+            />
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-1 p-2 border-b border-border-subtle bg-bg-tertiary/50">
                 {/* Undo/Redo */}

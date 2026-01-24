@@ -244,18 +244,39 @@ body {
    GPU-accelerated CSS animations
    ========================================= */
 @keyframes bubble1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(50px, -30px) scale(1.1); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(50px, -30px) scale(1.1);
+  }
 }
 
 @keyframes bubble2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-50px, 40px) scale(1.05); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-50px, 40px) scale(1.05);
+  }
 }
 
 @keyframes bubble3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(30px, 30px) scale(1.1); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(30px, 30px) scale(1.1);
+  }
 }
 
 /* =========================================
@@ -355,6 +376,7 @@ body {
 
 /* Enhanced touch interactions */
 @media (hover: none) and (pointer: coarse) {
+
   /* Touch device specific styles */
   .touch-action-pan {
     touch-action: pan-y pan-x;
@@ -414,18 +436,17 @@ body {
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
 
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--bg-tertiary) 25%,
-    var(--bg-secondary) 50%,
-    var(--bg-tertiary) 75%
-  );
+  background: linear-gradient(90deg,
+      var(--bg-tertiary) 25%,
+      var(--bg-secondary) 50%,
+      var(--bg-tertiary) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -443,6 +464,7 @@ body {
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -516,6 +538,7 @@ body {
 
 /* Dashboard specific responsive adjustments */
 @media (max-width: 640px) {
+
   /* Tighter spacing on small screens */
   .dashboard-section {
     margin-bottom: 1rem;
@@ -529,6 +552,7 @@ body {
 }
 
 @media (min-width: 641px) and (max-width: 1024px) {
+
   /* Tablet optimizations */
   .tablet-grid-2 {
     grid-template-columns: repeat(2, 1fr);
@@ -551,6 +575,7 @@ body {
     transform: scale(0.8);
     opacity: 1;
   }
+
   100% {
     transform: scale(2);
     opacity: 0;

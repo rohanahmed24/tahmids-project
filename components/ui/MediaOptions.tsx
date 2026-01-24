@@ -52,7 +52,7 @@ export function MediaOptions({ slug, hasVideo = false, variant = "default", clas
     // Prominent variant - Labeled icons for mobile hero/sliders
     if (variant === "prominent") {
         return (
-            <div className={`flex items-center gap-3 ${className}`}>
+            <div className={`flex items-center gap-3 flex-wrap ${className}`}>
                 {options.map((option) => (
                     <motion.button
                         key={option.id}

@@ -61,7 +61,7 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
-                            className="font-serif font-bold text-white leading-tight mb-3"
+                            className="font-serif font-bold text-white leading-tight mb-3 break-words hyphens-auto"
                             style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)' }}
                         >
                             {title}
