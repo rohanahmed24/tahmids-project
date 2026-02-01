@@ -41,6 +41,7 @@ interface EditorProps {
         published?: boolean;
         authorName?: string;
         metaDescription?: string;
+        backlinks?: string[];
     };
     action: (formData: FormData) => Promise<void>;
 }
@@ -60,6 +61,7 @@ export default function Editor({ initialData, action }: EditorProps) {
     const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl || "");
     const [isUploadingAudio, setIsUploadingAudio] = useState(false);
     const [metaDescription, setMetaDescription] = useState(initialData?.metaDescription || "");
+    const [backlinks, setBacklinks] = useState(initialData?.backlinks ? initialData.backlinks.join('\n') : "");
 
     // Premium Features State
     const [isFocusMode, setIsFocusMode] = useState(false);
@@ -620,6 +622,19 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm resize-none"
                                 />
                                 <p className="text-[10px] text-text-muted">{metaDescription.length}/160 characters</p>
+                            </div>
+
+                            <div className="space-y-2 pt-4 border-t border-gray-800">
+                                <label className="text-sm font-medium text-text-secondary">Backlinks (one per line)</label>
+                                <textarea
+                                    name="backlinks"
+                                    value={backlinks}
+                                    onChange={(e) => setBacklinks(e.target.value)}
+                                    placeholder="https://example.com&#10;https://another-site.com"
+                                    rows={4}
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm resize-none font-mono text-xs"
+                                />
+                                <p className="text-[10px] text-text-muted">External links to reference. Each URL on a new line.</p>
                             </div>
                         </div>
 

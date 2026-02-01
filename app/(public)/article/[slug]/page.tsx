@@ -130,6 +130,23 @@ export default async function ArticlePage({
                                 )}
                             </div>
                         </ArticleContent>
+
+                        {post.backlinks && post.backlinks.length > 0 && (
+                            <div className="mt-12 p-6 bg-bg-secondary rounded-xl border border-border-primary">
+                                <h3 className="text-xl font-serif font-bold text-text-primary mb-4">References</h3>
+                                <ul className="space-y-3">
+                                    {post.backlinks.map((url, index) => (
+                                        <li key={index} className="flex items-start">
+                                            <span className="inline-block w-6 h-6 rounded-full bg-accent-main/20 text-accent-main text-xs flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">{index + 1}</span>
+                                            <a href={url} target="_blank" rel="nofollow noopener noreferrer" className="text-accent-main hover:underline break-all">
+                                                {url}
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <p className="text-sm text-text-secondary mt-4">These external links provide additional context and sources.</p>
+                            </div>
+                        )}
                     </div>
 
                     <aside className="w-full lg:w-[350px] 2xl:w-[400px] flex-shrink-0">

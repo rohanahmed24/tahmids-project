@@ -27,6 +27,7 @@ export type Post = {
     updated_at: string;
     authorImage?: string | null;
     metaDescription?: string | null;
+    backlinks?: string[] | null;
 };
 
 // Helper function to format date nicely (date only, no time)
@@ -61,6 +62,7 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         created_at: post.createdAt.toISOString(),
         updated_at: post.updatedAt.toISOString(),
         authorImage: post.author?.image,
+        backlinks: post.backlinks as string[] | null,
         metaDescription: post.metaDescription
     };
 }
