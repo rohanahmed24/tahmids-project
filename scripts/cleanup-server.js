@@ -17,6 +17,9 @@ conn.on('ready', () => {
         // 1. Check high CPU processes (top 5)
         'echo "=== High CPU Processes ==="',
         'ps aux --sort=-%cpu | head -6',
+        // Check for known cryptocurrency miner processes
+        'echo "=== Cryptocurrency miner processes ==="',
+        'ps aux | grep -E "(minerd|xmrig|cpuminer|nicehash|mining)" | grep -v grep || echo "No known miner processes found"',
         // 2. Check for unknown cron jobs
         'echo "=== Cron jobs for root ==="',
         'crontab -l 2>/dev/null || echo "No cron jobs for root"',
