@@ -95,7 +95,7 @@ export async function createPost(formData: FormData) {
                 featured,
                 published,
                 metaDescription,
-                backlinks
+                backlinks: backlinks as Prisma.InputJsonValue
             }
         });
     } catch (error) {
@@ -186,7 +186,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
                 featured,
                 published,
                 metaDescription,
-                backlinks
+                backlinks: backlinks as Prisma.InputJsonValue
             }
         });
 

@@ -6,7 +6,8 @@ const config = {
     port: 22,
     username: 'root',
     password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
+    readyTimeout: 60000,
+    debug: console.log,
 };
 
 conn.on('ready', () => {
