@@ -2,13 +2,7 @@ const { Client } = require('ssh2');
 const fs = require('fs');
 const path = require('path');
 
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 console.log('📤 Uploading missing CSS files...');
 
@@ -29,7 +23,7 @@ conn.on('ready', () => {
             conn.end();
             return;
         }
-        
+
         let uploaded = 0;
         const uploadNext = (index) => {
             if (index >= localFiles.length) {
@@ -44,11 +38,11 @@ conn.on('ready', () => {
                 });
                 return;
             }
-            
+
             const filename = localFiles[index];
             const localPath = path.join(localCssDir, filename);
             const remotePath = path.join(remoteCssDir, filename).replace(/\\/g, '/');
-            
+
             console.log(`Uploading ${filename}...`);
             sftp.fastPut(localPath, remotePath, {}, (err) => {
                 if (err) {
@@ -60,7 +54,7 @@ conn.on('ready', () => {
                 uploadNext(index + 1);
             });
         };
-        
+
         // Ensure remote directory exists
         conn.exec(`mkdir -p ${remoteCssDir}`, (err) => {
             if (err) console.error('mkdir error:', err);

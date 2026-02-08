@@ -3,13 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const conn = new Client();
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 // 1. Read the fixed local seed file
 const localSeedPath = path.join(__dirname, '../prisma/seed.js');

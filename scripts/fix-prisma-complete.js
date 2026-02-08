@@ -1,19 +1,13 @@
 const { Client } = require('ssh2');
 
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 console.log('Fixing Prisma completely - regenerating in standalone directory...');
 
 const conn = new Client();
 conn.on('ready', () => {
     console.log('SSH connection successful!');
-    
+
     const commands = [
         'cd ~/tahmids-project',
         'echo "Stopping service..."',
@@ -38,7 +32,7 @@ conn.on('ready', () => {
             conn.end();
             return;
         }
-        
+
         stream.on('close', (code, signal) => {
             console.log('Complete Prisma fix completed with code', code);
             conn.end();

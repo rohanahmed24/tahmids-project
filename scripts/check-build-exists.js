@@ -1,13 +1,7 @@
 const { Client } = require('ssh2');
 
 const conn = new Client();
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 10000,
-};
+const config = require('./connection-config');
 
 conn.on('ready', () => {
     console.log('SSH connected');
@@ -21,7 +15,7 @@ conn.on('ready', () => {
         'echo ""; echo "=== package.json ==="',
         'cat /root/tahmids-project/package.json | grep -E "next|react" || echo "Cannot read package.json"'
     ].join('; ');
-    
+
     conn.exec(commands, (err, stream) => {
         if (err) {
             console.error('Exec error:', err);

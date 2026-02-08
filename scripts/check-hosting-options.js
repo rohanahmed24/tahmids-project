@@ -1,19 +1,13 @@
 const { Client } = require('ssh2');
 
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 console.log('Checking hosting provider options and alternative ports...');
 
 const conn = new Client();
 conn.on('ready', () => {
     console.log('SSH connection successful!');
-    
+
     const commands = [
         'echo "=== Checking if we can use port 80 or 443 ==="',
         'echo "Current listening ports:"',
@@ -35,7 +29,7 @@ conn.on('ready', () => {
             conn.end();
             return;
         }
-        
+
         stream.on('close', (code, signal) => {
             console.log('Hosting options check completed with code', code);
             conn.end();

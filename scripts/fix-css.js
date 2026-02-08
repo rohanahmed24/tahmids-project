@@ -1,13 +1,7 @@
 const { Client } = require('ssh2');
 
 const conn = new Client();
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 console.log('🔧 Fixing CSS serving...');
 
@@ -47,7 +41,7 @@ conn.on('ready', () => {
         'echo "--- Test CSS access ---"',
         'curl -s -o /dev/null -w "CSS %{http_code}" http://localhost:3001/_next/static/css/24a582c4c1344ecf.css',
     ].join('\n');
-    
+
     conn.exec(commands, (err, stream) => {
         if (err) {
             console.error('Exec error:', err);

@@ -1,17 +1,11 @@
 const { Client } = require('ssh2');
 
 const conn = new Client();
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 30000,
-};
+const config = require('./connection-config');
 
 conn.on('ready', () => {
     console.log('✅ SSH Connected');
-    
+
     const commands = [
         'cd /root/tahmids-project',
         'echo "📁 Syncing public files to standalone build..."',

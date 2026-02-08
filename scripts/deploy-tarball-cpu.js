@@ -2,13 +2,7 @@ const { Client } = require('ssh2');
 const fs = require('fs');
 const path = require('path');
 
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 const localTarball = path.join(__dirname, '..', 'deployment.tar.gz');
 const remoteTarball = '/tmp/deployment.tar.gz';
@@ -27,7 +21,7 @@ const conn = new Client();
 
 conn.on('ready', () => {
     console.log('✅ SSH connected');
-    
+
     const steps = [
         { name: 'Upload tarball', fn: uploadTarball },
         { name: 'Stop PM2', fn: stopPm2 },
@@ -37,11 +31,11 @@ conn.on('ready', () => {
         { name: 'Restart PM2', fn: restartPm2 },
         { name: 'Verify deployment', fn: verifyDeployment },
     ];
-    
+
     let stepIndex = 0;
     function nextStep(err) {
         if (err) {
-            console.error('❌ Deployment failed at step:', steps[stepIndex-1]?.name, err);
+            console.error('❌ Deployment failed at step:', steps[stepIndex - 1]?.name, err);
             conn.end();
             process.exit(1);
         }
@@ -51,14 +45,14 @@ conn.on('ready', () => {
             return;
         }
         const step = steps[stepIndex];
-        console.log(`\n🔧 Step ${stepIndex+1}/${steps.length}: ${step.name}`);
+        console.log(`\n🔧 Step ${stepIndex + 1}/${steps.length}: ${step.name}`);
         stepIndex++;
         // Log CPU usage before starting step
         logCpuUsage(() => {
             step.fn(nextStep);
         });
     }
-    
+
     function uploadTarball(callback) {
         console.log('📤 Uploading tarball...');
         conn.sftp((err, sftp) => {
@@ -76,14 +70,14 @@ conn.on('ready', () => {
             });
         });
     }
-    
+
     function stopPm2(callback) {
         console.log('⏸️ Stopping PM2...');
         conn.exec('cd ' + remoteProject + ' && pm2 stop wisdomia 2>/dev/null || true', (err, stream) => {
             stream.on('close', () => callback());
         });
     }
-    
+
     function backupStandalone(callback) {
         console.log('💾 Backing up existing standalone...');
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -92,7 +86,7 @@ conn.on('ready', () => {
             stream.on('close', () => callback());
         });
     }
-    
+
     function extractTarball(callback) {
         console.log('📦 Extracting tarball...');
         const cmd = `cd ${remoteProject} && tar -xzf ${remoteTarball} --strip-components=1`;
@@ -111,7 +105,7 @@ conn.on('ready', () => {
             });
         });
     }
-    
+
     function installDeps(callback) {
         console.log('📦 Installing dependencies...');
         const cmd = `cd ${remoteProject} && npm install --production --no-audit --no-fund`;
@@ -129,7 +123,7 @@ conn.on('ready', () => {
             });
         });
     }
-    
+
     function restartPm2(callback) {
         console.log('🔄 Restarting PM2...');
         const cmd = `cd ${remoteProject} && PORT=3001 pm2 start .next/standalone/server.js --name wisdomia && pm2 save`;
@@ -148,7 +142,7 @@ conn.on('ready', () => {
             });
         });
     }
-    
+
     function verifyDeployment(callback) {
         console.log('🧪 Verifying deployment...');
         const cmd = `sleep 3 && curl -s -o /dev/null -w "HTTP %{http_code}" http://localhost:3001`;
@@ -166,7 +160,7 @@ conn.on('ready', () => {
             });
         });
     }
-    
+
     function logCpuUsage(callback) {
         console.log('📊 Checking CPU usage...');
         const cmd = `top -b -n1 | head -5 | grep -E 'Cpu\\(s\\)|%Cpu' || echo 'CPU info not available'`;
@@ -184,10 +178,10 @@ conn.on('ready', () => {
             });
         });
     }
-    
+
     // Start steps
     nextStep();
-    
+
 }).on('error', (err) => {
     console.error('❌ Connection error:', err);
 }).connect(config);

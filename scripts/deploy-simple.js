@@ -1,20 +1,14 @@
 const { Client } = require('ssh2');
 const fs = require('fs');
 
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 console.log('Connecting to server to restart service...');
 
 const conn = new Client();
 conn.on('ready', () => {
     console.log('SSH connection successful!');
-    
+
     const commands = [
         'cd ~/tahmids-project',
         'echo "Restarting wisdomia service..."',
@@ -33,7 +27,7 @@ conn.on('ready', () => {
             conn.end();
             return;
         }
-        
+
         stream.on('close', (code, signal) => {
             console.log('Restart completed with code', code);
             conn.end();

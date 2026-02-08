@@ -1,19 +1,13 @@
 const { Client } = require('ssh2');
 
 const conn = new Client();
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 conn.on('ready', () => {
     console.log('SSH connected');
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupFile = `/tmp/wisdomia-db-backup-${timestamp}.sql.gz`;
-    
+
     // Extract DATABASE_URL, use it directly with pg_dump
     const commands = [
         'cd /root/tahmids-project',
@@ -25,7 +19,7 @@ conn.on('ready', () => {
         'echo "Checking backup size..."',
         'gunzip -c ' + backupFile + ' | wc -l'
     ].join(' && ');
-    
+
     conn.exec(commands, (err, stream) => {
         if (err) {
             console.error('Exec error:', err);

@@ -1,13 +1,7 @@
 const { Client } = require('ssh2');
 
 const conn = new Client();
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 console.log('📁 Listing images...');
 
@@ -32,7 +26,7 @@ conn.on('ready', () => {
         'echo "=== Check if imgs folder is readable ==="',
         'ls -la .next/standalone/public/imgs/',
     ].join('\n');
-    
+
     conn.exec(commands, (err, stream) => {
         if (err) {
             console.error('Exec error:', err);

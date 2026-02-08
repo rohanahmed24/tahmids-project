@@ -1,13 +1,7 @@
 const { Client } = require('ssh2');
 
 const conn = new Client();
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 console.log('🔄 Syncing static assets...');
 
@@ -47,7 +41,7 @@ conn.on('ready', () => {
         'top -bn1 | head -5',
         'echo "=== Done ==="',
     ].join('\n');
-    
+
     conn.exec(commands, (err, stream) => {
         if (err) {
             console.error('Exec error:', err);

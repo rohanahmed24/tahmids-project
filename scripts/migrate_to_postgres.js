@@ -2,13 +2,7 @@ const { Client } = require('ssh2');
 const crypto = require('crypto');
 
 const conn = new Client();
-const config = {
-    host: '76.13.5.200',
-    port: 22,
-    username: 'root',
-    password: '.6DKb@iGrt2qqM7',
-    readyTimeout: 20000,
-};
+const config = require('./connection-config');
 
 const DB_USER = 'wisdomia_user';
 const DB_NAME = 'project_1';
