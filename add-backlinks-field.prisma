@@ -1,0 +1,43 @@
+// Add backlinks field to Post model
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Post {
+  id            Int       @id @default(autoincrement())
+  slug          String   @unique
+  title         String
+  subtitle      String?
+  date          String?
+  authorName   String?
+  category      String?
+  content       String?
+  coverImage    String?
+  videoUrl     String?
+  audioUrl      String?
+  views         Int       @default(0)
+  featured      Boolean   @default(false)
+  topicSlug    String?
+  accentColor  String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  excerpt       String?
+  metaDescription String?
+  backlinks      Json?
+  published     Boolean   @default(true)
+  authorId     Int?     @map("author_id")
+  author       User?    @relation(fields: [authorId], references: [id])
+
+  @@index([slug])
+  @@index([date])
+  @@index([category])
+  @@index([featured])
+  @@index([published])
+  @@index([authorId])
+}

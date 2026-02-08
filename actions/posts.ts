@@ -55,7 +55,7 @@ export async function createPost(formData: FormData) {
     const published = formData.get("published") !== "false";
     const metaDescription = (formData.get("metaDescription") as string) || undefined;
     const backlinksRaw = formData.get("backlinks") as string;
-    const backlinks = backlinksRaw ? backlinksRaw.split('\n').filter(url => url.trim()).map(url => url.trim()) : undefined;
+    const backlinks = backlinksRaw?.trim() ? backlinksRaw.split('\n').filter(url => url.trim()).map(url => url.trim()) : undefined;
 
     const excerpt = content ? content.substring(0, 200) + "..." : "";
 
@@ -157,7 +157,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     const published = formData.get("published") !== "false";
     const metaDescription = (formData.get("metaDescription") as string) || undefined;
     const backlinksRaw = formData.get("backlinks") as string;
-    const backlinks = backlinksRaw ? backlinksRaw.split('\n').filter(url => url.trim()).map(url => url.trim()) : undefined;
+    const backlinks = backlinksRaw?.trim() ? backlinksRaw.split('\n').filter(url => url.trim()).map(url => url.trim()) : undefined;
 
     const excerpt = content ? content.substring(0, 200) + "..." : "";
 

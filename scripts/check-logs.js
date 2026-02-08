@@ -5,22 +5,41 @@ const config = {
     port: 22,
     username: 'root',
     password: '.6DKb@iGrt2qqM7',
+    readyTimeout: 20000,
 };
+
+console.log('Checking application logs...');
 
 const conn = new Client();
 conn.on('ready', () => {
-    console.log('Client :: ready');
-    // Fetch last 50 lines of error log and output log
-    const cmd = 'grep -C 5 "Error" ~/.pm2/logs/wisdomia-error.log | tail -n 50 && echo "---TAIL ERROR---" && tail -n 50 ~/.pm2/logs/wisdomia-error.log';
+    console.log('SSH connection successful!');
+    
+    const commands = [
+        'cd ~/tahmids-project',
+        'echo "=== PM2 Status ==="',
+        'pm2 status',
+        'echo "=== Application Logs (last 20 lines) ==="',
+        'pm2 logs wisdomia --lines 20 --nostream',
+        'echo "=== Check if port 3001 is listening ==="',
+        'netstat -tlnp | grep :3001 || ss -tlnp | grep :3001',
+        'echo "=== Check process ==="',
+        'ps aux | grep node'
+    ].join(' && ');
 
-    conn.exec(cmd, (err, stream) => {
-        if (err) throw err;
+    conn.exec(commands, (err, stream) => {
+        if (err) {
+            console.error('Execution error:', err);
+            conn.end();
+            return;
+        }
+        
         stream.on('close', (code, signal) => {
+            console.log('Log check completed with code', code);
             conn.end();
         }).on('data', (data) => {
             console.log(data.toString());
         }).stderr.on('data', (data) => {
-            console.log('STDERR: ' + data);
+            console.log('STDERR:', data.toString());
         });
     });
 }).on('error', (err) => {

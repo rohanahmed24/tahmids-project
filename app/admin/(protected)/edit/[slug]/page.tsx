@@ -43,7 +43,8 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                         featured: post.featured,
                         published: post.published ?? true,
                         authorName: post.authorName || undefined,
-                        metaDescription: post.metaDescription || undefined
+                        metaDescription: post.metaDescription || undefined,
+                        backlinks: post.backlinks || []
                     }}
                     action={updateAction}
                 />

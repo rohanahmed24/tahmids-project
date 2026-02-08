@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { DevToolsBlocker } from "@/components/DevToolsBlocker";
 import { SessionProvider } from "next-auth/react";
 import { SessionSync } from "@/components/SessionSync";
 import { getGoogleVerificationTag } from "@/actions/seo";
@@ -90,7 +89,6 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <DevToolsBlocker />
             <SessionSync />
             {children}
             <Toaster richColors position="top-center" />

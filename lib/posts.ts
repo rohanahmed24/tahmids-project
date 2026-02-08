@@ -39,6 +39,26 @@ function formatDate(dateInput: Date | string | null): string {
 
 // Mapper function to convert Prisma result to frontend Post type
 function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | null }): Post {
+    // Properly handle backlinks JSON field - handle both array and string formats
+    let backlinks: string[] | null = null;
+    if (post.backlinks !== null && post.backlinks !== undefined) {
+        if (Array.isArray(post.backlinks)) {
+            // Already an array - ensure all elements are strings
+            backlinks = post.backlinks.map(item => String(item));
+        } else if (typeof post.backlinks === 'string') {
+            // String containing JSON - parse it
+            try {
+                const parsed = JSON.parse(post.backlinks);
+                if (Array.isArray(parsed)) {
+                    backlinks = parsed.map(item => String(item));
+                }
+            } catch (e) {
+                console.error('Failed to parse backlinks JSON:', post.backlinks, e);
+                backlinks = null;
+            }
+        }
+    }
+
     return {
         id: post.id,
         slug: post.slug,
@@ -62,7 +82,7 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         created_at: post.createdAt.toISOString(),
         updated_at: post.updatedAt.toISOString(),
         authorImage: post.author?.image,
-        backlinks: post.backlinks as string[] | null,
+        backlinks: backlinks,
         metaDescription: post.metaDescription
     };
 }
