@@ -1,5 +1,19 @@
 import type { NextConfig } from "next";
 
+let uploadsPattern: { protocol: string; hostname: string; port?: string } | null = null;
+if (process.env.NEXT_PUBLIC_UPLOADS_BASE_URL) {
+  try {
+    const parsed = new URL(process.env.NEXT_PUBLIC_UPLOADS_BASE_URL);
+    uploadsPattern = {
+      protocol: parsed.protocol.replace(":", ""),
+      hostname: parsed.hostname,
+      port: parsed.port || undefined,
+    };
+  } catch {
+    uploadsPattern = null;
+  }
+}
+
 const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
@@ -76,7 +90,17 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Avoid local optimizer fetch failures during dev when using remote uploads.
+    unoptimized: process.env.NODE_ENV === "development",
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'thewisdomia.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'thewisdomia.com',
+      },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
@@ -85,9 +109,13 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'ui-avatars.com',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      ...(uploadsPattern ? [uploadsPattern] : []),
     ],
   },
 };
 
 export default nextConfig;
-

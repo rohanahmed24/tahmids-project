@@ -18,6 +18,27 @@ export type User = {
     featuredOrder?: number;
 };
 
+const uploadsBaseUrl = process.env.NEXT_PUBLIC_UPLOADS_BASE_URL?.replace(/\/$/, "");
+
+function normalizeImageUrl(url?: string | null): string | null | undefined {
+    if (!url) return url;
+    if (url.startsWith("/imgs/uploads/") && uploadsBaseUrl) {
+        return `${uploadsBaseUrl}${url}`;
+    }
+    if (url.startsWith("https://ui-avatars.com/") || url.startsWith("http://ui-avatars.com/")) {
+        try {
+            const parsed = new URL(url);
+            if (!parsed.searchParams.get("format")) {
+                parsed.searchParams.set("format", "png");
+            }
+            return parsed.toString();
+        } catch {
+            return url;
+        }
+    }
+    return url;
+}
+
 function mapPrismaUser(user: PrismaUser & { _count?: { posts: number } }): User {
     return {
         id: user.id,
@@ -26,7 +47,7 @@ function mapPrismaUser(user: PrismaUser & { _count?: { posts: number } }): User 
         role: user.role as 'user' | 'admin',
         created_at: user.createdAt.toISOString(),
         updated_at: user.updatedAt.toISOString(),
-        image: user.image,
+        image: normalizeImageUrl(user.image),
         email_verified: user.emailVerified?.toISOString() || null,
         article_count: user._count?.posts || 0,
         title: user.title,

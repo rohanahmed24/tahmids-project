@@ -18,30 +18,58 @@ export async function GET(
 
         const filePath = path.join(process.cwd(), "public/imgs/uploads", filename);
 
-        const file = await readFile(filePath);
+        try {
+            const file = await readFile(filePath);
 
-        // Determine content type
-        const ext = path.extname(filename).toLowerCase();
-        const contentTypes: Record<string, string> = {
-            ".jpg": "image/jpeg",
-            ".jpeg": "image/jpeg",
-            ".png": "image/png",
-            ".gif": "image/gif",
-            ".webp": "image/webp",
-            ".svg": "image/svg+xml",
-            ".mp3": "audio/mpeg",
-            ".wav": "audio/wav",
-            ".mp4": "video/mp4",
-        };
+            // Determine content type
+            const ext = path.extname(filename).toLowerCase();
+            const contentTypes: Record<string, string> = {
+                ".jpg": "image/jpeg",
+                ".jpeg": "image/jpeg",
+                ".png": "image/png",
+                ".gif": "image/gif",
+                ".webp": "image/webp",
+                ".svg": "image/svg+xml",
+                ".mp3": "audio/mpeg",
+                ".wav": "audio/wav",
+                ".mp4": "video/mp4",
+            };
 
-        const contentType = contentTypes[ext] || "application/octet-stream";
+            const contentType = contentTypes[ext] || "application/octet-stream";
 
-        return new NextResponse(file, {
-            headers: {
-                "Content-Type": contentType,
-                "Cache-Control": "public, max-age=31536000, immutable",
-            },
-        });
+            return new NextResponse(file, {
+                headers: {
+                    "Content-Type": contentType,
+                    "Cache-Control": "public, max-age=31536000, immutable",
+                },
+            });
+        } catch {
+            const remoteBase = process.env.NEXT_PUBLIC_UPLOADS_BASE_URL?.replace(/\/$/, "");
+            if (remoteBase) {
+                try {
+                    const requestUrl = new URL(request.url);
+                    const remoteUrl = new URL(remoteBase);
+                    if (remoteUrl.host !== requestUrl.host) {
+                        const encodedPath = pathSegments.map(encodeURIComponent).join("/");
+                        const fetchUrl = `${remoteBase}/imgs/uploads/${encodedPath}`;
+                        const remoteRes = await fetch(fetchUrl);
+                        if (remoteRes.ok) {
+                            const arrayBuffer = await remoteRes.arrayBuffer();
+                            return new NextResponse(Buffer.from(arrayBuffer), {
+                                headers: {
+                                    "Content-Type": remoteRes.headers.get("content-type") || "application/octet-stream",
+                                    "Cache-Control": "public, max-age=3600",
+                                },
+                            });
+                        }
+                    }
+                } catch {
+                    // fall through
+                }
+            }
+
+            return NextResponse.json({ error: "File not found" }, { status: 404 });
+        }
     } catch (error) {
         return NextResponse.json({ error: "File not found" }, { status: 404 });
     }

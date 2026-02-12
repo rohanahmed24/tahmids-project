@@ -37,6 +37,27 @@ function formatDate(dateInput: Date | string | null): string {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+const uploadsBaseUrl = process.env.NEXT_PUBLIC_UPLOADS_BASE_URL?.replace(/\/$/, "");
+
+function normalizeImageUrl(url?: string | null): string | null | undefined {
+    if (!url) return url;
+    if (url.startsWith("/imgs/uploads/") && uploadsBaseUrl) {
+        return `${uploadsBaseUrl}${url}`;
+    }
+    if (url.startsWith("https://ui-avatars.com/") || url.startsWith("http://ui-avatars.com/")) {
+        try {
+            const parsed = new URL(url);
+            if (!parsed.searchParams.get("format")) {
+                parsed.searchParams.set("format", "png");
+            }
+            return parsed.toString();
+        } catch {
+            return url;
+        }
+    }
+    return url;
+}
+
 // Mapper function to convert Prisma result to frontend Post type
 function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | null }): Post {
     // Properly handle backlinks JSON field - handle both array and string formats
@@ -71,7 +92,7 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         category: post.category || "Uncategorized",
         content: post.content,
         excerpt: post.excerpt,
-        coverImage: post.coverImage,
+        coverImage: normalizeImageUrl(post.coverImage),
         videoUrl: post.videoUrl,
         audioUrl: post.audioUrl,
         views: post.views || 0,
@@ -81,7 +102,7 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         accent_color: post.accentColor,
         created_at: post.createdAt.toISOString(),
         updated_at: post.updatedAt.toISOString(),
-        authorImage: post.author?.image,
+        authorImage: normalizeImageUrl(post.author?.image || undefined),
         backlinks: backlinks,
         metaDescription: post.metaDescription
     };
