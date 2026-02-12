@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { MobileSlider } from "@/components/ui/MobileSlider";
 import { useEffect, useState } from "react";
-import { getFeaturedWriters, User } from "@/lib/users";
+import type { User } from "@/lib/users";
 import { Assets } from "@/lib/assets";
 
 export function AuthorsGrid() {
@@ -11,17 +11,28 @@ export function AuthorsGrid() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        let isMounted = true;
         async function loadAuthors() {
             try {
-                const data = await getFeaturedWriters();
-                setAuthors(data);
+                const res = await fetch("/api/authors/featured");
+                if (!res.ok) throw new Error("Failed to fetch authors");
+                const data = (await res.json()) as { authors: User[] };
+                if (isMounted) {
+                    setAuthors(data.authors || []);
+                }
             } catch (error) {
                 console.error("Failed to load authors", error);
+                if (isMounted) {
+                    setAuthors([]);
+                }
             } finally {
-                setIsLoading(false);
+                if (isMounted) setIsLoading(false);
             }
         }
         loadAuthors();
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     if (isLoading) return null; // Or a skeleton

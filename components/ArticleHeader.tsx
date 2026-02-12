@@ -52,8 +52,7 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.4 }}
-                            className="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full font-bold uppercase tracking-widest text-white mb-3"
-                            style={{ fontSize: 'clamp(0.5rem, 2vw, 0.625rem)' }}
+                            className="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full font-bold uppercase tracking-widest text-white mb-3 text-[clamp(0.5rem,2vw,0.625rem)]"
                         >
                             {category}
                         </motion.span>
@@ -61,8 +60,7 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
-                            className="font-serif font-bold text-white leading-tight mb-3 break-words hyphens-auto"
-                            style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)' }}
+                            className="font-serif font-bold text-white leading-tight mb-3 break-words hyphens-auto text-[clamp(1.5rem,6vw,2rem)]"
                         >
                             {title}
                         </motion.h1>
@@ -76,15 +74,13 @@ export function ArticleHeader({
                 <div className="bg-bg-primary px-4 py-3">
                     <div className="flex items-center gap-2">
                         <span
-                            className="font-medium text-text-primary"
-                            style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)' }}
+                            className="font-medium text-text-primary text-[clamp(0.75rem,2.5vw,0.875rem)]"
                         >
                             by {author}
                         </span>
                         <span className="text-text-muted">•</span>
                         <span
-                            className="text-text-muted"
-                            style={{ fontSize: 'clamp(0.625rem, 2vw, 0.75rem)' }}
+                            className="text-text-muted text-[clamp(0.625rem,2vw,0.75rem)]"
                         >
                             {date}
                         </span>
@@ -122,14 +118,12 @@ export function ArticleHeader({
                             className="flex items-center gap-4"
                         >
                             <span
-                                className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full font-bold uppercase tracking-[0.2em] text-white"
-                                style={{ fontSize: 'clamp(0.625rem, 1vw, 0.75rem)' }}
+                                className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full font-bold uppercase tracking-[0.2em] text-white text-[clamp(0.625rem,1vw,0.75rem)]"
                             >
                                 {category}
                             </span>
                             <span
-                                className="text-white/60"
-                                style={{ fontSize: 'clamp(0.75rem, 1vw, 0.875rem)' }}
+                                className="text-white/60 text-[clamp(0.75rem,1vw,0.875rem)]"
                             >
                                 {date}
                             </span>
@@ -139,8 +133,7 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.3 }}
-                            className="font-serif font-bold text-white leading-tight"
-                            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
+                            className="font-serif font-bold text-white leading-tight text-[clamp(2rem,4vw,3rem)]"
                         >
                             {title}
                         </motion.h1>
@@ -153,8 +146,7 @@ export function ArticleHeader({
                             className="flex items-center gap-2"
                         >
                             <span
-                                className="font-medium text-white"
-                                style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
+                                className="font-medium text-white text-[clamp(0.875rem,1.2vw,1rem)]"
                             >
                                 by {author}
                             </span>

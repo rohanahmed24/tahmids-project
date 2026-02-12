@@ -3,17 +3,15 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { getAuthorByName } from "@/lib/authors";
-import { getRelatedPosts } from "@/lib/posts";
+import type { Post } from "@/lib/posts";
 
 interface ArticleSidebarProps {
-    authorName: string;
-    category: string;
-    currentSlug: string;
+    post: Post;
+    relatedPosts: Post[];
 }
 
-export async function ArticleSidebar({ authorName, category, currentSlug }: ArticleSidebarProps) {
-    const author = getAuthorByName(authorName);
-    const relatedPosts = await getRelatedPosts(category, currentSlug, 4);
+export async function ArticleSidebar({ post, relatedPosts }: ArticleSidebarProps) {
+    const author = getAuthorByName(post.authorName || post.author);
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -93,4 +91,3 @@ export async function ArticleSidebar({ authorName, category, currentSlug }: Arti
         </aside>
     );
 }
-

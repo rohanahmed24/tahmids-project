@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { MobileSlider } from "@/components/ui/MobileSlider";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { useState, useEffect } from "react";
-import { getPostsByCategory, getHotTopics, Post } from "@/lib/posts";
+import type { Post } from "@/lib/posts";
 import { Assets } from "@/lib/assets";
 
 interface StoriesGridProps {
@@ -24,19 +24,16 @@ export function StoriesGrid({ category }: StoriesGridProps) {
         const fetchStories = async () => {
             setLoading(true);
             try {
-                let data: Post[] = [];
-                if (category) {
-                    // Clean category name to match DB (e.g. "Technology & AI" -> "Technology")
-                    // Actually, for now let's try direct match, and if empty, maybe try mapped?
-                    // User wants strict matching.
-                    data = await getPostsByCategory(category, 8);
-                } else {
-                    // Default to hot topics if no category
-                    data = await getHotTopics(8);
-                }
-                setStories(data);
+                const params = new URLSearchParams();
+                if (category) params.set("category", category);
+                params.set("limit", "8");
+                const res = await fetch(`/api/stories?${params.toString()}`);
+                if (!res.ok) throw new Error("Failed to fetch stories");
+                const data = (await res.json()) as { stories: Post[] };
+                setStories(data.stories || []);
             } catch (error) {
                 console.error("Failed to fetch stories", error);
+                setStories([]);
             } finally {
                 setLoading(false);
             }
