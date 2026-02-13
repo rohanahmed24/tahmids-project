@@ -7,7 +7,7 @@ import { BacklinksSection } from "@/components/BacklinksSection";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
 
 interface ArticlePageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {

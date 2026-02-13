@@ -1,14 +1,19 @@
 import type { NextConfig } from "next";
 
-let uploadsPattern: { protocol: string; hostname: string; port?: string } | null = null;
+type RemotePattern = NonNullable<NonNullable<NextConfig["images"]>["remotePatterns"]>[number];
+
+let uploadsPattern: RemotePattern | null = null;
 if (process.env.NEXT_PUBLIC_UPLOADS_BASE_URL) {
   try {
     const parsed = new URL(process.env.NEXT_PUBLIC_UPLOADS_BASE_URL);
-    uploadsPattern = {
-      protocol: parsed.protocol.replace(":", ""),
-      hostname: parsed.hostname,
-      port: parsed.port || undefined,
-    };
+    const protocol = parsed.protocol.replace(":", "");
+    if (protocol === "http" || protocol === "https") {
+      uploadsPattern = {
+        protocol,
+        hostname: parsed.hostname,
+        ...(parsed.port ? { port: parsed.port } : {}),
+      };
+    }
   } catch {
     uploadsPattern = null;
   }
