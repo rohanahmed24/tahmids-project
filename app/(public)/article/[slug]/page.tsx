@@ -21,7 +21,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const relatedPosts = await getRelatedPosts(post.category, post.slug, 4);
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <div className="min-h-screen bg-bg-primary overflow-x-clip">
       {/* Article Header */}
       <ArticleHeader
         title={post.title}
