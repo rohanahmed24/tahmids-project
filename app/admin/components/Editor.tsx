@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import {
     Image as ImageIcon,
@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { BASE_CATEGORIES, categoryToSlug } from "@/lib/categories";
 
 interface EditorProps {
     initialData?: {
@@ -44,16 +45,16 @@ interface EditorProps {
         backlinks?: string[];
     };
     action: (formData: FormData) => Promise<void>;
+    categoryOptions?: string[];
 }
 
-export default function Editor({ initialData, action }: EditorProps) {
+export default function Editor({ initialData, action, categoryOptions = [] }: EditorProps) {
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const [title, setTitle] = useState(initialData?.title || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [content, setContent] = useState(initialData?.content || "");
     const [coverImage, setCoverImage] = useState(initialData?.coverImage || "");
     const [category, setCategory] = useState(initialData?.category || "Technology");
-    const [topicSlug, setTopicSlug] = useState(initialData?.topic_slug || "");
     const [published, setPublished] = useState(initialData?.published ?? true);
     const [authorName, setAuthorName] = useState(initialData?.authorName || "");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,6 +74,23 @@ export default function Editor({ initialData, action }: EditorProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioFileInputRef = useRef<HTMLInputElement>(null);
+
+    const availableCategories = useMemo(() => {
+        const unique = new Set<string>();
+        for (const item of [...BASE_CATEGORIES, ...categoryOptions]) {
+            const normalized = item.trim();
+            if (!normalized) continue;
+            unique.add(normalized);
+        }
+        if (initialData?.category?.trim()) {
+            unique.add(initialData.category.trim());
+        }
+        return Array.from(unique);
+    }, [categoryOptions, initialData?.category]);
+
+    const knownCategories = useMemo(() => new Set(availableCategories), [availableCategories]);
+    const categorySelectValue = knownCategories.has(category.trim()) ? category.trim() : "__custom__";
+    const computedTopicSlug = useMemo(() => categoryToSlug(category), [category]);
 
     // Initial Auto-save Recovery
     useEffect(() => {
@@ -523,38 +541,55 @@ export default function Editor({ initialData, action }: EditorProps) {
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-text-secondary">Category</label>
+                                <input type="hidden" name="category" value={category} />
                                 <select
-                                    name="category"
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
+                                    value={categorySelectValue}
+                                    onChange={(e) => {
+                                        const next = e.target.value;
+                                        if (next === "__custom__") {
+                                            if (knownCategories.has(category.trim())) {
+                                                setCategory("");
+                                            }
+                                            return;
+                                        }
+                                        setCategory(next);
+                                    }}
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-sm text-text-primary"
                                 >
-                                    <option value="Technology">Technology</option>
-                                    <option value="Philosophy">Philosophy</option>
-                                    <option value="History">History</option>
-                                    <option value="Culture">Culture</option>
-                                    <option value="Science">Science</option>
-                                    <option value="Art">Art</option>
-                                    <option value="Politics">Politics</option>
-                                    <option value="Mystery">Mystery</option>
-                                    <option value="Crime">Crime</option>
-                                    <option value="News">News</option>
-                                    <option value="Business">Business</option>
-                                    <option value="Health">Health</option>
-                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="" disabled>Select a category</option>
+                                    {availableCategories.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                    <option value="__custom__">Custom category...</option>
                                 </select>
+                                {categorySelectValue === "__custom__" && (
+                                    <input
+                                        type="text"
+                                        value={category}
+                                        onChange={(e) => setCategory(e.target.value)}
+                                        placeholder="Type new category"
+                                        className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-sm text-text-primary"
+                                        required
+                                    />
+                                )}
+                                <p className="text-[10px] text-text-muted">Select an existing category or create a new one.</p>
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-text-secondary">Topic Slug</label>
                                 <input
-                                    type="text"
+                                    type="hidden"
                                     name="topic_slug"
-                                    value={topicSlug}
-                                    onChange={(e) => setTopicSlug(e.target.value)}
-                                    placeholder="e.g. artificial-intelligence"
+                                    value={computedTopicSlug}
+                                />
+                                <input
+                                    type="text"
+                                    value={computedTopicSlug}
+                                    readOnly
+                                    placeholder="auto-generated from category"
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-sm text-text-primary"
                                 />
+                                <p className="text-[10px] text-text-muted">Auto-generated to match the selected category.</p>
                             </div>
 
                             <div className="space-y-2">

@@ -4,6 +4,7 @@ import { createPost } from "@/actions/posts";
 import Editor from "@/app/admin/components/Editor";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { getCategoryOptions } from "@/lib/posts";
 
 export default async function WritePage() {
     const session = await getAdminSession();
@@ -12,6 +13,8 @@ export default async function WritePage() {
     if (!session || !isAdmin) {
         redirect("/signin");
     }
+
+    const categoryOptions = await getCategoryOptions();
 
     return (
         <div className="max-w-[1600px] mx-auto p-6 space-y-8">
@@ -35,7 +38,7 @@ export default async function WritePage() {
 
             {/* Editor */}
             <div className="bg-bg-secondary rounded-xl border border-border-primary overflow-hidden">
-                <Editor action={createPost} />
+                <Editor action={createPost} categoryOptions={categoryOptions} />
             </div>
         </div>
     );

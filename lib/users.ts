@@ -18,12 +18,12 @@ export type User = {
     featuredOrder?: number;
 };
 
-const uploadsBaseUrl = process.env.NEXT_PUBLIC_UPLOADS_BASE_URL?.replace(/\/$/, "");
-
 function normalizeImageUrl(url?: string | null): string | null | undefined {
     if (!url) return url;
-    if (url.startsWith("/imgs/uploads/") && uploadsBaseUrl) {
-        return `${uploadsBaseUrl}${url}`;
+    // Keep upload paths local so newly uploaded local files resolve correctly.
+    // Missing local files are already handled by /api/uploads fallback logic.
+    if (url.startsWith("/imgs/uploads/")) {
+        return url;
     }
     if (url.startsWith("https://ui-avatars.com/") || url.startsWith("http://ui-avatars.com/")) {
         try {

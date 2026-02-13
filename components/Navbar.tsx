@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useSession, signOut } from "next-auth/react";
-import { getNavbarLinks } from "@/actions/navbar";
+import { getMenuCategories } from "@/actions/categories";
 
 export default function Navbar() {
     const { data: session, status } = useSession();
@@ -16,16 +16,16 @@ export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const [navbarLinks, setNavbarLinks] = useState<{ id: number; label: string; href: string }[]>([]);
+    const [sectionLinks, setSectionLinks] = useState<{ name: string; href: string }[]>([]);
 
     useEffect(() => {
-        const fetchNav = async () => {
-            const result = await getNavbarLinks();
+        const fetchSections = async () => {
+            const result = await getMenuCategories();
             if (result.success && result.links) {
-                setNavbarLinks(result.links);
+                setSectionLinks(result.links);
             }
         };
-        fetchNav();
+        fetchSections();
     }, []);
 
     // Text color logic: 
@@ -171,24 +171,25 @@ export default function Navbar() {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-y-6 gap-x-4">
-                                    {navbarLinks.length > 0 ? (
-                                        navbarLinks.map((item) => (
+                                    {sectionLinks.length > 0 ? (
+                                        sectionLinks.map((item) => (
                                             <Link
-                                                key={item.id}
+                                                key={item.href}
                                                 href={item.href}
                                                 onClick={() => setIsMenuOpen(false)}
                                                 className="text-lg font-sans text-text-primary hover:text-accent transition-colors"
                                             >
-                                                {item.label}
+                                                {item.name}
                                             </Link>
                                         ))
                                     ) : (
                                         [
-                                            { name: "Politics", href: "/topics/politics" },
                                             { name: "Technology", href: "/topics/technology" },
-                                            { name: "Science", href: "/topics/science" },
+                                            { name: "Design", href: "/topics/design" },
                                             { name: "Culture", href: "/topics/culture" },
-                                            { name: "About", href: "/about" },
+                                            { name: "Business", href: "/topics/business" },
+                                            { name: "Self", href: "/topics/self" },
+                                            { name: "Politics", href: "/topics/politics" },
                                         ].map((item) => (
                                             <Link
                                                 key={item.name}
