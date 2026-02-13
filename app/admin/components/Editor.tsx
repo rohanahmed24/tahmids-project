@@ -41,6 +41,8 @@ interface EditorProps {
         featured?: boolean;
         published?: boolean;
         authorName?: string;
+        translatorName?: string;
+        editorName?: string;
         metaDescription?: string;
         backlinks?: string[];
     };
@@ -57,6 +59,8 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const [category, setCategory] = useState(initialData?.category || "Technology");
     const [published, setPublished] = useState(initialData?.published ?? true);
     const [authorName, setAuthorName] = useState(initialData?.authorName || "");
+    const [translatorName, setTranslatorName] = useState(initialData?.translatorName || "");
+    const [editorName, setEditorName] = useState(initialData?.editorName || "");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.coverImage || null);
     const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl || "");
@@ -395,7 +399,9 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         formData.set("published", String(published));
-        if (authorName) formData.set("authorName", authorName);
+        formData.set("authorName", authorName);
+        formData.set("translatorName", translatorName);
+        formData.set("editorName", editorName);
         // Ensure other states are set if not controlled inputs (they are mostly named inputs)
         handleSubmit(formData);
     };
@@ -633,7 +639,7 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                             </div>
 
                             <div className="space-y-2 pt-4 border-t border-gray-800">
-                                <label className="text-sm font-medium text-text-secondary">Author Name</label>
+                                <label className="text-sm font-medium text-text-secondary">Writer Name</label>
                                 <input
                                     type="text"
                                     name="authorName"
@@ -643,6 +649,30 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
                                 />
                                 <p className="text-[10px] text-text-muted">Leave empty to use your profile name.</p>
+                            </div>
+
+                            <div className="space-y-2 pt-4 border-t border-gray-800">
+                                <label className="text-sm font-medium text-text-secondary">Translator Name</label>
+                                <input
+                                    type="text"
+                                    name="translatorName"
+                                    value={translatorName}
+                                    onChange={(e) => setTranslatorName(e.target.value)}
+                                    placeholder="e.g. Ayesha Rahman"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                            </div>
+
+                            <div className="space-y-2 pt-4 border-t border-gray-800">
+                                <label className="text-sm font-medium text-text-secondary">Editor Name</label>
+                                <input
+                                    type="text"
+                                    name="editorName"
+                                    value={editorName}
+                                    onChange={(e) => setEditorName(e.target.value)}
+                                    placeholder="e.g. Editorial Team"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
                             </div>
 
                             <div className="space-y-2 pt-4 border-t border-gray-800">

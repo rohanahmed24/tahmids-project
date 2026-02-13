@@ -50,7 +50,9 @@ export async function createPost(formData: FormData) {
     if (!category) {
         throw new Error("Category is required");
     }
-    const authorName = (formData.get("authorName") as string) || session.name;
+    const authorName = ((formData.get("authorName") as string) || "").trim() || session.name;
+    const translatorName = ((formData.get("translatorName") as string) || "").trim() || undefined;
+    const editorName = ((formData.get("editorName") as string) || "").trim() || undefined;
     const videoUrl = (formData.get("videoUrl") as string) || undefined;
     const audioUrl = (formData.get("audioUrl") as string) || undefined;
     const subtitle = (formData.get("subtitle") as string) || undefined;
@@ -88,6 +90,8 @@ export async function createPost(formData: FormData) {
                 subtitle,
                 date,
                 authorName,
+                translatorName,
+                editorName,
                 authorId: user?.id,
                 category,
                 content,
@@ -173,6 +177,9 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     }
     const videoUrl = (formData.get("videoUrl") as string) || undefined;
     const audioUrl = (formData.get("audioUrl") as string) || undefined;
+    const authorName = ((formData.get("authorName") as string) || "").trim() || null;
+    const translatorName = ((formData.get("translatorName") as string) || "").trim() || null;
+    const editorName = ((formData.get("editorName") as string) || "").trim() || null;
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = categoryToSlug(category) || undefined;
     const accent_color = (formData.get("accent_color") as string) || "#3B82F6";
@@ -203,6 +210,9 @@ export async function updatePost(originalSlug: string, formData: FormData) {
             data: {
                 title,
                 subtitle,
+                authorName,
+                translatorName,
+                editorName,
                 category,
                 content,
                 excerpt,

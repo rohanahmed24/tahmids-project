@@ -46,6 +46,8 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                         featured: post.featured,
                         published: post.published ?? true,
                         authorName: post.authorName || undefined,
+                        translatorName: post.translatorName || undefined,
+                        editorName: post.editorName || undefined,
                         metaDescription: post.metaDescription || undefined,
                         backlinks: post.backlinks || []
                     }}

@@ -8,6 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useSession, signOut } from "next-auth/react";
 import { getMenuCategories } from "@/actions/categories";
+import { BASE_CATEGORIES, categoryToSlug } from "@/lib/categories";
 
 export default function Navbar() {
     const { data: session, status } = useSession();
@@ -183,14 +184,10 @@ export default function Navbar() {
                                             </Link>
                                         ))
                                     ) : (
-                                        [
-                                            { name: "Technology", href: "/topics/technology" },
-                                            { name: "Design", href: "/topics/design" },
-                                            { name: "Culture", href: "/topics/culture" },
-                                            { name: "Business", href: "/topics/business" },
-                                            { name: "Self", href: "/topics/self" },
-                                            { name: "Politics", href: "/topics/politics" },
-                                        ].map((item) => (
+                                        BASE_CATEGORIES.map((name) => ({
+                                            name,
+                                            href: `/topics/${categoryToSlug(name)}`,
+                                        })).map((item) => (
                                             <Link
                                                 key={item.name}
                                                 href={item.href}

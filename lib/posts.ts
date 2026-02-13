@@ -17,6 +17,8 @@ export type Post = {
     date: string;
     author: string;
     authorName?: string | null;
+    translatorName?: string | null;
+    editorName?: string | null;
     authorId?: number | null;
     category: string;
     content?: string | null;
@@ -102,6 +104,8 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         date: formatDate(post.date),
         author: post.authorName || "Anonymous",
         authorName: post.authorName,
+        translatorName: post.translatorName,
+        editorName: post.editorName,
         authorId: post.authorId,
         category: normalizedCategory,
         content: post.content,

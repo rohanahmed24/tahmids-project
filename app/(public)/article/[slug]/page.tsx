@@ -26,6 +26,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <ArticleHeader
         title={post.title}
         author={post.author}
+        translatorName={post.translatorName}
+        editorName={post.editorName}
         date={post.date}
         category={post.category}
         subtitle={post.subtitle || undefined}

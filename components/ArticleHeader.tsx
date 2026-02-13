@@ -8,6 +8,8 @@ import { MediaOptions } from "@/components/ui/MediaOptions";
 interface ArticleHeaderProps {
     title?: string;
     author?: string;
+    translatorName?: string | null;
+    editorName?: string | null;
     date?: string;
     category?: string;
     subtitle?: string;
@@ -19,6 +21,8 @@ interface ArticleHeaderProps {
 export function ArticleHeader({
     title = "The Art of Digital Silence",
     author = "Sarah Jenkins",
+    translatorName,
+    editorName,
     date = "Oct 24, 2024",
     category = "Design",
     coverImage,
@@ -27,6 +31,12 @@ export function ArticleHeader({
 }: ArticleHeaderProps) {
     const { scrollY } = useScroll();
     const y = useTransform(scrollY, [0, 500], [0, 150]);
+    const cleanTranslatorName = translatorName?.trim();
+    const cleanEditorName = editorName?.trim();
+    const creditItems = [
+        cleanEditorName ? `Edited by ${cleanEditorName}` : null,
+        cleanTranslatorName ? `Translated by ${cleanTranslatorName}` : null,
+    ].filter((item): item is string => Boolean(item));
 
     // Use coverImage if provided, otherwise fallback to default
     const heroImage = coverImage || Assets.imgArticleHero;
@@ -72,17 +82,24 @@ export function ArticleHeader({
 
                 {/* Author section below image */}
                 <div className="bg-bg-primary px-4 py-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span
                             className="font-medium text-text-primary text-[clamp(0.75rem,2.5vw,0.875rem)]"
                         >
                             by {author}
                         </span>
-                        <span className="text-text-muted">•</span>
+                        {creditItems.map((item) => (
+                            <span
+                                key={item}
+                                className="text-text-muted text-[clamp(0.625rem,2vw,0.75rem)]"
+                            >
+                                • {item}
+                            </span>
+                        ))}
                         <span
                             className="text-text-muted text-[clamp(0.625rem,2vw,0.75rem)]"
                         >
-                            {date}
+                            • {date}
                         </span>
                     </div>
                 </div>
@@ -143,13 +160,19 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.5 }}
-                            className="flex items-center gap-2"
+                            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[clamp(0.75rem,1vw,0.875rem)]"
                         >
                             <span
                                 className="font-medium text-white text-[clamp(0.875rem,1.2vw,1rem)]"
                             >
                                 by {author}
                             </span>
+                            {creditItems.map((item) => (
+                                <span key={item} className="text-white/75">
+                                    • {item}
+                                </span>
+                            ))}
+                            <span className="text-white/60">• {date}</span>
                         </motion.div>
 
                         {/* Media Options - Read, Listen, Watch */}
