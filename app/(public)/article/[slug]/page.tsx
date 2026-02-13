@@ -4,6 +4,7 @@ import { ArticleHeader } from "@/components/ArticleHeader";
 import { ArticleContent } from "@/components/ArticleContent";
 import { ArticleSidebar } from "@/components/ArticleSidebar";
 import { BacklinksSection } from "@/components/BacklinksSection";
+import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
 
 interface ArticlePageProps {
   params: { slug: string };
@@ -38,6 +39,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
           {/* Article Content */}
           <div className="space-y-8">
+            {post.content && (
+              <ArticleAudioPlayer title={post.title} content={post.content} />
+            )}
+
             <ArticleContent>
               {post.content && (
                 <div 
