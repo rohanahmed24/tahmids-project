@@ -49,3 +49,7 @@ next-env.d.ts
 
 # User uploaded files
 /public/imgs/uploads/
+
+# DB backups
+*.dump
+*.sql
