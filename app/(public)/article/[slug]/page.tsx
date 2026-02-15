@@ -6,6 +6,7 @@ import { ArticleSidebar } from "@/components/ArticleSidebar";
 import { BacklinksSection } from "@/components/BacklinksSection";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
 import { getCurrentLocale } from "@/lib/locale";
+import { Assets } from "@/lib/assets";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -96,7 +97,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
       type: "article",
       publishedTime: post.date,
       authors: [post.author],
-      images: post.coverImage ? [post.coverImage] : [],
+      images: [post.coverImage || Assets.imgPlaceholderImage],
     },
   };
 }

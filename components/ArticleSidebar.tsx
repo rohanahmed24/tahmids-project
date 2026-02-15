@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 import { getAuthorByName } from "@/lib/authors";
 import type { Post } from "@/lib/posts";
@@ -53,14 +52,6 @@ export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: Arti
                         ))}
                     </div>
                 )}
-                <div className="flex gap-2">
-                    <button className="flex-1 py-3 border border-black/10 dark:border-white/10 font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
-                        {t(locale, "follow")}
-                    </button>
-                    <button className="px-4 py-3 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                        <ArrowRight className="w-4 h-4" />
-                    </button>
-                </div>
             </div>
 
             {/* Related Stories */}
@@ -76,19 +67,13 @@ export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: Arti
                             <Link href={`/article/${post.slug}`} key={post.slug} className="group block space-y-3" data-testid={`link-related-post-${post.slug}`}>
                                 {/* Mobile: square aspect, PC: 3:2 aspect for larger display */}
                                 <div className="relative w-full aspect-square md:aspect-[3/2] overflow-hidden rounded-sm bg-bg-secondary">
-                                    {post.coverImage ? (
-                                        <Image
-                                            src={post.coverImage}
-                                            alt={post.title}
-                                            fill
-                                            sizes="(max-width: 768px) 50vw, 350px"
-                                            className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-text-tertiary text-xs">
-                                            No image
-                                        </div>
-                                    )}
+                                    <Image
+                                        src={post.coverImage || "/placeholder.jpg"}
+                                        alt={post.title}
+                                        fill
+                                        sizes="(max-width: 768px) 50vw, 350px"
+                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    />
                                 </div>
                                 <div className="space-y-1.5">
                                     <p className="text-[11px] font-bold uppercase tracking-widest text-text-secondary">

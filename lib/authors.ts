@@ -34,7 +34,7 @@ export function getAuthorByName(name?: string | null) {
             name: "Anonymous",
             role: "Contributor",
             bio: "A valued contributor to Wisdomia.",
-            img: "/imgs/default-avatar.svg"
+            img: Assets.imgAvatarImage
         };
     }
 
@@ -46,6 +46,6 @@ export function getAuthorByName(name?: string | null) {
         name: safeName,
         role: "Contributor",
         bio: "A valued contributor to Wisdomia.",
-        img: "/imgs/default-avatar.svg"
+        img: Assets.imgAvatarImage
     };
 }
