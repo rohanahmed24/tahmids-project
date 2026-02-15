@@ -68,23 +68,49 @@ function formatDate(dateInput: Date | string | null, locale: Locale = "en"): str
 
 function normalizeImageUrl(url?: string | null): string | null | undefined {
     if (!url) return url;
+    const trimmed = url.trim();
+    if (!trimmed || trimmed === "null" || trimmed === "undefined") return null;
+
     // Keep upload paths local so newly uploaded local files resolve correctly.
     // Missing local files are already handled by /api/uploads fallback logic.
-    if (url.startsWith("/imgs/uploads/")) {
-        return url;
+    if (trimmed.startsWith("/imgs/uploads/")) {
+        return trimmed;
     }
-    if (url.startsWith("https://ui-avatars.com/") || url.startsWith("http://ui-avatars.com/")) {
+    if (trimmed.startsWith("/")) {
+        return trimmed;
+    }
+
+    if (trimmed.startsWith("https://ui-avatars.com/") || trimmed.startsWith("http://ui-avatars.com/")) {
         try {
-            const parsed = new URL(url);
+            const parsed = new URL(trimmed);
             if (!parsed.searchParams.get("format")) {
                 parsed.searchParams.set("format", "png");
             }
             return parsed.toString();
         } catch {
-            return url;
+            return null;
         }
     }
-    return url;
+
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+        try {
+            const parsed = new URL(trimmed);
+
+            // Fix bad local absolute URLs saved from dev (e.g., http://localhost:3000/imgs/uploads/...)
+            if (
+                (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") &&
+                parsed.pathname.startsWith("/")
+            ) {
+                return parsed.pathname;
+            }
+
+            return parsed.toString();
+        } catch {
+            return null;
+        }
+    }
+
+    return null;
 }
 
 // Mapper function to convert Prisma result to frontend Post type

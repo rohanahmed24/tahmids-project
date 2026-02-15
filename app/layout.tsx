@@ -45,10 +45,11 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: [
-        { url: "/favicon.ico", sizes: "any" },
-        { url: "/icon.png", type: "image/png", sizes: "32x32" }
+        { url: "/favicon.ico?v=2", type: "image/x-icon", sizes: "any" },
+        { url: "/icon.png?v=2", type: "image/png", sizes: "32x32" }
       ],
-      apple: "/apple-touch-icon.png"
+      shortcut: "/favicon.ico?v=2",
+      apple: "/apple-touch-icon.png?v=2"
     },
     manifest: "/site.webmanifest",
     verification: {
