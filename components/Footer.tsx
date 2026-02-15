@@ -1,6 +1,44 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { getLocalizedCategoryName } from "@/lib/categories";
 
 export function Footer() {
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            brandDesc: "গুরুত্বপূর্ণ গল্পের জন্য একটি ডিজিটাল ঠিকানা। আধুনিক চিন্তাশীল পাঠকের জন্য প্রজ্ঞা, নকশা ও সংস্কৃতি।",
+            explore: "অন্বেষণ",
+            company: "কোম্পানি",
+            about: "আমাদের সম্পর্কে",
+            advertise: "বিজ্ঞাপন",
+            careers: "ক্যারিয়ার",
+            contact: "যোগাযোগ",
+            privacy: "গোপনীয়তা",
+            terms: "শর্তাবলি",
+            member: "সদস্য হোন",
+        }
+        : {
+            brandDesc: "A digital sanctuary for stories that matter. Curating wisdom, design, and culture for the modern thinker.",
+            explore: "Explore",
+            company: "Company",
+            about: "About",
+            advertise: "Advertise",
+            careers: "Careers",
+            contact: "Contact",
+            privacy: "Privacy",
+            terms: "Terms",
+            member: "Become a Member",
+        };
+
+    const exploreLinks = [
+        { href: "/topics/design-culture", label: getLocalizedCategoryName("Design", locale) },
+        { href: "/topics/culture", label: getLocalizedCategoryName("Culture", locale) },
+        { href: "/topics/technology-ai", label: getLocalizedCategoryName("Technology", locale) },
+        { href: "/topics/philosophy", label: locale === "bn" ? "দর্শন" : "Philosophy" },
+    ];
+
     return (
         <footer className="relative w-full bg-bg-primary border-t border-border-subtle pt-16 md:pt-20 pb-10 px-6 md:px-12 text-text-primary transition-colors duration-500 safe-bottom overflow-hidden">
             {/* Watermark */}
@@ -17,31 +55,32 @@ export function Footer() {
                         WISDOMIA
                     </h2>
                     <p className="text-xs md:text-sm text-text-muted leading-relaxed max-w-sm">
-                        A digital sanctuary for stories that matter. Curating wisdom, design, and culture for the modern thinker.
+                        {copy.brandDesc}
                     </p>
                 </div>
 
                 {/* Links 1 */}
                 <div className="col-span-1 md:col-span-2 space-y-4 md:space-y-6">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-text-muted">Explore</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-text-muted">{copy.explore}</h4>
                     <ul className="space-y-3 md:space-y-4 text-sm font-medium">
-                        <li><Link href="/topics/design-culture" className="hover:text-accent active:opacity-70 transition-colors">Design</Link></li>
-                        <li><Link href="/topics/culture" className="hover:text-accent active:opacity-70 transition-colors">Culture</Link></li>
-                        <li><Link href="/topics/technology-ai" className="hover:text-accent active:opacity-70 transition-colors">Technology</Link></li>
-                        <li><Link href="/topics/philosophy" className="hover:text-accent active:opacity-70 transition-colors">Philosophy</Link></li>
+                        {exploreLinks.map((link) => (
+                            <li key={link.href}>
+                                <Link href={link.href} className="hover:text-accent active:opacity-70 transition-colors">{link.label}</Link>
+                            </li>
+                        ))}
                     </ul>
                 </div>
 
                 {/* Links 2 */}
                 <div className="col-span-1 md:col-span-2 space-y-4 md:space-y-6">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-text-muted">Company</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-widest text-text-muted">{copy.company}</h4>
                     <ul className="space-y-3 md:space-y-4 text-sm font-medium">
-                        <li><Link href="/about" className="hover:text-accent active:opacity-70 transition-colors">About</Link></li>
-                        <li><Link href="/advertise" className="hover:text-accent active:opacity-70 transition-colors">Advertise</Link></li>
-                        <li><Link href="/careers" className="hover:text-accent active:opacity-70 transition-colors">Careers</Link></li>
-                        <li><Link href="/contact" className="hover:text-accent active:opacity-70 transition-colors">Contact</Link></li>
-                        <li><Link href="/privacy" className="hover:text-accent active:opacity-70 transition-colors">Privacy</Link></li>
-                        <li><Link href="/terms" className="hover:text-accent active:opacity-70 transition-colors">Terms</Link></li>
+                        <li><Link href="/about" className="hover:text-accent active:opacity-70 transition-colors">{copy.about}</Link></li>
+                        <li><Link href="/advertise" className="hover:text-accent active:opacity-70 transition-colors">{copy.advertise}</Link></li>
+                        <li><Link href="/careers" className="hover:text-accent active:opacity-70 transition-colors">{copy.careers}</Link></li>
+                        <li><Link href="/contact" className="hover:text-accent active:opacity-70 transition-colors">{copy.contact}</Link></li>
+                        <li><Link href="/privacy" className="hover:text-accent active:opacity-70 transition-colors">{copy.privacy}</Link></li>
+                        <li><Link href="/terms" className="hover:text-accent active:opacity-70 transition-colors">{copy.terms}</Link></li>
                     </ul>
                 </div>
 
@@ -51,7 +90,7 @@ export function Footer() {
                         href="/pricing"
                         className="text-xs font-bold uppercase tracking-widest border border-border-subtle px-6 py-4 rounded-full hover:bg-black hover:text-white hover:border-black active:scale-95 transition-all w-full md:w-auto text-center"
                     >
-                        Become a Member
+                        {copy.member}
                     </Link>
                 </div>
             </div>

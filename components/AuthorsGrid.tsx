@@ -5,10 +5,15 @@ import { MobileSlider } from "@/components/ui/MobileSlider";
 import { useEffect, useState } from "react";
 import type { User } from "@/lib/users";
 import { Assets } from "@/lib/assets";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export function AuthorsGrid() {
     const [authors, setAuthors] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? { meet: "পরিচিত হোন আমাদের", writers: "লেখকদের সঙ্গে" }
+        : { meet: "Meet our", writers: "writers" };
 
     useEffect(() => {
         let isMounted = true;
@@ -43,7 +48,7 @@ export function AuthorsGrid() {
             <div className="max-w-[1280px] mx-auto space-y-8 md:space-y-16">
                 <div className="text-center space-y-4 md:space-y-6">
                     <h2 className="text-3xl md:text-5xl lg:text-7xl font-serif font-medium text-text-primary tracking-tighter">
-                        Meet our <span className="italic text-text-muted">writers</span>
+                        {copy.meet} <span className="italic text-text-muted">{copy.writers}</span>
                     </h2>
                     {/* Optional: View All Link */}
                 </div>

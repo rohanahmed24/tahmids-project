@@ -10,6 +10,7 @@ import {
   VolumeX,
   Headphones,
 } from "lucide-react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface AudioPlayerProps {
   content: string;
@@ -17,6 +18,35 @@ interface AudioPlayerProps {
 }
 
 export function AudioPlayer({ content, title }: AudioPlayerProps) {
+  const { locale } = useLocale();
+  const copy = locale === "bn"
+    ? {
+      listenToArticle: "লেখাটি শুনুন",
+      paused: "বিরতি",
+      playing: "চলছে...",
+      speed: "গতি",
+      restart: "আবার শুরু",
+      pause: "বিরতি",
+      play: "চালু করুন",
+      unmute: "আনমিউট",
+      mute: "মিউট",
+      poweredBy: "আপনার ব্রাউজারের টেক্সট-টু-স্পিচ দ্বারা চালিত",
+      audioProgress: "অডিও অগ্রগতি",
+    }
+    : {
+      listenToArticle: "Listen to Article",
+      paused: "Paused",
+      playing: "Playing...",
+      speed: "speed",
+      restart: "Restart",
+      pause: "Pause",
+      play: "Play",
+      unmute: "Unmute",
+      mute: "Mute",
+      poweredBy: "Powered by your browser's text-to-speech",
+      audioProgress: "Audio progress",
+    };
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -450,13 +480,13 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
             <Headphones className="w-5 h-5 text-accent" />
           </div>
           <div className="text-left">
-            <p className="font-medium text-sm">Listen to Article</p>
+            <p className="font-medium text-sm">{copy.listenToArticle}</p>
             <p className="text-xs text-text-muted">
               {isPlaying
                 ? isPaused
-                  ? "Paused"
-                  : "Playing..."
-                : `${totalTime} • ${speed}x speed`}
+                  ? copy.paused
+                  : copy.playing
+                : `${totalTime} • ${speed}x ${copy.speed}`}
             </p>
           </div>
         </div>
@@ -497,7 +527,7 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
                                     className="relative w-full h-4 flex items-center rounded-full cursor-pointer touch-none overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                                     role="slider"
                                     tabIndex={0}
-                                    aria-label="Audio progress"
+                                    aria-label={copy.audioProgress}
                                     aria-valuenow={Math.round(progress)}
                                     aria-valuemin={0}
                                     aria-valuemax={100}
@@ -536,8 +566,8 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
                   whileTap={{ scale: 0.9 }}
                   onClick={handleRestart}
                   className="p-3 text-text-muted hover:text-text-primary transition-colors"
-                  title="Restart"
-                  aria-label="Restart"
+                  title={copy.restart}
+                  aria-label={copy.restart}
                 >
                   <RotateCcw className="w-5 h-5 md:w-5 md:h-5" />
                 </motion.button>
@@ -548,7 +578,7 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
                   whileTap={{ scale: 0.9 }}
                   onClick={handlePlayPause}
                   className="w-16 h-16 bg-accent text-white rounded-full flex items-center justify-center shadow-lg shadow-accent/30"
-                  aria-label={isPlaying && !isPaused ? "Pause" : "Play"}
+                  aria-label={isPlaying && !isPaused ? copy.pause : copy.play}
                 >
                   {isPlaying && !isPaused ? (
                     <Pause className="w-6 h-6" />
@@ -563,8 +593,8 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
                   whileTap={{ scale: 0.9 }}
                   onClick={toggleMute}
                   className="p-3 text-text-muted hover:text-text-primary transition-colors"
-                  title={isMuted ? "Unmute" : "Mute"}
-                  aria-label={isMuted ? "Unmute" : "Mute"}
+                  title={isMuted ? copy.unmute : copy.mute}
+                  aria-label={isMuted ? copy.unmute : copy.mute}
                 >
                   {isMuted ? (
                     <VolumeX className="w-5 h-5" />
@@ -595,7 +625,7 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
 
               {/* Info */}
               <p className="text-xs text-text-muted text-center">
-                Powered by your browser's text-to-speech
+                {copy.poweredBy}
               </p>
             </div>
           </motion.div>

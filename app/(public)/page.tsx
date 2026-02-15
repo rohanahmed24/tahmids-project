@@ -3,7 +3,8 @@ import { FeaturedTales } from "@/components/FeaturedTales";
 import { getHotTopics, getRecentPosts, getPostsByCategories, getPublicCategorySummaries } from "@/lib/posts";
 import dynamic from "next/dynamic";
 import { Metadata } from "next";
-import { BASE_CATEGORIES, categoryToSlug } from "@/lib/categories";
+import { BASE_CATEGORIES, categoryToSlug, getLocalizedCategoryName } from "@/lib/categories";
+import { getCurrentLocale } from "@/lib/locale";
 
 // Dynamic Imports for Code Splitting (Below the fold components)
 const Subscription = dynamic(() => import("@/components/Subscription").then(mod => mod.Subscription));
@@ -17,30 +18,46 @@ const AuthorsGrid = dynamic(() => import("@/components/AuthorsGrid").then(mod =>
 const CategorySection = dynamic(() => import("@/components/CategorySection").then(mod => mod.CategorySection));
 
 // SEO Metadata
-export const metadata: Metadata = {
-  title: "Wisdomia - Your Digital Magazine",
-  description: "Explore stories that matter across technology, design, culture, business, self-growth, and politics.",
-  keywords: ["digital magazine", "technology", "design", "culture", "business", "self", "politics"],
-  openGraph: {
-    title: "Wisdomia - Your Digital Magazine",
-    description: "Explore stories that matter across technology, design, culture, business, self-growth, and politics.",
-    type: "website",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getCurrentLocale();
+  return locale === "bn"
+    ? {
+      title: "Wisdomia - আপনার ডিজিটাল ম্যাগাজিন",
+      description: "প্রযুক্তি, নকশা, সংস্কৃতি, ব্যবসা, স্বউন্নয়ন এবং রাজনীতি নিয়ে গুরুত্বপূর্ণ গল্প পড়ুন।",
+      keywords: ["digital magazine", "technology", "design", "culture", "business", "self", "politics"],
+      openGraph: {
+        title: "Wisdomia - আপনার ডিজিটাল ম্যাগাজিন",
+        description: "প্রযুক্তি, নকশা, সংস্কৃতি, ব্যবসা, স্বউন্নয়ন এবং রাজনীতি নিয়ে গুরুত্বপূর্ণ গল্প পড়ুন।",
+        type: "website",
+      },
+    }
+    : {
+      title: "Wisdomia - Your Digital Magazine",
+      description: "Explore stories that matter across technology, design, culture, business, self-growth, and politics.",
+      keywords: ["digital magazine", "technology", "design", "culture", "business", "self", "politics"],
+      openGraph: {
+        title: "Wisdomia - Your Digital Magazine",
+        description: "Explore stories that matter across technology, design, culture, business, self-growth, and politics.",
+        type: "website",
+      },
+    };
+}
 
 export default async function Home() {
+  const locale = await getCurrentLocale();
   const homepageCategories = BASE_CATEGORIES.map((category) => ({
-    title: category,
+    key: category,
+    title: getLocalizedCategoryName(category, locale),
     slug: categoryToSlug(category),
   }));
 
   // Parallel data fetching for better performance
   const [hotTopics, recentPosts, categoryData, categories] = await Promise.all([
-    getHotTopics(),
-    getRecentPosts(),
+    getHotTopics(5, locale),
+    getRecentPosts(10, locale),
     // Single optimized query for all categories
-    getPostsByCategories(homepageCategories.map((category) => category.title)),
-    getPublicCategorySummaries(),
+    getPostsByCategories(homepageCategories.map((category) => category.key), 6, locale),
+    getPublicCategorySummaries(locale),
   ]);
 
   return (
@@ -54,14 +71,14 @@ export default async function Home() {
           key={category.slug}
           title={category.title}
           slug={category.slug}
-          articles={categoryData[category.title] || []}
+          articles={categoryData[category.key] || []}
         />
       ))}
 
       <DailyQuote />
       <Subscription />
       <ArticleGrid articles={recentPosts} />
-      <TopicExplore categories={categories} />
+      <TopicExplore categories={categories} locale={locale} />
       <AuthorsGrid />
       <Testimonials />
       <FAQ />

@@ -7,9 +7,60 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/actions/auth";
 import { signIn } from "next-auth/react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            fillAll: "সব ঘর পূরণ করুন",
+            minPassword: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে",
+            wrong: "কিছু ভুল হয়েছে",
+            couldNotWith: "সাইন ইন করা যায়নি",
+            accountCreated: "অ্যাকাউন্ট তৈরি হয়েছে!",
+            redirectSignIn: "আপনাকে সাইন ইন পেজে নেওয়া হচ্ছে...",
+            redirecting: "রিডাইরেক্ট হচ্ছে...",
+            joinFree: "ফ্রিতে যোগ দিন",
+            startYour: "আপনার",
+            legacy: "যাত্রা শুরু করুন",
+            leftBody: "অ্যাকাউন্ট খুলে গল্প সেভ করুন, আলোচনায় অংশ নিন এবং আপনার জন্য সাজানো বিশেষ কনটেন্ট পান।",
+            signUp: "সাইন আপ",
+            haveAccount: "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+            signIn: "সাইন ইন",
+            fullName: "পূর্ণ নাম",
+            email: "ইমেইল",
+            password: "পাসওয়ার্ড",
+            enterName: "আপনার নাম লিখুন",
+            createPassword: "একটি পাসওয়ার্ড তৈরি করুন",
+            minHint: "কমপক্ষে ৮ অক্ষর হতে হবে",
+            createAccount: "অ্যাকাউন্ট তৈরি করুন",
+            orJoin: "অথবা যোগ দিন",
+        }
+        : {
+            fillAll: "Please fill in all fields",
+            minPassword: "Password must be at least 8 characters",
+            wrong: "Something went wrong",
+            couldNotWith: "Could not sign in with",
+            accountCreated: "Account Created!",
+            redirectSignIn: "Redirecting you to sign in...",
+            redirecting: "Redirecting...",
+            joinFree: "Join Free Today",
+            startYour: "Start your",
+            legacy: "legacy.",
+            leftBody: "Create an account to save stories, join discussions, and unlock exclusive content tailored just for you.",
+            signUp: "Sign Up",
+            haveAccount: "Already have an account?",
+            signIn: "Sign in",
+            fullName: "Full Name",
+            email: "Email",
+            password: "Password",
+            enterName: "Enter your name",
+            createPassword: "Create a password",
+            minHint: "Must be at least 8 characters",
+            createAccount: "Create Account",
+            orJoin: "Or join with",
+        };
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -22,11 +73,11 @@ export default function RegisterPage() {
 
     const validateForm = () => {
         if (!formData.name.trim() || !formData.email.trim() || !formData.password) {
-            setError("Please fill in all fields");
+            setError(copy.fillAll);
             return false;
         }
         if (formData.password.length < 8) {
-            setError("Password must be at least 8 characters");
+            setError(copy.minPassword);
             return false;
         }
         return true;
@@ -60,7 +111,7 @@ export default function RegisterPage() {
                 router.push("/signin");
             }, 2000);
         } catch {
-            setError("Something went wrong");
+            setError(copy.wrong);
             setIsLoading(false);
         }
     };
@@ -71,7 +122,7 @@ export default function RegisterPage() {
         try {
             await signIn(provider.toLowerCase(), { callbackUrl: "/" });
         } catch {
-            setError(`Could not sign in with ${provider}`);
+            setError(`${copy.couldNotWith} ${provider}`);
             setIsLoading(false);
         }
     };
@@ -93,11 +144,11 @@ export default function RegisterPage() {
                     >
                         <CheckCircle className="w-10 h-10 text-green-400" />
                     </motion.div>
-                    <h2 className="text-3xl font-serif font-bold">Account Created!</h2>
-                    <p className="text-gray-400">Redirecting you to sign in...</p>
+                    <h2 className="text-3xl font-serif font-bold">{copy.accountCreated}</h2>
+                    <p className="text-gray-400">{copy.redirectSignIn}</p>
                     <div className="flex items-center justify-center gap-2 text-blue-400">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">Redirecting...</span>
+                        <span className="text-sm">{copy.redirecting}</span>
                     </div>
                 </motion.div>
             </main>
@@ -128,14 +179,14 @@ export default function RegisterPage() {
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20"
                     >
                         <Sparkles className="w-4 h-4 text-blue-400" />
-                        <span className="text-xs font-bold text-blue-400 uppercase tracking-wide">Join Free Today</span>
+                        <span className="text-xs font-bold text-blue-400 uppercase tracking-wide">{copy.joinFree}</span>
                     </motion.div>
                     <h1 className="text-6xl font-serif font-bold leading-tight">
-                        Start your <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">legacy.</span>
+                        {copy.startYour} <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">{copy.legacy}</span>
                     </h1>
                     <p className="text-lg text-gray-400 max-w-md">
-                        Create an account to save stories, join discussions, and unlock exclusive content tailored just for you.
+                        {copy.leftBody}
                     </p>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-400">
@@ -152,9 +203,9 @@ export default function RegisterPage() {
                     className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl"
                 >
                     <div className="text-center mb-8">
-                        <h2 className="text-3xl font-serif font-bold mb-2">Sign Up</h2>
+                        <h2 className="text-3xl font-serif font-bold mb-2">{copy.signUp}</h2>
                         <p className="text-gray-400 text-sm">
-                            Already have an account? <Link href="/signin" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">Sign in</Link>
+                            {copy.haveAccount} <Link href="/signin" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">{copy.signIn}</Link>
                         </p>
                     </div>
 
@@ -171,7 +222,7 @@ export default function RegisterPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Full Name</label>
+                            <label className="text-xs font-bold uppercase tracking-widest text-gray-500">{copy.fullName}</label>
                             <div className="relative">
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                                 <input
@@ -179,7 +230,7 @@ export default function RegisterPage() {
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     className="w-full bg-black/40 border border-white/10 p-4 pl-12 rounded-xl text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
-                                    placeholder="Enter your name"
+                                    placeholder={copy.enterName}
                                     disabled={isLoading}
                                     required
                                 />
@@ -187,7 +238,7 @@ export default function RegisterPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Email</label>
+                            <label className="text-xs font-bold uppercase tracking-widest text-gray-500">{copy.email}</label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                                 <input
@@ -203,7 +254,7 @@ export default function RegisterPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Password</label>
+                            <label className="text-xs font-bold uppercase tracking-widest text-gray-500">{copy.password}</label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                                 <input
@@ -211,7 +262,7 @@ export default function RegisterPage() {
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     className="w-full bg-black/40 border border-white/10 p-4 pl-12 pr-12 rounded-xl text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
-                                    placeholder="Create a password"
+                                    placeholder={copy.createPassword}
                                     disabled={isLoading}
                                     required
                                     minLength={8}
@@ -224,7 +275,7 @@ export default function RegisterPage() {
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                             </div>
-                            <p className="text-xs text-gray-600 pl-1">Must be at least 8 characters</p>
+                            <p className="text-xs text-gray-600 pl-1">{copy.minHint}</p>
                         </div>
 
                         <button
@@ -232,13 +283,13 @@ export default function RegisterPage() {
                             disabled={isLoading}
                             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Create Account <ArrowRight className="w-5 h-5" /></>}
+                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>{copy.createAccount} <ArrowRight className="w-5 h-5" /></>}
                         </button>
                     </form>
 
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
-                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-transparent px-4 text-gray-500">Or join with</span></div>
+                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-transparent px-4 text-gray-500">{copy.orJoin}</span></div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

@@ -1,96 +1,182 @@
 "use client";
 
 import { MotionWrapper } from "@/components/ui/MotionWrapper";
+import { useLocale } from "@/components/providers/LocaleProvider";
+
+type TermsSection = {
+  title: string;
+  paragraphs: string[];
+  bullets?: string[];
+};
 
 export default function TermsPage() {
-    return (
-        <main className="min-h-screen bg-base transition-colors duration-300">
-            {/* Header */}
-            <div className="bg-surface pt-28 pb-20 px-6 text-center">
-                <MotionWrapper type="slide-up">
-                    <span className="text-xs font-bold tracking-[0.3em] uppercase opacity-40 text-main mb-6 block">Legal</span>
-                    <h1 className="text-5xl md:text-7xl font-serif font-medium text-main tracking-tighter leading-[0.9]">
-                        Terms & Conditions
-                    </h1>
-                    <p className="text-muted mt-6 max-w-xl mx-auto">
-                        Last updated: December 20, 2024
-                    </p>
-                </MotionWrapper>
-            </div>
+  const { locale } = useLocale();
 
-            {/* Content */}
-            <div className="max-w-3xl mx-auto px-6 py-20">
-                <MotionWrapper type="fade-in" className="prose prose-lg dark:prose-invert max-w-none">
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-serif font-bold text-main mb-4">1. Acceptance of Terms</h2>
-                        <p className="text-secondary leading-relaxed mb-4">
-                            By accessing and using WISDOMIA ("the Website"), you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to abide by these terms, please do not use this service.
-                        </p>
-                    </section>
+  const content = locale === "bn"
+    ? {
+      badge: "আইনি",
+      title: "শর্তাবলি",
+      updated: "সর্বশেষ হালনাগাদ: ২০ ডিসেম্বর, ২০২৪",
+      sections: [
+        {
+          title: "১. শর্ত গ্রহণ",
+          paragraphs: [
+            "WISDOMIA ব্যবহার করলে আপনি এই শর্তাবলির সাথে সম্মত হন। যদি সম্মত না হন, অনুগ্রহ করে সেবা ব্যবহার করবেন না।",
+          ],
+        },
+        {
+          title: "২. ব্যবহার লাইসেন্স",
+          paragraphs: [
+            "ব্যক্তিগত, অ-ব্যবসায়িক উদ্দেশ্যে সীমিত লাইসেন্সে WISDOMIA-র উপকরণ দেখার অনুমতি দেওয়া হয়।",
+          ],
+          bullets: [
+            "উপকরণ পরিবর্তন বা কপি করা যাবে না",
+            "ব্যবসায়িক বা পাবলিক প্রদর্শনে ব্যবহার করা যাবে না",
+            "ওয়েবসাইটের সফটওয়্যার রিভার্স ইঞ্জিনিয়ার করা যাবে না",
+            "কপিরাইট বা মালিকানার নোটিশ সরানো যাবে না",
+            "অন্য সার্ভারে উপকরণ মিরর করা যাবে না",
+          ],
+        },
+        {
+          title: "৩. কনটেন্ট মালিকানা",
+          paragraphs: [
+            "WISDOMIA-তে প্রকাশিত সকল লেখা, ছবি, গ্রাফিক্স ও মাল্টিমিডিয়া কনটেন্টের মালিকানা WISDOMIA বা সংশ্লিষ্ট নির্মাতার। অনুমতি ছাড়া ব্যবহার নিষিদ্ধ।",
+          ],
+        },
+        {
+          title: "৪. ব্যবহারকারীর অবদান",
+          paragraphs: [
+            "আপনি মন্তব্য, প্রতিক্রিয়া বা অন্য কনটেন্ট জমা দিলে, তা ব্যবহার/প্রকাশ/বিতরণের জন্য আপনি আমাদের নন-এক্সক্লুসিভ লাইসেন্স প্রদান করেন।",
+          ],
+        },
+        {
+          title: "৫. দায় অস্বীকার",
+          paragraphs: [
+            "WISDOMIA-র উপকরণ 'যেমন আছে' ভিত্তিতে প্রদান করা হয়। প্রযোজ্য আইনের সীমার মধ্যে সকল ধরনের প্রত্যক্ষ/পরোক্ষ ওয়ারেন্টি অস্বীকার করা হয়।",
+          ],
+        },
+        {
+          title: "৬. দায়-সীমাবদ্ধতা",
+          paragraphs: [
+            "WISDOMIA বা তার সরবরাহকারী কোনো প্রকার ক্ষতির জন্য দায়ী থাকবে না, যার মধ্যে ডেটা/লাভের ক্ষতি বা ব্যবসায়িক বিঘ্ন অন্তর্ভুক্ত।",
+          ],
+        },
+        {
+          title: "৭. সংশোধন",
+          paragraphs: [
+            "WISDOMIA যেকোনো সময় নোটিশ ছাড়া এই শর্তাবলি পরিবর্তন করতে পারে। ওয়েবসাইট ব্যবহার অব্যাহত রাখলে আপনি সংশোধিত শর্তে সম্মত বলে গণ্য হবেন।",
+          ],
+        },
+        {
+          title: "৮. প্রযোজ্য আইন",
+          paragraphs: [
+            "এই শর্তাবলি প্রযোজ্য আইন অনুযায়ী পরিচালিত ও ব্যাখ্যায়িত হবে এবং সংশ্লিষ্ট আদালতের একচেটিয়া এখতিয়ারে আপনি সম্মত থাকবেন।",
+          ],
+        },
+      ] satisfies TermsSection[],
+      footer: "এই শর্তাবলি সম্পর্কে কোনো প্রশ্ন থাকলে",
+    }
+    : {
+      badge: "Legal",
+      title: "Terms & Conditions",
+      updated: "Last updated: December 20, 2024",
+      sections: [
+        {
+          title: "1. Acceptance of Terms",
+          paragraphs: [
+            "By accessing and using WISDOMIA, you accept and agree to be bound by these terms. If you do not agree, please do not use this service.",
+          ],
+        },
+        {
+          title: "2. Use License",
+          paragraphs: [
+            "Permission is granted to temporarily view materials on WISDOMIA for personal, non-commercial use only.",
+          ],
+          bullets: [
+            "Do not modify or copy the materials",
+            "Do not use the materials for commercial or public display",
+            "Do not reverse engineer software on the Website",
+            "Do not remove copyright/proprietary notices",
+            "Do not mirror materials on other servers",
+          ],
+        },
+        {
+          title: "3. Content Ownership",
+          paragraphs: [
+            "All content on WISDOMIA is the property of WISDOMIA or its creators. Unauthorized use or distribution is prohibited.",
+          ],
+        },
+        {
+          title: "4. User Contributions",
+          paragraphs: [
+            "If you submit content to WISDOMIA, you grant us a non-exclusive license to use, modify, publish, and distribute that content.",
+          ],
+        },
+        {
+          title: "5. Disclaimer",
+          paragraphs: [
+            "Materials on WISDOMIA are provided 'as is'. We disclaim all warranties to the extent permitted by law.",
+          ],
+        },
+        {
+          title: "6. Limitations",
+          paragraphs: [
+            "WISDOMIA shall not be liable for any damages, including loss of data, profits, or business interruption.",
+          ],
+        },
+        {
+          title: "7. Revisions",
+          paragraphs: [
+            "WISDOMIA may revise these terms at any time without notice. Continued use means you accept the updated terms.",
+          ],
+        },
+        {
+          title: "8. Governing Law",
+          paragraphs: [
+            "These terms are governed by applicable laws, and disputes are subject to the exclusive jurisdiction of the relevant courts.",
+          ],
+        },
+      ] satisfies TermsSection[],
+      footer: "If you have any questions about these Terms & Conditions, please contact us at",
+    };
 
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-serif font-bold text-main mb-4">2. Use License</h2>
-                        <p className="text-secondary leading-relaxed mb-4">
-                            Permission is granted to temporarily view the materials (information or software) on WISDOMIA for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
-                        </p>
-                        <ul className="list-disc pl-6 text-secondary space-y-2">
-                            <li>Modify or copy the materials</li>
-                            <li>Use the materials for any commercial purpose or public display</li>
-                            <li>Attempt to decompile or reverse engineer any software contained on the Website</li>
-                            <li>Remove any copyright or other proprietary notations from the materials</li>
-                            <li>Transfer the materials to another person or "mirror" the materials on any other server</li>
-                        </ul>
-                    </section>
+  return (
+    <main className="min-h-screen bg-base transition-colors duration-300">
+      <div className="bg-surface pt-28 pb-20 px-6 text-center">
+        <MotionWrapper type="slide-up">
+          <span className="text-xs font-bold tracking-[0.3em] uppercase opacity-40 text-main mb-6 block">{content.badge}</span>
+          <h1 className="text-5xl md:text-7xl font-serif font-medium text-main tracking-tighter leading-[0.9]">
+            {content.title}
+          </h1>
+          <p className="text-muted mt-6 max-w-xl mx-auto">{content.updated}</p>
+        </MotionWrapper>
+      </div>
 
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-serif font-bold text-main mb-4">3. Content Ownership</h2>
-                        <p className="text-secondary leading-relaxed mb-4">
-                            All content published on WISDOMIA, including but not limited to articles, images, graphics, and multimedia content, is the property of WISDOMIA or its content creators. Unauthorized use, reproduction, or distribution of this content is strictly prohibited.
-                        </p>
-                    </section>
+      <div className="max-w-3xl mx-auto px-6 py-20">
+        <MotionWrapper type="fade-in" className="prose prose-lg dark:prose-invert max-w-none">
+          {content.sections.map((section) => (
+            <section key={section.title} className="mb-12">
+              <h2 className="text-2xl font-serif font-bold text-main mb-4">{section.title}</h2>
+              {section.paragraphs.map((p) => (
+                <p key={p} className="text-secondary leading-relaxed mb-4">{p}</p>
+              ))}
+              {section.bullets && (
+                <ul className="list-disc pl-6 text-secondary space-y-2">
+                  {section.bullets.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))}
 
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-serif font-bold text-main mb-4">4. User Contributions</h2>
-                        <p className="text-secondary leading-relaxed mb-4">
-                            If you submit content to WISDOMIA, including comments, feedback, or other submissions, you grant us a non-exclusive, royalty-free, perpetual, and worldwide license to use, modify, publish, and distribute such content.
-                        </p>
-                    </section>
-
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-serif font-bold text-main mb-4">5. Disclaimer</h2>
-                        <p className="text-secondary leading-relaxed mb-4">
-                            The materials on WISDOMIA are provided on an "as is" basis. WISDOMIA makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
-                        </p>
-                    </section>
-
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-serif font-bold text-main mb-4">6. Limitations</h2>
-                        <p className="text-secondary leading-relaxed mb-4">
-                            In no event shall WISDOMIA or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on the Website.
-                        </p>
-                    </section>
-
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-serif font-bold text-main mb-4">7. Revisions</h2>
-                        <p className="text-secondary leading-relaxed mb-4">
-                            WISDOMIA may revise these terms of service at any time without notice. By using this Website, you are agreeing to be bound by the then-current version of these terms of service.
-                        </p>
-                    </section>
-
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-serif font-bold text-main mb-4">8. Governing Law</h2>
-                        <p className="text-secondary leading-relaxed mb-4">
-                            These terms and conditions are governed by and construed in accordance with applicable laws, and you irrevocably submit to the exclusive jurisdiction of the courts in that location.
-                        </p>
-                    </section>
-
-                    <section className="pt-8 border-t border-border">
-                        <p className="text-muted text-sm">
-                            If you have any questions about these Terms & Conditions, please contact us at <a href="mailto:legal@wisdomia.com" className="text-accent hover:underline">legal@wisdomia.com</a>.
-                        </p>
-                    </section>
-                </MotionWrapper>
-            </div>
-        </main>
-    );
+          <section className="pt-8 border-t border-border">
+            <p className="text-muted text-sm">
+              {content.footer} <a href="mailto:legal@wisdomia.com" className="text-accent hover:underline">legal@wisdomia.com</a>.
+            </p>
+          </section>
+        </MotionWrapper>
+      </div>
+    </main>
+  );
 }

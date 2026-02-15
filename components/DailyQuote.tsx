@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export function DailyQuote() {
+    const { locale } = useLocale();
     return (
         <section className="relative py-12 md:py-48 bg-bg-primary overflow-hidden border-y border-border-subtle">
             {/* Texture/Grain Overlay */}
@@ -18,7 +20,7 @@ export function DailyQuote() {
                     viewport={{ once: true }}
                 >
                     <span className="block text-xs font-bold tracking-[0.3em] uppercase opacity-50 mb-8 text-text-primary">
-                        Daily Inspiration
+                        {locale === "bn" ? "দৈনিক অনুপ্রেরণা" : "Daily Inspiration"}
                     </span>
 
                     <blockquote className="text-xl md:text-3xl font-serif leading-relaxed text-center max-w-4xl mx-auto">

@@ -1,12 +1,26 @@
 "use client";
 
 import { ExternalLinkIcon } from "lucide-react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface BacklinksSectionProps {
   backlinks: string[];
 }
 
 export function BacklinksSection({ backlinks }: BacklinksSectionProps) {
+  const { locale } = useLocale();
+  const copy = locale === "bn"
+    ? {
+      title: "উৎসসূত্র",
+      subtitle: "এই লেখায় নিচের বাহ্যিক সূত্রগুলো উল্লেখ করা হয়েছে:",
+      footer: "বাহ্যিক লিংক নতুন উইন্ডোতে খুলবে। বাহ্যিক সাইটের কনটেন্টের জন্য Wisdomia দায়ী নয়।",
+    }
+    : {
+      title: "Cited Sources",
+      subtitle: "This article references the following external sources:",
+      footer: "External links open in new window. Wisdomia is not responsible for content on external sites.",
+    };
+
   if (!backlinks || backlinks.length === 0) {
     return null;
   }
@@ -47,11 +61,11 @@ export function BacklinksSection({ backlinks }: BacklinksSectionProps) {
     <div className="bg-bg-secondary border border-border rounded-lg p-6 mt-12">
       <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
         <span className="w-1 h-6 bg-accent rounded-full"></span>
-        Cited Sources
+        {copy.title}
       </h3>
       
       <p className="text-text-muted text-sm mb-4">
-        This article references the following external sources:
+        {copy.subtitle}
       </p>
 
       <div className="space-y-2">
@@ -76,7 +90,7 @@ export function BacklinksSection({ backlinks }: BacklinksSectionProps) {
 
       <div className="mt-4 pt-4 border-t border-border">
         <p className="text-text-muted text-xs">
-          External links open in new window. Wisdomia is not responsible for content on external sites.
+          {copy.footer}
         </p>
       </div>
     </div>

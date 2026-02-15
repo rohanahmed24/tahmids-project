@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { BookOpen, Headphones, Play } from "lucide-react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface MediaOptionsProps {
     slug: string;
@@ -13,23 +14,27 @@ interface MediaOptionsProps {
 
 export function MediaOptions({ slug, hasVideo = false, variant = "default", className = "" }: MediaOptionsProps) {
     const router = useRouter();
+    const { locale } = useLocale();
+    const labels = locale === "bn"
+        ? { read: "পড়ুন", listen: "শুনুন", watch: "দেখুন" }
+        : { read: "Read", listen: "Listen", watch: "Watch" };
 
     const options = [
         {
             id: "read",
-            label: "Read",
+            label: labels.read,
             icon: BookOpen,
             href: `/article/${slug}#article-content`,
         },
         {
             id: "listen",
-            label: "Listen",
+            label: labels.listen,
             icon: Headphones,
             href: `/article/${slug}?mode=listen#article-content`,
         },
         ...(hasVideo ? [{
             id: "watch",
-            label: "Watch",
+            label: labels.watch,
             icon: Play,
             href: `/article/${slug}?mode=watch#article-content`,
         }] : []),
@@ -130,7 +135,6 @@ export function MediaOptions({ slug, hasVideo = false, variant = "default", clas
         </div>
     );
 }
-
 
 
 

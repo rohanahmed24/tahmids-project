@@ -5,8 +5,36 @@ import { motion } from "framer-motion";
 import { Mail, ArrowRight, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { subscribeToNewsletter } from "@/actions/newsletter";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export default function SubscribePage() {
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            successDefault: "সফলভাবে সাবস্ক্রাইব হয়েছে!",
+            failed: "সাবস্ক্রাইব করা যায়নি",
+            error: "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।",
+            title: "আপডেটে থাকুন",
+            subtitle: "সাপ্তাহিক কিউরেটেড লেখা, এক্সক্লুসিভ ইনসাইট ও চিন্তাপ্রসূত কনটেন্ট সরাসরি আপনার ইনবক্সে পান।",
+            successTitle: "আপনি যুক্ত হয়েছেন!",
+            emailPlaceholder: "আপনার ইমেইল দিন...",
+            subscribeNow: "এখনই সাবস্ক্রাইব",
+            noSpam: "কোনো স্প্যাম নয়। যেকোনো সময় আনসাবস্ক্রাইব করুন।",
+            backHome: "← হোমে ফিরুন",
+        }
+        : {
+            successDefault: "Successfully subscribed!",
+            failed: "Failed to subscribe",
+            error: "Something went wrong. Please try again.",
+            title: "Stay in the Loop",
+            subtitle: "Get weekly curated stories, exclusive insights, and thought-provoking content delivered straight to your inbox.",
+            successTitle: "You're In!",
+            emailPlaceholder: "Enter your email...",
+            subscribeNow: "Subscribe Now",
+            noSpam: "No spam, ever. Unsubscribe anytime.",
+            backHome: "← Back to Home",
+        };
+
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -21,15 +49,15 @@ export default function SubscribePage() {
             const result = await subscribeToNewsletter(email);
             if (result.success) {
                 setStatus("success");
-                setMessage(result.message || "Successfully subscribed!");
+                setMessage(result.message || copy.successDefault);
                 setEmail("");
             } else {
                 setStatus("error");
-                setMessage(result.error || "Failed to subscribe");
+                setMessage(result.error || copy.failed);
             }
         } catch {
             setStatus("error");
-            setMessage("Something went wrong. Please try again.");
+            setMessage(copy.error);
         } finally {
             setIsLoading(false);
         }
@@ -71,10 +99,10 @@ export default function SubscribePage() {
                 </motion.div>
 
                 <h1 className="text-4xl md:text-5xl font-serif font-bold text-text-primary mb-4">
-                    Stay in the Loop
+                    {copy.title}
                 </h1>
                 <p className="text-text-secondary text-lg mb-8 max-w-md mx-auto">
-                    Get weekly curated stories, exclusive insights, and thought-provoking content delivered straight to your inbox.
+                    {copy.subtitle}
                 </p>
 
                 {status === "success" ? (
@@ -87,7 +115,7 @@ export default function SubscribePage() {
                         <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Check className="w-8 h-8 text-white" />
                         </div>
-                        <h2 className="text-2xl font-bold text-green-400 mb-2">You're In!</h2>
+                        <h2 className="text-2xl font-bold text-green-400 mb-2">{copy.successTitle}</h2>
                         <p className="text-text-secondary" data-testid="text-success-message">{message}</p>
                     </motion.div>
                 ) : (
@@ -98,7 +126,7 @@ export default function SubscribePage() {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Enter your email..."
+                                placeholder={copy.emailPlaceholder}
                                 required
                                 data-testid="input-subscribe-email"
                                 className="w-full pl-12 pr-4 py-4 bg-bg-secondary border border-border-primary rounded-xl text-text-primary placeholder:text-text-muted focus:border-accent-main focus:outline-none transition-colors"
@@ -128,7 +156,7 @@ export default function SubscribePage() {
                                 <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
                                 <>
-                                    Subscribe Now
+                                    {copy.subscribeNow}
                                     <ArrowRight className="w-4 h-4" />
                                 </>
                             )}
@@ -137,7 +165,7 @@ export default function SubscribePage() {
                 )}
 
                 <p className="text-text-muted text-xs mt-6" data-testid="text-no-spam">
-                    No spam, ever. Unsubscribe anytime.
+                    {copy.noSpam}
                 </p>
 
                 <Link
@@ -145,7 +173,7 @@ export default function SubscribePage() {
                     data-testid="link-back-home"
                     className="inline-block mt-8 text-text-secondary hover:text-text-primary text-sm transition-colors"
                 >
-                    ← Back to Home
+                    {copy.backHome}
                 </Link>
             </motion.div>
         </main>

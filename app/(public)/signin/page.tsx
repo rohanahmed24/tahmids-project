@@ -6,9 +6,52 @@ import { Eye, EyeOff, ArrowRight, Loader2, CheckCircle, AlertCircle } from "luci
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export default function SignInPage() {
     const router = useRouter();
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            fillAll: "সব ঘর পূরণ করুন",
+            invalid: "ইমেইল বা পাসওয়ার্ড সঠিক নয়",
+            wrong: "কিছু ভুল হয়েছে",
+            couldNotWith: "সাইন ইন করা যায়নি",
+            welcomeBack: "আবার স্বাগতম!",
+            redirectingDash: "আপনাকে ড্যাশবোর্ডে নেওয়া হচ্ছে...",
+            redirecting: "রিডাইরেক্ট হচ্ছে...",
+            unlock: "অসাধারণ সম্ভাবনা",
+            unlock2: "উন্মুক্ত করুন",
+            leftBody: "চিন্তাশীল পাঠক, নির্মাতা ও উদ্ভাবকদের কমিউনিটিতে যোগ দিন। প্রিমিয়াম কনটেন্ট ও বিশেষ ইনসাইট পান।",
+            joinMembers: "১০k+ সদস্যের সাথে যোগ দিন",
+            signIn: "সাইন ইন",
+            newHere: "নতুন?",
+            createAccount: "অ্যাকাউন্ট তৈরি করুন",
+            email: "ইমেইল",
+            password: "পাসওয়ার্ড",
+            forgot: "ভুলে গেছেন?",
+            orContinue: "অথবা চালিয়ে যান",
+        }
+        : {
+            fillAll: "Please fill in all fields",
+            invalid: "Invalid credentials",
+            wrong: "Something went wrong",
+            couldNotWith: "Could not sign in with",
+            welcomeBack: "Welcome Back!",
+            redirectingDash: "Redirecting you to your dashboard...",
+            redirecting: "Redirecting...",
+            unlock: "Unlock the",
+            unlock2: "extraordinary.",
+            leftBody: "Join a community of thinkers, creators, and innovators. Access premium content and exclusive insights.",
+            joinMembers: "Join 10k+ members",
+            signIn: "Sign In",
+            newHere: "New here?",
+            createAccount: "Create an account",
+            email: "Email",
+            password: "Password",
+            forgot: "Forgot?",
+            orContinue: "Or continue with",
+        };
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -23,7 +66,7 @@ export default function SignInPage() {
         setError("");
 
         if (!formData.email.trim() || !formData.password) {
-            setError("Please fill in all fields");
+            setError(copy.fillAll);
             return;
         }
 
@@ -37,7 +80,7 @@ export default function SignInPage() {
             });
 
             if (result?.error) {
-                setError("Invalid credentials");
+                setError(copy.invalid);
                 setIsLoading(false);
                 return;
             }
@@ -46,7 +89,7 @@ export default function SignInPage() {
             setIsLoading(false);
             router.push("/dashboard");
         } catch {
-            setError("Something went wrong");
+            setError(copy.wrong);
             setIsLoading(false);
         }
     };
@@ -57,7 +100,7 @@ export default function SignInPage() {
         try {
             await signIn(provider.toLowerCase(), { callbackUrl: "/" });
         } catch {
-            setError(`Could not sign in with ${provider}`);
+            setError(`${copy.couldNotWith} ${provider}`);
             setIsLoading(false);
         }
     };
@@ -79,11 +122,11 @@ export default function SignInPage() {
                     >
                         <CheckCircle className="w-10 h-10 text-green-400" />
                     </motion.div>
-                    <h2 className="text-3xl font-serif font-bold">Welcome Back!</h2>
-                    <p className="text-gray-400">Redirecting you to your dashboard...</p>
+                    <h2 className="text-3xl font-serif font-bold">{copy.welcomeBack}</h2>
+                    <p className="text-gray-400">{copy.redirectingDash}</p>
                     <div className="flex items-center justify-center gap-2 text-purple-400">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">Redirecting...</span>
+                        <span className="text-sm">{copy.redirecting}</span>
                     </div>
                 </motion.div>
             </main>
@@ -108,11 +151,11 @@ export default function SignInPage() {
                 <Link href="/" className="text-2xl font-serif font-black tracking-tighter">WISDOMIA</Link>
                 <div className="space-y-8">
                     <h1 className="text-6xl font-serif font-bold leading-tight">
-                        Unlock the <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">extraordinary.</span>
+                        {copy.unlock} <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">{copy.unlock2}</span>
                     </h1>
                     <p className="text-lg text-gray-400 max-w-md">
-                        Join a community of thinkers, creators, and innovators. Access premium content and exclusive insights.
+                        {copy.leftBody}
                     </p>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-400">
@@ -123,7 +166,7 @@ export default function SignInPage() {
                             </div>
                         ))}
                     </div>
-                    <p>Join 10k+ members</p>
+                    <p>{copy.joinMembers}</p>
                 </div>
             </motion.div>
 
@@ -136,9 +179,9 @@ export default function SignInPage() {
                     className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl"
                 >
                     <div className="text-center mb-10">
-                        <h2 className="text-3xl font-serif font-bold mb-2">Sign In</h2>
+                        <h2 className="text-3xl font-serif font-bold mb-2">{copy.signIn}</h2>
                         <p className="text-gray-400 text-sm">
-                            New here? <Link href="/register" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">Create an account</Link>
+                            {copy.newHere} <Link href="/register" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">{copy.createAccount}</Link>
                         </p>
                     </div>
 
@@ -155,7 +198,7 @@ export default function SignInPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-2">
-                            <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Email</label>
+                            <label className="text-xs font-bold uppercase tracking-widest text-gray-500">{copy.email}</label>
                             <input
                                 type="email"
                                 value={formData.email}
@@ -167,8 +210,8 @@ export default function SignInPage() {
                         </div>
                         <div className="space-y-2">
                             <div className="flex justify-between">
-                                <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Password</label>
-                                <Link href="/forgot-password" className="text-xs text-purple-400 hover:text-purple-300">Forgot?</Link>
+                                <label className="text-xs font-bold uppercase tracking-widest text-gray-500">{copy.password}</label>
+                                <Link href="/forgot-password" className="text-xs text-purple-400 hover:text-purple-300">{copy.forgot}</Link>
                             </div>
                             <div className="relative">
                                 <input
@@ -194,13 +237,13 @@ export default function SignInPage() {
                             disabled={isLoading}
                             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-4 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Sign In <ArrowRight className="w-5 h-5" /></>}
+                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>{copy.signIn} <ArrowRight className="w-5 h-5" /></>}
                         </button>
                     </form>
 
                     <div className="relative my-8">
                         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10"></div></div>
-                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-transparent px-4 text-gray-500">Or continue with</span></div>
+                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-transparent px-4 text-gray-500">{copy.orContinue}</span></div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

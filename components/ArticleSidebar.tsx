@@ -4,13 +4,16 @@ import { ArrowRight } from "lucide-react";
 
 import { getAuthorByName } from "@/lib/authors";
 import type { Post } from "@/lib/posts";
+import type { Locale } from "@/lib/locale";
+import { t } from "@/lib/translations";
 
 interface ArticleSidebarProps {
     post: Post;
     relatedPosts: Post[];
+    locale?: Locale;
 }
 
-export async function ArticleSidebar({ post, relatedPosts }: ArticleSidebarProps) {
+export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: ArticleSidebarProps) {
     const author = getAuthorByName(post.authorName || post.author);
     const cleanEditorName = post.editorName?.trim();
     const cleanTranslatorName = post.translatorName?.trim();
@@ -21,7 +24,7 @@ export async function ArticleSidebar({ post, relatedPosts }: ArticleSidebarProps
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return date.toLocaleDateString(locale === "bn" ? "bn-BD" : "en-US", { month: 'short', day: 'numeric' });
     };
 
     return (
@@ -40,11 +43,11 @@ export async function ArticleSidebar({ post, relatedPosts }: ArticleSidebarProps
                 <p className="text-sm opacity-90 leading-relaxed font-sans">
                     {author.bio}
                 </p>
-                {roleCredits.length > 0 && (
+        {roleCredits.length > 0 && (
                     <div className="space-y-1 border-y border-black/10 dark:border-white/10 py-3">
                         {roleCredits.map((credit) => (
                             <p key={credit.label} className="text-xs leading-relaxed">
-                                <span className="uppercase tracking-widest opacity-60 mr-2">{credit.label}</span>
+                                <span className="uppercase tracking-widest opacity-60 mr-2">{credit.label === "Editor" ? t(locale, "editorLabel") : t(locale, "translatorLabel")}</span>
                                 <span className="font-medium">{credit.value}</span>
                             </p>
                         ))}
@@ -52,7 +55,7 @@ export async function ArticleSidebar({ post, relatedPosts }: ArticleSidebarProps
                 )}
                 <div className="flex gap-2">
                     <button className="flex-1 py-3 border border-black/10 dark:border-white/10 font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
-                        Follow
+                        {t(locale, "follow")}
                     </button>
                     <button className="px-4 py-3 border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                         <ArrowRight className="w-4 h-4" />
@@ -64,7 +67,7 @@ export async function ArticleSidebar({ post, relatedPosts }: ArticleSidebarProps
             <div>
                 <h4 className="font-serif text-lg font-bold mb-6 flex items-center gap-2 text-text-primary">
                     <span className="w-2 h-2 rounded-full bg-accent"></span>
-                    Related Stories
+                    {t(locale, "relatedStories")}
                 </h4>
                 {/* Mobile: 2 columns, PC: 1 column (larger cards look better) */}
                 <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
@@ -100,7 +103,7 @@ export async function ArticleSidebar({ post, relatedPosts }: ArticleSidebarProps
                             </Link>
                         ))
                     ) : (
-                        <p className="text-sm text-text-tertiary col-span-2">No related stories yet.</p>
+                        <p className="text-sm text-text-tertiary col-span-2">{t(locale, "noRelatedStories")}</p>
                     )}
                 </div>
             </div>

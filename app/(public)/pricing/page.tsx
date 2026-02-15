@@ -4,65 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Sparkles, Zap, Crown, ArrowRight } from "lucide-react";
 import Link from "next/link";
-
-const plans = [
-    {
-        id: "free",
-        name: "Reader",
-        description: "For casual readers who want to explore",
-        monthlyPrice: 0,
-        yearlyPrice: 0,
-        icon: Sparkles,
-        color: "from-gray-500 to-gray-600",
-        features: [
-            "Access to 5 free articles per month",
-            "Weekly newsletter",
-            "Community discussions",
-            "Basic bookmarking",
-        ],
-        cta: "Get Started",
-        popular: false,
-    },
-    {
-        id: "pro",
-        name: "Explorer",
-        description: "For dedicated readers seeking deeper wisdom",
-        monthlyPrice: 12,
-        yearlyPrice: 99,
-        icon: Zap,
-        color: "from-accent to-blue-600",
-        features: [
-            "Unlimited article access",
-            "Ad-free reading experience",
-            "Early access to new content",
-            "Exclusive podcasts & videos",
-            "Priority support",
-            "Download for offline reading",
-        ],
-        cta: "Start Exploring",
-        popular: true,
-    },
-    {
-        id: "premium",
-        name: "Visionary",
-        description: "For thought leaders who want it all",
-        monthlyPrice: 29,
-        yearlyPrice: 249,
-        icon: Crown,
-        color: "from-amber-500 to-orange-600",
-        features: [
-            "Everything in Explorer",
-            "1-on-1 author sessions",
-            "Exclusive masterclasses",
-            "Private community access",
-            "Personalized recommendations",
-            "White-glove concierge support",
-            "First access to events",
-        ],
-        cta: "Become a Visionary",
-        popular: false,
-    },
-];
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 // Animation variants
 const containerVariants = {
@@ -140,9 +82,161 @@ const titleLetterVariants = {
 };
 
 export default function PricingPage() {
+    const { locale } = useLocale();
     const [isYearly, setIsYearly] = useState(false);
+    const copy = locale === "bn"
+        ? {
+            title: "আপনার যাত্রা বেছে নিন",
+            badge: "সহজ ও স্বচ্ছ মূল্য",
+            subtitle: "আপনার প্রাপ্য প্রজ্ঞা আনলক করুন। প্রতিটি প্ল্যান আপনার ভাবনাকে সমৃদ্ধ করতে তৈরি।",
+            monthly: "মাসিক",
+            yearly: "বার্ষিক",
+            save30: "৩০% সাশ্রয়",
+            mostPopular: "সবচেয়ে জনপ্রিয়",
+            year: "বছর",
+            month: "মাস",
+            faqTitle1: "প্রশ্ন আছে? আমাদের কাছে",
+            faqTitle2: "উত্তর আছে।",
+            faqBody: "আপনার জন্য সেরা প্ল্যান বেছে নিতে আমাদের টিম সাহায্য করবে।",
+            contactSupport: "সাপোর্টে যোগাযোগ",
+            guaranteeTitle: "৩০ দিনের টাকা ফেরত গ্যারান্টি",
+            guaranteeBody: "সন্তুষ্ট না হলে ৩০ দিনের মধ্যে পুরো টাকা ফেরত। আপনার জ্ঞানযাত্রা ঝুঁকিমুক্ত হওয়া উচিত।",
+        }
+        : {
+            title: "Choose Your Journey",
+            badge: "Simple, transparent pricing",
+            subtitle: "Unlock the wisdom you deserve. Every plan is designed to elevate your mind and enrich your perspective.",
+            monthly: "Monthly",
+            yearly: "Yearly",
+            save30: "Save 30%",
+            mostPopular: "Most Popular",
+            year: "year",
+            month: "month",
+            faqTitle1: "Questions? We've got",
+            faqTitle2: "answers",
+            faqBody: "Our team is here to help you find the perfect plan for your journey.",
+            contactSupport: "Contact Support",
+            guaranteeTitle: "30-Day Money-Back Guarantee",
+            guaranteeBody: "Not satisfied? No problem. We'll refund your payment within 30 days, no questions asked. Your journey to wisdom should be risk-free.",
+        };
 
-    const title = "Choose Your Journey";
+    const plans = locale === "bn"
+        ? [
+            {
+                id: "free",
+                name: "রিডার",
+                description: "যারা সহজে পড়তে চান তাদের জন্য",
+                monthlyPrice: 0,
+                yearlyPrice: 0,
+                icon: Sparkles,
+                color: "from-gray-500 to-gray-600",
+                features: [
+                    "মাসে ৫টি ফ্রি লেখা পড়া",
+                    "সাপ্তাহিক নিউজলেটার",
+                    "কমিউনিটি আলোচনা",
+                    "বেসিক বুকমার্কিং",
+                ],
+                cta: "শুরু করুন",
+                popular: false,
+            },
+            {
+                id: "pro",
+                name: "এক্সপ্লোরার",
+                description: "যারা গভীরভাবে পড়তে চান তাদের জন্য",
+                monthlyPrice: 12,
+                yearlyPrice: 99,
+                icon: Zap,
+                color: "from-accent to-blue-600",
+                features: [
+                    "আনলিমিটেড লেখা অ্যাক্সেস",
+                    "বিজ্ঞাপনমুক্ত পড়া",
+                    "নতুন কনটেন্টে আগাম অ্যাক্সেস",
+                    "এক্সক্লুসিভ পডকাস্ট ও ভিডিও",
+                    "প্রায়োরিটি সাপোর্ট",
+                    "অফলাইনে পড়ার জন্য ডাউনলোড",
+                ],
+                cta: "এক্সপ্লোর শুরু করুন",
+                popular: true,
+            },
+            {
+                id: "premium",
+                name: "ভিশনারি",
+                description: "যারা সবকিছু চান তাদের জন্য",
+                monthlyPrice: 29,
+                yearlyPrice: 249,
+                icon: Crown,
+                color: "from-amber-500 to-orange-600",
+                features: [
+                    "এক্সপ্লোরারের সব সুবিধা",
+                    "১-অন-১ লেখক সেশন",
+                    "এক্সক্লুসিভ মাস্টারক্লাস",
+                    "প্রাইভেট কমিউনিটি অ্যাক্সেস",
+                    "ব্যক্তিগতকৃত সুপারিশ",
+                    "কনসিয়ার্জ সাপোর্ট",
+                    "ইভেন্টে আগে অ্যাক্সেস",
+                ],
+                cta: "ভিশনারি হন",
+                popular: false,
+            },
+        ]
+        : [
+            {
+                id: "free",
+                name: "Reader",
+                description: "For casual readers who want to explore",
+                monthlyPrice: 0,
+                yearlyPrice: 0,
+                icon: Sparkles,
+                color: "from-gray-500 to-gray-600",
+                features: [
+                    "Access to 5 free articles per month",
+                    "Weekly newsletter",
+                    "Community discussions",
+                    "Basic bookmarking",
+                ],
+                cta: "Get Started",
+                popular: false,
+            },
+            {
+                id: "pro",
+                name: "Explorer",
+                description: "For dedicated readers seeking deeper wisdom",
+                monthlyPrice: 12,
+                yearlyPrice: 99,
+                icon: Zap,
+                color: "from-accent to-blue-600",
+                features: [
+                    "Unlimited article access",
+                    "Ad-free reading experience",
+                    "Early access to new content",
+                    "Exclusive podcasts & videos",
+                    "Priority support",
+                    "Download for offline reading",
+                ],
+                cta: "Start Exploring",
+                popular: true,
+            },
+            {
+                id: "premium",
+                name: "Visionary",
+                description: "For thought leaders who want it all",
+                monthlyPrice: 29,
+                yearlyPrice: 249,
+                icon: Crown,
+                color: "from-amber-500 to-orange-600",
+                features: [
+                    "Everything in Explorer",
+                    "1-on-1 author sessions",
+                    "Exclusive masterclasses",
+                    "Private community access",
+                    "Personalized recommendations",
+                    "White-glove concierge support",
+                    "First access to events",
+                ],
+                cta: "Become a Visionary",
+                popular: false,
+            },
+        ];
 
     return (
         <main className="min-h-screen bg-bg-primary text-text-primary overflow-hidden">
@@ -183,13 +277,13 @@ export default function PricingPage() {
                             <Sparkles className="w-4 h-4 text-accent" />
                         </motion.span>
                         <span className="text-xs font-bold uppercase tracking-widest text-accent">
-                            Simple, transparent pricing
+                            {copy.badge}
                         </span>
                     </motion.div>
 
                     {/* Animated Title - Word by Word for proper mobile wrapping */}
                     <h1 className="text-4xl md:text-7xl lg:text-8xl font-serif font-bold tracking-tight mb-6">
-                        {title.split(" ").map((word, i) => (
+                        {copy.title.split(" ").map((word, i) => (
                             <motion.span
                                 key={i}
                                 custom={i}
@@ -209,8 +303,7 @@ export default function PricingPage() {
                         transition={{ delay: 0.8, duration: 0.6 }}
                         className="text-lg md:text-xl text-text-secondary max-w-2xl mx-auto mb-12"
                     >
-                        Unlock the wisdom you deserve. Every plan is designed to
-                        elevate your mind and enrich your perspective.
+                        {copy.subtitle}
                     </motion.p>
 
                     {/* Animated Toggle */}
@@ -221,7 +314,7 @@ export default function PricingPage() {
                         className="flex items-center justify-center gap-4 mb-16"
                     >
                         <span className={`text-sm font-medium transition-colors ${!isYearly ? "text-text-primary" : "text-text-muted"}`}>
-                            Monthly
+                            {copy.monthly}
                         </span>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -236,7 +329,7 @@ export default function PricingPage() {
                             />
                         </motion.button>
                         <span className={`text-sm font-medium transition-colors ${isYearly ? "text-text-primary" : "text-text-muted"}`}>
-                            Yearly
+                            {copy.yearly}
                         </span>
                         <AnimatePresence>
                             {isYearly && (
@@ -246,7 +339,7 @@ export default function PricingPage() {
                                     exit={{ opacity: 0, x: 10, scale: 0.8 }}
                                     className="px-3 py-1 bg-green-500/20 text-green-500 text-xs font-bold rounded-full"
                                 >
-                                    Save 30%
+                                    {copy.save30}
                                 </motion.span>
                             )}
                         </AnimatePresence>
@@ -282,7 +375,7 @@ export default function PricingPage() {
                                     className="absolute -top-4 left-1/2 -translate-x-1/2 z-10"
                                 >
                                     <div className="px-4 py-1 bg-accent text-white text-xs font-bold uppercase tracking-widest rounded-full shadow-lg shadow-accent/30">
-                                        Most Popular
+                                        {copy.mostPopular}
                                     </div>
                                 </motion.div>
                             )}
@@ -322,7 +415,7 @@ export default function PricingPage() {
                                                 ${isYearly ? plan.yearlyPrice : plan.monthlyPrice}
                                             </span>
                                             <span className="text-text-muted text-sm">
-                                                /{isYearly ? "year" : "month"}
+                                                /{isYearly ? copy.year : copy.month}
                                             </span>
                                         </motion.div>
                                     </AnimatePresence>
@@ -386,10 +479,10 @@ export default function PricingPage() {
                     className="max-w-2xl mx-auto text-center"
                 >
                     <h2 className="text-3xl md:text-4xl font-serif font-bold mb-6">
-                        Questions? We've got <span className="italic text-accent">answers</span>.
+                        {copy.faqTitle1} <span className="italic text-accent">{copy.faqTitle2}</span>.
                     </h2>
                     <p className="text-text-secondary mb-8">
-                        Our team is here to help you find the perfect plan for your journey.
+                        {copy.faqBody}
                     </p>
                     <motion.div
                         whileHover={{ scale: 1.05 }}
@@ -399,7 +492,7 @@ export default function PricingPage() {
                             href="/contact"
                             className="inline-flex items-center gap-2 px-8 py-4 bg-bg-secondary border border-border-subtle rounded-full font-bold text-sm uppercase tracking-widest hover:bg-black hover:text-white hover:border-black transition-all"
                         >
-                            Contact Support
+                            {copy.contactSupport}
                             <ArrowRight className="w-4 h-4" />
                         </Link>
                     </motion.div>
@@ -425,11 +518,10 @@ export default function PricingPage() {
                         </div>
                     </motion.div>
                     <h3 className="text-2xl md:text-3xl font-serif font-bold mb-4">
-                        30-Day Money-Back Guarantee
+                        {copy.guaranteeTitle}
                     </h3>
                     <p className="text-text-secondary max-w-xl mx-auto">
-                        Not satisfied? No problem. We'll refund your payment within 30 days,
-                        no questions asked. Your journey to wisdom should be risk-free.
+                        {copy.guaranteeBody}
                     </p>
                 </motion.div>
             </section>

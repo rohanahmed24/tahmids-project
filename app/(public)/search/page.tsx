@@ -2,6 +2,7 @@ import { searchPosts } from "@/actions/search";
 import { ArticleCard } from "@/components/ArticleCard";
 import { Search } from "lucide-react";
 import Link from "next/link";
+import { getCurrentLocale } from "@/lib/locale";
 
 // Force dynamic rendering since we use searchParams
 export const dynamic = 'force-dynamic';
@@ -12,18 +13,41 @@ export default async function SearchPage({
     searchParams: Promise<{ q: string }>;
 }) {
     const { q } = await searchParams;
-    const posts = await searchPosts(q || "");
+    const searchTerm = q || "";
+    const posts = await searchPosts(searchTerm);
+    const locale = await getCurrentLocale();
+    const copy = locale === "bn"
+        ? {
+            results: "সার্চ ফলাফল",
+            allStories: "সব লেখা",
+            story: "লেখা",
+            stories: "লেখা",
+            found: "পাওয়া গেছে",
+            noStories: "কোনো লেখা পাওয়া যায়নি",
+            noStoriesBody: `“${searchTerm}” এর সাথে মেলে এমন কিছু পাওয়া যায়নি। ভিন্ন কীওয়ার্ড দিয়ে চেষ্টা করুন বা বিষয়ভিত্তিক পেজ দেখুন।`,
+            browseTopics: "বিষয়গুলো দেখুন",
+        }
+        : {
+            results: "Search Results",
+            allStories: "All Stories",
+            story: "story",
+            stories: "stories",
+            found: "found",
+            noStories: "No stories found",
+            noStoriesBody: `We couldn't find anything matching "${searchTerm}". Try searching for different keywords or browse our categories.`,
+            browseTopics: "Browse Topics",
+        };
 
     return (
         <main className="min-h-screen bg-gray-950 text-white pt-32 pb-20 px-6 md:px-12">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-12 text-center">
-                    <p className="text-purple-400 font-mono text-sm mb-4 uppercase tracking-widest">Search Results</p>
+                    <p className="text-purple-400 font-mono text-sm mb-4 uppercase tracking-widest">{copy.results}</p>
                     <h1 className="text-4xl md:text-6xl font-serif font-black mb-6">
-                        {q ? `"${q}"` : "All Stories"}
+                        {searchTerm ? `"${searchTerm}"` : copy.allStories}
                     </h1>
                     <p className="text-gray-400 text-lg">
-                        {posts.length} {posts.length === 1 ? "story" : "stories"} found
+                        {posts.length} {posts.length === 1 ? copy.story : copy.stories} {copy.found}
                     </p>
                 </div>
 
@@ -39,16 +63,16 @@ export default async function SearchPage({
                             <Search className="w-8 h-8 text-gray-600" />
                         </div>
                         <div className="max-w-md space-y-2">
-                            <h2 className="text-2xl font-bold">No stories found</h2>
+                            <h2 className="text-2xl font-bold">{copy.noStories}</h2>
                             <p className="text-gray-400">
-                                We couldn't find anything matching "{q}". Try searching for different keywords or browse our categories.
+                                {copy.noStoriesBody}
                             </p>
                         </div>
                         <Link
                             href="/topics"
                             className="px-8 py-3 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-gray-200 transition-colors rounded-full"
                         >
-                            Browse Topics
+                            {copy.browseTopics}
                         </Link>
                     </div>
                 )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Play, Youtube } from "lucide-react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface ArticleVideoPlayerProps {
     videoUrl: string;
@@ -34,6 +35,23 @@ function isYouTubeUrl(url: string): boolean {
 }
 
 export function ArticleVideoPlayer({ videoUrl, title }: ArticleVideoPlayerProps) {
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            unsupported: "আপনার ব্রাউজার ভিডিও ট্যাগ সমর্থন করে না।",
+            watchMode: "দেখার মোড",
+            youtube: "ইউটিউব",
+            video: "ভিডিও",
+            content: "কনটেন্ট",
+        }
+        : {
+            unsupported: "Your browser does not support the video tag.",
+            watchMode: "Watch mode",
+            youtube: "YouTube",
+            video: "Video",
+            content: "content",
+        };
+
     const youtubeEmbedUrl = isYouTubeUrl(videoUrl) ? getYouTubeEmbedUrl(videoUrl) : null;
     
     return (
@@ -56,7 +74,7 @@ export function ArticleVideoPlayer({ videoUrl, title }: ArticleVideoPlayerProps)
                         preload="metadata"
                     >
                         <source src={videoUrl} type="video/mp4" />
-                        Your browser does not support the video tag.
+                        {copy.unsupported}
                     </video>
                 )}
             </div>
@@ -65,7 +83,7 @@ export function ArticleVideoPlayer({ videoUrl, title }: ArticleVideoPlayerProps)
                     {youtubeEmbedUrl ? <Youtube className="w-4 h-4 text-red-500" /> : <Play className="w-4 h-4" />}
                     <span className="font-medium">{title}</span>
                 </div>
-                <p className="text-xs text-text-tertiary mt-1">Watch mode • {youtubeEmbedUrl ? 'YouTube' : 'Video'} content</p>
+                <p className="text-xs text-text-tertiary mt-1">{copy.watchMode} • {youtubeEmbedUrl ? copy.youtube : copy.video} {copy.content}</p>
             </div>
         </div>
     );

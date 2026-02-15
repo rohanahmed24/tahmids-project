@@ -5,12 +5,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { getPublicCategorySummaries } from "@/lib/posts";
+import { getCurrentLocale } from "@/lib/locale";
+import { t } from "@/lib/translations";
 
 interface TopicPageProps {
     params: Promise<{ slug: string }>;
 }
 
-const CATEGORY_META: Record<string, { subtitle: string; description: string; accent: string }> = {
+const CATEGORY_META_EN: Record<string, { subtitle: string; description: string; accent: string }> = {
     technology: {
         subtitle: "Innovation & Tools",
         description: "Deep dives into technology trends, AI shifts, and the systems shaping modern life.",
@@ -43,14 +45,50 @@ const CATEGORY_META: Record<string, { subtitle: string; description: string; acc
     },
 };
 
-function getCategoryMeta(slug: string, categoryName: string) {
+const CATEGORY_META_BN: Record<string, { subtitle: string; description: string; accent: string }> = {
+    technology: {
+        subtitle: "উদ্ভাবন ও টুলস",
+        description: "প্রযুক্তি প্রবণতা, এআই পরিবর্তন এবং আধুনিক জীবনকে গড়ে তোলা সিস্টেম নিয়ে বিশ্লেষণ।",
+        accent: "#60A5FA",
+    },
+    design: {
+        subtitle: "রূপ ও কার্যকারিতা",
+        description: "ডিজাইন চিন্তা, নান্দনিকতা এবং অর্থপূর্ণ ডিজিটাল/ভৌত অভিজ্ঞতার কারিগরি দিক।",
+        accent: "#A78BFA",
+    },
+    culture: {
+        subtitle: "মানুষ ও সমাজ",
+        description: "পরিচয়, মিডিয়া, শিল্প এবং জনআলোচনাকে প্রভাবিত করা সাংস্কৃতিক শক্তি নিয়ে গল্প ও বিশ্লেষণ।",
+        accent: "#F472B6",
+    },
+    business: {
+        subtitle: "বাজার ও কৌশল",
+        description: "ব্যবসায়িক মডেল, অর্থনৈতিক গতি এবং উচ্চ-প্রভাব সিদ্ধান্তের বাস্তব দৃষ্টিভঙ্গি।",
+        accent: "#22C55E",
+    },
+    self: {
+        subtitle: "বিকাশ ও মানসিকতা",
+        description: "স্ব-উন্নয়ন, স্বচ্ছতা, অভ্যাস এবং সচেতন জীবন নিয়ে কাঠামো ও গল্প।",
+        accent: "#F59E0B",
+    },
+    politics: {
+        subtitle: "ক্ষমতা ও নীতি",
+        description: "রাজনৈতিক কাঠামো, নীতির প্রভাব এবং বৈশ্বিক ঘটনাপ্রবাহ নিয়ে প্রেক্ষাপটসমৃদ্ধ কভারেজ।",
+        accent: "#EF4444",
+    },
+};
+
+function getCategoryMeta(slug: string, categoryName: string, locale: "en" | "bn") {
     const fallback = {
-        subtitle: "Category Focus",
-        description: `Latest stories and analysis from ${categoryName}.`,
+        subtitle: locale === "bn" ? "বিষয়ভিত্তিক ফোকাস" : "Category Focus",
+        description: locale === "bn"
+            ? `${categoryName} থেকে সর্বশেষ লেখা ও বিশ্লেষণ।`
+            : `Latest stories and analysis from ${categoryName}.`,
         accent: "#0A2540",
     };
 
-    return CATEGORY_META[slug] || fallback;
+    const metaTable = locale === "bn" ? CATEGORY_META_BN : CATEGORY_META_EN;
+    return metaTable[slug] || fallback;
 }
 
 function slugToTitle(slug: string): string {
@@ -62,25 +100,26 @@ function slugToTitle(slug: string): string {
 }
 
 export default async function TopicPage({ params }: TopicPageProps) {
+    const locale = await getCurrentLocale();
     const { slug } = await params;
-    const categories = await getPublicCategorySummaries();
+    const categories = await getPublicCategorySummaries(locale);
     const topic = categories.find((category) => category.slug === slug);
 
     if (!topic) {
         return (
             <main className="min-h-screen bg-base flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-4xl font-serif font-bold text-main mb-4">Topic Not Found</h1>
-                    <p className="text-secondary mb-8">The topic you're looking for doesn't exist.</p>
+                    <h1 className="text-4xl font-serif font-bold text-main mb-4">{t(locale, "topicNotFound")}</h1>
+                    <p className="text-secondary mb-8">{t(locale, "topicNotFoundBody")}</p>
                     <Link href="/topics" className="text-accent hover:underline">
-                        Browse All Topics
+                        {t(locale, "browseAllTopics")}
                     </Link>
                 </div>
             </main>
         );
     }
 
-    const meta = getCategoryMeta(slug, topic.name);
+    const meta = getCategoryMeta(slug, topic.name, locale);
     const relatedCategories = categories.filter((category) => category.slug !== slug);
 
     return (
@@ -122,14 +161,14 @@ export default async function TopicPage({ params }: TopicPageProps) {
                     <MotionWrapper type="fade-in">
                         <div className="flex items-center justify-between mb-12">
                             <h2 className="text-2xl md:text-3xl font-serif font-medium text-main">
-                                Latest in {topic.name}
+                                {t(locale, "latestIn")} {topic.name}
                             </h2>
                             <span className="text-sm font-bold uppercase tracking-widest text-accent">
-                                {topic.count} {topic.count === 1 ? "Story" : "Stories"}
+                                {topic.count} {topic.count === 1 ? t(locale, "story") : t(locale, "stories")}
                             </span>
                         </div>
                     </MotionWrapper>
-                    <StoriesGrid category={topic.name} />
+                    <StoriesGrid category={topic.canonicalName} categoryLabel={topic.name} />
                 </div>
             </section>
 
@@ -138,7 +177,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
                 <div className="max-w-[1280px] mx-auto">
                     <MotionWrapper type="fade-in">
                         <h2 className="text-2xl md:text-3xl font-serif font-medium text-main mb-12 text-center">
-                            Explore Related Topics
+                            {t(locale, "exploreRelatedTopics")}
                         </h2>
                         <div className="flex flex-wrap justify-center gap-4">
                             {relatedCategories.map((category) => (
@@ -161,12 +200,17 @@ export default async function TopicPage({ params }: TopicPageProps) {
 }
 
 export async function generateMetadata({ params }: TopicPageProps) {
+    const locale = await getCurrentLocale();
     const { slug } = await params;
     const categoryName = slugToTitle(slug);
 
     return {
-        title: `${categoryName} Stories | Wisdomia`,
-        description: `Explore the latest ${categoryName} stories and analysis on Wisdomia.`,
+        title: locale === "bn"
+            ? `${categoryName} ${t(locale, "stories")} | Wisdomia`
+            : `${categoryName} Stories | Wisdomia`,
+        description: locale === "bn"
+            ? `${categoryName} বিষয়ে ${t(locale, "latestStories")} এবং বিশ্লেষণ দেখুন।`
+            : `Explore the latest ${categoryName} stories and analysis on Wisdomia.`,
         alternates: {
             canonical: `/topics/${slug}`,
         },

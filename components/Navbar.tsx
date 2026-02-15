@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Menu, X, User, LogOut, Loader2 } from "lucide-react";
+import { Search, Menu, X, LogOut, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -9,14 +9,16 @@ import { LanguageToggle } from "./LanguageToggle";
 import { useSession, signOut } from "next-auth/react";
 import { getMenuCategories } from "@/actions/categories";
 import { BASE_CATEGORIES, categoryToSlug } from "@/lib/categories";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { t } from "@/lib/translations";
 
 export default function Navbar() {
     const { data: session, status } = useSession();
+    const { locale } = useLocale();
     const user = session?.user;
     const isLoading = status === "loading";
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [sectionLinks, setSectionLinks] = useState<{ name: string; href: string }[]>([]);
 
     useEffect(() => {
@@ -27,7 +29,7 @@ export default function Navbar() {
             }
         };
         fetchSections();
-    }, []);
+    }, [locale]);
 
     // Text color logic: 
     // Uses semantic primary text (Charcoal in Light, White in Dark)
@@ -44,7 +46,6 @@ export default function Navbar() {
 
     const handleLogout = async () => {
         await signOut({ callbackUrl: "/" });
-        setIsUserMenuOpen(false);
     };
 
     return (
@@ -63,7 +64,7 @@ export default function Navbar() {
                             className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
                         >
                             <Menu className="w-5 h-5" />
-                            <span className="hidden md:block">Menu</span>
+                            <span className="hidden md:block">{t(locale, "menu")}</span>
                         </button>
                     </div>
 
@@ -144,7 +145,7 @@ export default function Navbar() {
                                             onClick={() => setIsMenuOpen(false)}
                                             className="text-sm font-bold uppercase tracking-widest bg-accent-primary text-white px-4 py-2 rounded-full hover:opacity-90 transition-opacity"
                                         >
-                                            Sign In
+                                            {t(locale, "signIn")}
                                         </Link>
                                     )}
                                 </div>
@@ -157,9 +158,9 @@ export default function Navbar() {
                                 </div>
 
                                 <div className="flex items-center gap-4 text-sm font-sans text-text-secondary">
-                                    <Link href="/popular" onClick={() => setIsMenuOpen(false)} className="hover:text-text-primary">Popular</Link>
-                                    <Link href="/latest" onClick={() => setIsMenuOpen(false)} className="hover:text-text-primary">Latest</Link>
-                                    <Link href="/newsletters" onClick={() => setIsMenuOpen(false)} className="hover:text-text-primary">Newsletters</Link>
+                                    <Link href="/popular" onClick={() => setIsMenuOpen(false)} className="hover:text-text-primary">{t(locale, "popular")}</Link>
+                                    <Link href="/latest" onClick={() => setIsMenuOpen(false)} className="hover:text-text-primary">{t(locale, "latest")}</Link>
+                                    <Link href="/newsletters" onClick={() => setIsMenuOpen(false)} className="hover:text-text-primary">{t(locale, "newsletters")}</Link>
                                 </div>
                             </div>
 
@@ -167,7 +168,7 @@ export default function Navbar() {
                             <div className="p-8">
                                 <div className="mb-6">
                                     <span className="text-accent font-bold uppercase tracking-wider text-sm">
-                                        SECTIONS
+                                        {t(locale, "sections")}
                                     </span>
                                 </div>
 

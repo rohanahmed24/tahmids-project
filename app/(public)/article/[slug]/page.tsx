@@ -5,20 +5,22 @@ import { ArticleContent } from "@/components/ArticleContent";
 import { ArticleSidebar } from "@/components/ArticleSidebar";
 import { BacklinksSection } from "@/components/BacklinksSection";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
+import { getCurrentLocale } from "@/lib/locale";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
+  const locale = await getCurrentLocale();
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await getPostBySlug(slug, locale);
 
   if (!post) {
     notFound();
   }
 
-  const relatedPosts = await getRelatedPosts(post.category, post.slug, 4);
+  const relatedPosts = await getRelatedPosts(post.categoryEn, post.slug, 4, locale);
 
   return (
     <div className="min-h-screen bg-bg-primary overflow-x-clip">
@@ -34,6 +36,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         coverImage={post.coverImage || undefined}
         slug={post.slug}
         videoUrl={post.videoUrl || undefined}
+        locale={locale}
       />
 
       {/* Main Content Area */}
@@ -41,7 +44,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
           {/* Article Content */}
           <div className="space-y-8 min-w-0">
-            {post.content && (
+            {locale !== "bn" && post.content && (
               <ArticleAudioPlayer title={post.title} content={post.content} />
             )}
 
@@ -64,6 +67,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <ArticleSidebar 
             post={post} 
             relatedPosts={relatedPosts} 
+            locale={locale}
           />
         </div>
       </div>
@@ -72,8 +76,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 }
 
 export async function generateMetadata({ params }: ArticlePageProps) {
+  const locale = await getCurrentLocale();
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await getPostBySlug(slug, locale);
 
   if (!post) {
     return {
