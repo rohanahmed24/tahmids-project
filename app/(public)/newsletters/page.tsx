@@ -5,8 +5,37 @@ import { motion } from "framer-motion";
 import { Mail, ArrowRight, Loader2, Check, Newspaper } from "lucide-react";
 import Link from "next/link";
 import { subscribeToNewsletter } from "@/actions/newsletter";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export default function NewslettersPage() {
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            successDefault: "সফলভাবে সাবস্ক্রাইব হয়েছে!",
+            failed: "সাবস্ক্রাইব করা যায়নি",
+            error: "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।",
+            newsletters: "নিউজলেটার",
+            stayInformed: "আপডেট থাকুন",
+            subtitle: "আমাদের নিউজলেটার সাবস্ক্রাইব করুন, কোনো গুরুত্বপূর্ণ গল্প মিস করবেন না।",
+            subscribeAll: "সবগুলোতে সাবস্ক্রাইব",
+            subscribeAllBody: "একটি সাবস্ক্রিপশনেই আমাদের সব নিউজলেটার পাবেন।",
+            emailPlaceholder: "আপনার ইমেইল...",
+            subscribe: "সাবস্ক্রাইব",
+            backHome: "← হোমে ফিরুন",
+        }
+        : {
+            successDefault: "Successfully subscribed!",
+            failed: "Failed to subscribe",
+            error: "Something went wrong. Please try again.",
+            newsletters: "Newsletters",
+            stayInformed: "Stay Informed",
+            subtitle: "Subscribe to our newsletters and never miss a story. Get curated content delivered directly to your inbox.",
+            subscribeAll: "Subscribe to All",
+            subscribeAllBody: "Get all our newsletters with a single subscription.",
+            emailPlaceholder: "Your email address...",
+            subscribe: "Subscribe",
+            backHome: "← Back to Home",
+        };
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -21,21 +50,37 @@ export default function NewslettersPage() {
             const result = await subscribeToNewsletter(email);
             if (result.success) {
                 setStatus("success");
-                setMessage(result.message || "Successfully subscribed!");
+                setMessage(result.message || copy.successDefault);
                 setEmail("");
             } else {
                 setStatus("error");
-                setMessage(result.error || "Failed to subscribe");
+                setMessage(result.error || copy.failed);
             }
         } catch {
             setStatus("error");
-            setMessage("Something went wrong. Please try again.");
+            setMessage(copy.error);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const newsletters = [
+    const newsletters = locale === "bn" ? [
+        {
+            title: "সাপ্তাহিক প্রজ্ঞা",
+            description: "সপ্তাহের সেরা কিউরেটেড লেখাগুলো, প্রতি রবিবার আপনার ইনবক্সে।",
+            frequency: "সাপ্তাহিক"
+        },
+        {
+            title: "ব্রেকিং ইনসাইটস",
+            description: "গুরুত্বপূর্ণ বড় খবর ও গল্প, ঘটনার সাথে সাথেই।",
+            frequency: "প্রয়োজনে"
+        },
+        {
+            title: "ডিপ ডাইভস",
+            description: "গুরুত্বপূর্ণ বিষয় নিয়ে গভীর বিশ্লেষণ ও দীর্ঘ-আকারের লেখা।",
+            frequency: "মাসিক"
+        }
+    ] : [
         {
             title: "Weekly Wisdom",
             description: "A curated selection of the week's best stories, delivered every Sunday.",
@@ -59,13 +104,13 @@ export default function NewslettersPage() {
                 <div className="mb-12 text-center">
                     <div className="flex items-center justify-center gap-2 text-accent mb-4">
                         <Newspaper className="w-5 h-5" />
-                        <span className="font-mono text-sm uppercase tracking-widest">Newsletters</span>
+                        <span className="font-mono text-sm uppercase tracking-widest">{copy.newsletters}</span>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-serif font-black mb-6">
-                        Stay Informed
+                        {copy.stayInformed}
                     </h1>
                     <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-                        Subscribe to our newsletters and never miss a story. Get curated content delivered directly to your inbox.
+                        {copy.subtitle}
                     </p>
                 </div>
 
@@ -95,9 +140,9 @@ export default function NewslettersPage() {
                 <div className="max-w-lg mx-auto">
                     <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-border-primary rounded-2xl p-8 text-center">
                         <Mail className="w-12 h-12 text-accent mx-auto mb-4" />
-                        <h2 className="text-2xl font-bold mb-4">Subscribe to All</h2>
+                        <h2 className="text-2xl font-bold mb-4">{copy.subscribeAll}</h2>
                         <p className="text-text-secondary mb-6">
-                            Get all our newsletters with a single subscription.
+                            {copy.subscribeAllBody}
                         </p>
 
                         {status === "success" ? (
@@ -111,7 +156,7 @@ export default function NewslettersPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Your email address..."
+                                    placeholder={copy.emailPlaceholder}
                                     required
                                     data-testid="input-newsletter-email"
                                     className="flex-1 px-4 py-3 bg-bg-primary border border-border-primary rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
@@ -125,10 +170,10 @@ export default function NewslettersPage() {
                                     className="px-6 py-3 bg-accent text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
                                     {isLoading ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                        <>
-                                            Subscribe
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                            <>
+                                            {copy.subscribe}
                                             <ArrowRight className="w-4 h-4" />
                                         </>
                                     )}
@@ -148,7 +193,7 @@ export default function NewslettersPage() {
                         data-testid="link-back-home"
                         className="text-text-secondary hover:text-text-primary transition-colors"
                     >
-                        ← Back to Home
+                        {copy.backHome}
                     </Link>
                 </div>
             </div>

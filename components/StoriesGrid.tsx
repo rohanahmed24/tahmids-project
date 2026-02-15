@@ -3,19 +3,22 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MobileSlider } from "@/components/ui/MobileSlider";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { useState, useEffect } from "react";
 import type { Post } from "@/lib/posts";
 import { Assets } from "@/lib/assets";
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { t } from "@/lib/translations";
 
 interface StoriesGridProps {
     category?: string; // Optional filtering
+    categoryLabel?: string;
 }
 
-export function StoriesGrid({ category }: StoriesGridProps) {
+export function StoriesGrid({ category, categoryLabel }: StoriesGridProps) {
+    const { locale } = useLocale();
     const router = useRouter();
     const [stories, setStories] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -46,7 +49,7 @@ export function StoriesGrid({ category }: StoriesGridProps) {
         return (
             <section className="relative w-full py-12 md:py-24 bg-bg-primary">
                 <div className="max-w-[1800px] mx-auto px-6 md:px-12 text-center text-text-muted">
-                    Loading stories...
+                    {t(locale, "loadingStories")}
                 </div>
             </section>
         );
@@ -56,7 +59,9 @@ export function StoriesGrid({ category }: StoriesGridProps) {
         return (
             <section className="relative w-full py-12 md:py-24 bg-bg-primary">
                 <div className="max-w-[1800px] mx-auto px-6 md:px-12 text-center">
-                    <p className="text-text-secondary text-lg">No stories found in {category || "this section"} yet.</p>
+                    <p className="text-text-secondary text-lg">
+                        {t(locale, "noStoriesFoundIn")} {categoryLabel || category || t(locale, "thisSection")} {t(locale, "yet")}.
+                    </p>
                 </div>
             </section>
         );
@@ -68,10 +73,10 @@ export function StoriesGrid({ category }: StoriesGridProps) {
                 {/* Section Header */}
                 <div className="text-center mb-10 md:mb-20 text-text-primary">
                     <span className="text-xs font-bold tracking-[0.3em] uppercase opacity-50 block mb-4">
-                        {category ? "Curated Stories" : "Latest Stories"}
+                        {category ? t(locale, "curatedStories") : t(locale, "latestStories")}
                     </span>
                     <h2 className="text-4xl md:text-5xl lg:text-7xl font-serif font-black tracking-tighter">
-                        {category ? category.toUpperCase() : <>THE <span className="italic font-light">ARCHIVE</span></>}
+                        {category ? (categoryLabel || category).toUpperCase() : <>THE <span className="italic font-light">ARCHIVE</span></>}
                     </h2>
                 </div>
 
@@ -171,7 +176,7 @@ export function StoriesGrid({ category }: StoriesGridProps) {
 
                 <div className="flex justify-center mt-20">
                     <button className="text-xs font-bold uppercase tracking-[0.2em] border border-border-subtle px-8 py-4 text-text-primary hover:bg-black hover:text-white hover:border-black transition-all">
-                        Load More Stories
+                        {t(locale, "loadMoreStories")}
                     </button>
                 </div>
             </div>

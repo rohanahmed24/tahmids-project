@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { Post } from "@/lib/posts";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface CategorySectionProps {
     title: string;
@@ -18,6 +19,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
     const containerRef = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const [containerWidth, setContainerWidth] = useState(0);
+    const { locale } = useLocale();
 
     const cardsPerPage = 2;
     const gap = 12;
@@ -81,7 +83,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                         className="font-bold uppercase tracking-widest text-accent hover:underline"
                         style={{ fontSize: 'clamp(0.625rem, 1vw, 0.875rem)' }}
                     >
-                        View All
+                        {locale === "bn" ? "সব দেখুন" : "View All"}
                     </Link>
                 </div>
 
@@ -138,7 +140,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                                         ? "bg-accent w-4"
                                         : "bg-text-muted/30 w-1.5 hover:bg-text-muted/50"
                                         }`}
-                                    aria-label={`Go to slider page ${index + 1}`}
+                                    aria-label={locale === "bn" ? `স্লাইড পেজ ${index + 1} এ যান` : `Go to slider page ${index + 1}`}
                                 />
                             ))}
                         </div>

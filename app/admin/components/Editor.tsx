@@ -28,6 +28,7 @@ import {
     BASE_CATEGORIES,
     canonicalizeCategoryName,
     categoryToSlug,
+    getBengaliCategoryName,
 } from "@/lib/categories";
 
 interface EditorProps {
@@ -35,19 +36,27 @@ interface EditorProps {
         title: string;
         slug: string;
         category: string;
+        categoryBn?: string;
         content: string;
+        contentBn?: string;
         coverImage?: string;
         videoUrl?: string;
         audioUrl?: string;
         subtitle?: string;
+        subtitleBn?: string;
         topic_slug?: string;
         accent_color?: string;
         featured?: boolean;
         published?: boolean;
         authorName?: string;
+        authorNameBn?: string;
         translatorName?: string;
+        translatorNameBn?: string;
         editorName?: string;
+        editorNameBn?: string;
         metaDescription?: string;
+        metaDescriptionBn?: string;
+        titleBn?: string;
         backlinks?: string[];
     };
     action: (formData: FormData) => Promise<void>;
@@ -57,19 +66,27 @@ interface EditorProps {
 export default function Editor({ initialData, action, categoryOptions = [] }: EditorProps) {
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const [title, setTitle] = useState(initialData?.title || "");
+    const [titleBn, setTitleBn] = useState(initialData?.titleBn || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [content, setContent] = useState(initialData?.content || "");
+    const [contentBn, setContentBn] = useState(initialData?.contentBn || "");
     const [coverImage, setCoverImage] = useState(initialData?.coverImage || "");
     const [category, setCategory] = useState(initialData?.category || "Technology");
+    const [categoryBn, setCategoryBn] = useState(initialData?.categoryBn || getBengaliCategoryName(initialData?.category || "Technology"));
     const [published, setPublished] = useState(initialData?.published ?? true);
     const [authorName, setAuthorName] = useState(initialData?.authorName || "");
+    const [authorNameBn, setAuthorNameBn] = useState(initialData?.authorNameBn || "");
     const [translatorName, setTranslatorName] = useState(initialData?.translatorName || "");
+    const [translatorNameBn, setTranslatorNameBn] = useState(initialData?.translatorNameBn || "");
     const [editorName, setEditorName] = useState(initialData?.editorName || "");
+    const [editorNameBn, setEditorNameBn] = useState(initialData?.editorNameBn || "");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.coverImage || null);
     const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl || "");
     const [isUploadingAudio, setIsUploadingAudio] = useState(false);
     const [metaDescription, setMetaDescription] = useState(initialData?.metaDescription || "");
+    const [metaDescriptionBn, setMetaDescriptionBn] = useState(initialData?.metaDescriptionBn || "");
+    const [subtitleBn, setSubtitleBn] = useState(initialData?.subtitleBn || "");
     const [backlinks, setBacklinks] = useState(initialData?.backlinks ? initialData.backlinks.join('\n') : "");
 
     // Premium Features State
@@ -420,8 +437,16 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
         const formData = new FormData(e.currentTarget);
         formData.set("published", String(published));
         formData.set("authorName", authorName);
+        formData.set("authorNameBn", authorNameBn);
         formData.set("translatorName", translatorName);
+        formData.set("translatorNameBn", translatorNameBn);
         formData.set("editorName", editorName);
+        formData.set("editorNameBn", editorNameBn);
+        formData.set("titleBn", titleBn);
+        formData.set("contentBn", contentBn);
+        formData.set("categoryBn", categoryBn);
+        formData.set("subtitleBn", subtitleBn);
+        formData.set("metaDescriptionBn", metaDescriptionBn);
         // Ensure other states are set if not controlled inputs (they are mostly named inputs)
         handleSubmit(formData);
     };
@@ -514,6 +539,16 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                 required
                             />
                         </div>
+                        <div>
+                            <input
+                                type="text"
+                                name="titleBn"
+                                value={titleBn}
+                                onChange={(e) => setTitleBn(e.target.value)}
+                                placeholder="বাংলা শিরোনাম (ঐচ্ছিক)"
+                                className="w-full bg-transparent text-2xl font-serif font-semibold placeholder:text-text-muted focus:outline-none text-text-primary"
+                            />
+                        </div>
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                             <span className="font-mono text-purple-500">/article/</span>
                             <div className="relative flex-1">
@@ -550,6 +585,19 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                 dangerouslySetInnerHTML={{ __html: content }}
                             />
                         )}
+                    </div>
+
+                    {/* Bengali Content */}
+                    <div className="bg-bg-card border border-border-primary rounded-2xl p-6 space-y-3">
+                        <label className="text-sm font-medium text-text-secondary">Bengali Content (Optional)</label>
+                        <textarea
+                            name="contentBn"
+                            value={contentBn}
+                            onChange={(e) => setContentBn(e.target.value)}
+                            placeholder="বাংলা অনুবাদ কনটেন্ট এখানে লিখুন..."
+                            rows={14}
+                            className="w-full px-3 py-3 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm resize-y"
+                        />
                     </div>
                 </div>
 
@@ -603,6 +651,18 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                             </div>
 
                             <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Category (Bengali)</label>
+                                <input
+                                    type="text"
+                                    name="categoryBn"
+                                    value={categoryBn}
+                                    onChange={(e) => setCategoryBn(e.target.value)}
+                                    placeholder="যেমন: প্রযুক্তি"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-sm text-text-primary"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
                                 <label className="text-sm font-medium text-text-secondary">Topic Slug</label>
                                 <input
                                     type="hidden"
@@ -626,6 +686,18 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                     name="subtitle"
                                     defaultValue={initialData?.subtitle}
                                     placeholder="Brief tagline..."
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Subtitle (Bengali)</label>
+                                <input
+                                    type="text"
+                                    name="subtitleBn"
+                                    value={subtitleBn}
+                                    onChange={(e) => setSubtitleBn(e.target.value)}
+                                    placeholder="বাংলা সাবটাইটেল..."
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
                                 />
                             </div>
@@ -672,6 +744,18 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                 <p className="text-[10px] text-text-muted">Leave empty to use your profile name.</p>
                             </div>
 
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Writer Name (Bengali)</label>
+                                <input
+                                    type="text"
+                                    name="authorNameBn"
+                                    value={authorNameBn}
+                                    onChange={(e) => setAuthorNameBn(e.target.value)}
+                                    placeholder="যেমন: সাইফুল ইসলাম"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                            </div>
+
                             <div className="space-y-2 pt-4 border-t border-gray-800">
                                 <label className="text-sm font-medium text-text-secondary">Translator Name</label>
                                 <input
@@ -680,6 +764,18 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                     value={translatorName}
                                     onChange={(e) => setTranslatorName(e.target.value)}
                                     placeholder="e.g. Ayesha Rahman"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Translator Name (Bengali)</label>
+                                <input
+                                    type="text"
+                                    name="translatorNameBn"
+                                    value={translatorNameBn}
+                                    onChange={(e) => setTranslatorNameBn(e.target.value)}
+                                    placeholder="যেমন: আয়েশা রহমান"
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
                                 />
                             </div>
@@ -696,6 +792,18 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                 />
                             </div>
 
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Editor Name (Bengali)</label>
+                                <input
+                                    type="text"
+                                    name="editorNameBn"
+                                    value={editorNameBn}
+                                    onChange={(e) => setEditorNameBn(e.target.value)}
+                                    placeholder="যেমন: সম্পাদকীয় টিম"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                            </div>
+
                             <div className="space-y-2 pt-4 border-t border-gray-800">
                                 <label className="text-sm font-medium text-text-secondary">Meta Description</label>
                                 <textarea
@@ -708,6 +816,20 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm resize-none"
                                 />
                                 <p className="text-[10px] text-text-muted">{metaDescription.length}/160 characters</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Meta Description (Bengali)</label>
+                                <textarea
+                                    name="metaDescriptionBn"
+                                    value={metaDescriptionBn}
+                                    onChange={(e) => setMetaDescriptionBn(e.target.value)}
+                                    placeholder="বাংলা সারাংশ (১৬০ অক্ষর সুপারিশকৃত)"
+                                    maxLength={300}
+                                    rows={3}
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm resize-none"
+                                />
+                                <p className="text-[10px] text-text-muted">{metaDescriptionBn.length}/160 characters</p>
                             </div>
 
                             <div className="space-y-2 pt-4 border-t border-gray-800">

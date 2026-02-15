@@ -8,12 +8,36 @@ import { ChevronLeft, ChevronRight, Flame } from "lucide-react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { Post } from "@/lib/posts";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface HeroSliderProps {
     items: Post[];
 }
 
 export function HeroSlider({ items }: HeroSliderProps) {
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            welcome: "Wisdomia-তে স্বাগতম",
+            source: "চিরন্তন প্রজ্ঞার",
+            source2: "আপনার ঠিকানা",
+            discover: "ভাবনাকে নাড়া দেয় এমন লেখা, অন্তর্দৃষ্টি ও গল্প আবিষ্কার করুন।",
+            hotTopics: "গরম বিষয়",
+            heroHighlights: "প্রধান হাইলাইটস",
+            previousSlide: "পূর্বের স্লাইড",
+            nextSlide: "পরের স্লাইড",
+        }
+        : {
+            welcome: "Welcome to Wisdomia",
+            source: "Your Source for",
+            source2: "Timeless Wisdom",
+            discover: "Discover thought-provoking articles, insights, and stories that inspire and enlighten.",
+            hotTopics: "Hot Topics",
+            heroHighlights: "Hero Highlights",
+            previousSlide: "Previous slide",
+            nextSlide: "Next slide",
+        };
+
     const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 20 }, [Autoplay({ delay: 5000, stopOnInteraction: false })]);
     const [selectedIndex, setSelectedIndex] = useState(0);
     // Filter mainly ensuring we have items, fallback to empty array if undefined
@@ -42,14 +66,14 @@ export function HeroSlider({ items }: HeroSliderProps) {
                     <div className="flex items-center gap-2 bg-orange-500/80 backdrop-blur-md rounded-full px-4 py-2 mb-6">
                         <Flame className="w-4 h-4 text-white" />
                         <span className="text-xs font-bold uppercase tracking-widest text-white">
-                            Welcome to Wisdomia
+                            {copy.welcome}
                         </span>
                     </div>
                     <h1 className="text-4xl md:text-7xl font-serif font-bold text-white mb-4 max-w-4xl">
-                        Your Source for <span className="italic text-purple-300">Timeless Wisdom</span>
+                        {copy.source} <span className="italic text-purple-300">{copy.source2}</span>
                     </h1>
                     <p className="text-lg md:text-xl text-white/80 max-w-2xl">
-                        Discover thought-provoking articles, insights, and stories that inspire and enlighten.
+                        {copy.discover}
                     </p>
                 </div>
             </section>
@@ -69,7 +93,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
             }}
             role="region"
             aria-roledescription="carousel"
-            aria-label="Hero Highlights"
+            aria-label={copy.heroHighlights}
         >
             {/* Embla Carousel Viewport */}
             <div className="overflow-hidden h-full" ref={emblaRef}>
@@ -101,7 +125,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
                 <div className="flex items-center gap-2 bg-orange-500/80 backdrop-blur-md rounded-full px-3 py-1.5 md:px-4 md:py-2">
                     <Flame className="w-3 h-3 md:w-4 md:h-4 text-white" />
                     <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white">
-                        Hot Topics
+                        {copy.hotTopics}
                     </span>
                 </div>
             </div>
@@ -140,7 +164,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
             <button
                 onClick={scrollPrev}
                 className="hidden md:flex absolute bottom-1/2 -translate-y-1/2 left-8 z-20 w-12 h-12 md:w-14 md:h-14 bg-black/40 backdrop-blur-md border border-white/30 rounded-full items-center justify-center text-white hover:bg-black/60 transition-colors opacity-0 group-hover:opacity-100 duration-300"
-                aria-label="Previous slide"
+                aria-label={copy.previousSlide}
             >
                 <ChevronLeft className="w-6 h-6" />
             </button>
@@ -148,7 +172,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
             <button
                 onClick={scrollNext}
                 className="hidden md:flex absolute bottom-1/2 -translate-y-1/2 right-8 z-20 w-12 h-12 md:w-14 md:h-14 bg-black/40 backdrop-blur-md border border-white/30 rounded-full items-center justify-center text-white hover:bg-black/60 transition-colors opacity-0 group-hover:opacity-100 duration-300"
-                aria-label="Next slide"
+                aria-label={copy.nextSlide}
             >
                 <ChevronRight className="w-6 h-6" />
             </button>
@@ -163,7 +187,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
                             ? "bg-white"
                             : "bg-white/30"
                             }`}
-                        aria-label={`Go to slide ${index + 1}`}
+                        aria-label={locale === "bn" ? `স্লাইড ${index + 1} এ যান` : `Go to slide ${index + 1}`}
                     />
                 ))}
             </div>
@@ -199,7 +223,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
                             ? "ring-2 ring-white ring-offset-2 ring-offset-black/50"
                             : "opacity-50 hover:opacity-80"
                             }`}
-                        aria-label={`Go to slide ${index + 1}`}
+                        aria-label={locale === "bn" ? `স্লাইড ${index + 1} এ যান` : `Go to slide ${index + 1}`}
                     >
                         <Image
                             src={topic.coverImage || '/placeholder.jpg'}

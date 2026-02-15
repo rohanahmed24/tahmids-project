@@ -35,13 +35,20 @@ model Post {
   id          Int      @id @default(autoincrement())
   slug        String   @unique
   title       String
+  titleBn     String?  @map("title_bn")
   subtitle    String?
+  subtitleBn  String?  @map("subtitle_bn")
   date        String?
   authorName  String?  @map("author")
+  authorNameBn String? @map("author_bn")
   translatorName String? @map("translator_name")
+  translatorNameBn String? @map("translator_name_bn")
   editorName  String?  @map("editor_name")
+  editorNameBn String? @map("editor_name_bn")
   category    String?
+  categoryBn  String?  @map("category_bn")
   content     String?
+  contentBn   String?  @map("content_bn")
   coverImage  String?
   videoUrl    String?
   audioUrl    String?  @map("audio_url")
@@ -52,7 +59,9 @@ model Post {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
   excerpt     String?
+  excerptBn   String?  @map("excerpt_bn")
   metaDescription String? @map("meta_description")
+  metaDescriptionBn String? @map("meta_description_bn")
   backlinks    Json?    @map("backlinks")
   published   Boolean? @default(true)
   authorId    Int?     @map("author_id")

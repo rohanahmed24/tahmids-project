@@ -12,7 +12,7 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
     }
 
     const { slug } = await params;
-    const post = await getPostBySlug(slug);
+    const post = await getPostBySlug(slug, "en", true);
 
     if (!post) {
         notFound();
@@ -34,21 +34,29 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                 <Editor
                     initialData={{
                         title: post.title,
+                        titleBn: post.titleBn || undefined,
                         slug: post.slug,
                         category: post.category,
+                        categoryBn: post.categoryBn || undefined,
                         content: post.content || "",
+                        contentBn: post.contentBn || undefined,
                         coverImage: post.coverImage || undefined,
                         videoUrl: post.videoUrl || undefined,
                         audioUrl: post.audioUrl || undefined,
                         subtitle: post.subtitle || undefined,
+                        subtitleBn: post.subtitleBn || undefined,
                         topic_slug: post.topic_slug || undefined,
                         accent_color: post.accent_color || undefined,
                         featured: post.featured,
                         published: post.published ?? true,
                         authorName: post.authorName || undefined,
+                        authorNameBn: post.authorNameBn || undefined,
                         translatorName: post.translatorName || undefined,
+                        translatorNameBn: post.translatorNameBn || undefined,
                         editorName: post.editorName || undefined,
+                        editorNameBn: post.editorNameBn || undefined,
                         metaDescription: post.metaDescription || undefined,
+                        metaDescriptionBn: post.metaDescriptionBn || undefined,
                         backlinks: post.backlinks || []
                     }}
                     action={updateAction}

@@ -5,24 +5,36 @@ import {
     BASE_CATEGORIES,
     canonicalizeCategoryName,
     categoryToSlug,
+    getBengaliCategoryName,
+    getLocalizedCategoryName,
     normalizeCategoryName,
 } from "@/lib/categories";
+import type { Locale } from "@/lib/locale";
 
 // Re-exporting the type compatible with the frontend
 export type Post = {
     id: number;
     slug: string;
     title: string;
+    titleBn?: string | null;
     subtitle?: string | null;
+    subtitleBn?: string | null;
     date: string;
     author: string;
     authorName?: string | null;
+    authorNameBn?: string | null;
     translatorName?: string | null;
+    translatorNameBn?: string | null;
     editorName?: string | null;
+    editorNameBn?: string | null;
     authorId?: number | null;
     category: string;
+    categoryEn: string;
+    categoryBn?: string | null;
     content?: string | null;
+    contentBn?: string | null;
     excerpt?: string | null;
+    excerptBn?: string | null;
     coverImage?: string | null;
     videoUrl?: string | null;
     audioUrl?: string | null;
@@ -35,20 +47,23 @@ export type Post = {
     updated_at: string;
     authorImage?: string | null;
     metaDescription?: string | null;
+    metaDescriptionBn?: string | null;
     backlinks?: string[] | null;
 };
 
 export type CategorySummary = {
     name: string;
+    canonicalName: string;
     slug: string;
     count: number;
 };
 
 // Helper function to format date nicely (date only, no time)
-function formatDate(dateInput: Date | string | null): string {
-    if (!dateInput) return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+function formatDate(dateInput: Date | string | null, locale: Locale = "en"): string {
+    const dateLocale = locale === "bn" ? "bn-BD" : "en-US";
+    if (!dateInput) return new Date().toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' });
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString(dateLocale, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function normalizeImageUrl(url?: string | null): string | null | undefined {
@@ -73,7 +88,10 @@ function normalizeImageUrl(url?: string | null): string | null | undefined {
 }
 
 // Mapper function to convert Prisma result to frontend Post type
-function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | null }): Post {
+function mapPrismaPost(
+    post: PrismaPost & { author?: { image: string | null } | null },
+    locale: Locale = "en"
+): Post {
     // Properly handle backlinks JSON field - handle both array and string formats
     let backlinks: string[] | null = null;
     if (post.backlinks !== null && post.backlinks !== undefined) {
@@ -95,21 +113,53 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
     }
 
     const normalizedCategory = canonicalizeCategoryName(post.category || "") || "Uncategorized";
+    const localizedCategory =
+        locale === "bn"
+            ? (post.categoryBn?.trim() || getBengaliCategoryName(normalizedCategory) || normalizedCategory)
+            : normalizedCategory;
+
+    const localizedTitle =
+        locale === "bn" ? (post.titleBn || post.title) : post.title;
+    const localizedSubtitle =
+        locale === "bn" ? (post.subtitleBn || post.subtitle) : post.subtitle;
+    const localizedAuthorName =
+        locale === "bn" ? (post.authorNameBn || post.authorName) : post.authorName;
+    const localizedTranslatorName =
+        locale === "bn" ? (post.translatorNameBn || post.translatorName) : post.translatorName;
+    const localizedEditorName =
+        locale === "bn" ? (post.editorNameBn || post.editorName) : post.editorName;
+    const localizedContent =
+        locale === "bn" ? (post.contentBn || post.content) : post.content;
+    const localizedExcerpt =
+        locale === "bn" ? (post.excerptBn || post.excerpt) : post.excerpt;
+    const localizedMetaDescription =
+        locale === "bn"
+            ? (post.metaDescriptionBn || post.metaDescription)
+            : post.metaDescription;
 
     return {
         id: post.id,
         slug: post.slug,
-        title: post.title,
-        subtitle: post.subtitle,
-        date: formatDate(post.date),
-        author: post.authorName || "Anonymous",
-        authorName: post.authorName,
-        translatorName: post.translatorName,
-        editorName: post.editorName,
+        title: localizedTitle,
+        titleBn: post.titleBn,
+        subtitle: localizedSubtitle,
+        subtitleBn: post.subtitleBn,
+        date: formatDate(post.date, locale),
+        author: localizedAuthorName || "Anonymous",
+        authorName: localizedAuthorName,
+        authorNameBn: post.authorNameBn,
+        translatorName: localizedTranslatorName,
+        translatorNameBn: post.translatorNameBn,
+        editorName: localizedEditorName,
+        editorNameBn: post.editorNameBn,
         authorId: post.authorId,
-        category: normalizedCategory,
-        content: post.content,
-        excerpt: post.excerpt,
+        category: localizedCategory,
+        categoryEn: normalizedCategory,
+        categoryBn: post.categoryBn,
+        content: localizedContent,
+        contentBn: post.contentBn,
+        excerpt: localizedExcerpt,
+        excerptBn: post.excerptBn,
         coverImage: normalizeImageUrl(post.coverImage),
         videoUrl: post.videoUrl,
         audioUrl: post.audioUrl,
@@ -122,7 +172,8 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         updated_at: post.updatedAt.toISOString(),
         authorImage: normalizeImageUrl(post.author?.image || undefined),
         backlinks: backlinks,
-        metaDescription: post.metaDescription
+        metaDescription: localizedMetaDescription,
+        metaDescriptionBn: post.metaDescriptionBn
     };
 }
 
@@ -133,7 +184,9 @@ type CategoryGroupRow = {
 
 function buildCategorySummaries(
     rows: CategoryGroupRow[],
-    includeBaseCategories: boolean
+    includeBaseCategories: boolean,
+    locale: Locale,
+    localizedNamesBySlug: Map<string, string>
 ): CategorySummary[] {
     const summariesBySlug = new Map<string, CategorySummary>();
     const baseOrder = new Map(BASE_CATEGORIES.map((category, index) => [categoryToSlug(category), index]));
@@ -141,7 +194,12 @@ function buildCategorySummaries(
     if (includeBaseCategories) {
         for (const category of BASE_CATEGORIES) {
             const slug = categoryToSlug(category);
-            summariesBySlug.set(slug, { name: category, slug, count: 0 });
+            summariesBySlug.set(slug, {
+                name: getLocalizedCategoryName(category, locale),
+                canonicalName: category,
+                slug,
+                count: 0,
+            });
         }
     }
 
@@ -153,18 +211,23 @@ function buildCategorySummaries(
         if (!slug) continue;
 
         const canonicalName = canonicalizeCategoryName(rawCategory);
+        const localizedName = locale === "bn"
+            ? (localizedNamesBySlug.get(slug) || getBengaliCategoryName(canonicalName))
+            : canonicalName;
         const existing = summariesBySlug.get(slug);
 
         if (existing) {
             existing.count += row._count._all;
             if (!baseOrder.has(slug)) {
-                existing.name = canonicalName;
+                existing.name = localizedName;
+                existing.canonicalName = canonicalName;
             }
             continue;
         }
 
         summariesBySlug.set(slug, {
-            name: canonicalName,
+            name: localizedName,
+            canonicalName,
             slug,
             count: row._count._all,
         });
@@ -186,7 +249,7 @@ function buildCategorySummaries(
 }
 
 export const getPublicCategorySummaries = unstable_cache(
-    async (): Promise<CategorySummary[]> => {
+    async (locale: Locale = "en"): Promise<CategorySummary[]> => {
         try {
             const grouped = await prisma.post.groupBy({
                 by: ["category"],
@@ -197,11 +260,37 @@ export const getPublicCategorySummaries = unstable_cache(
                 _count: { _all: true },
             });
 
-            return buildCategorySummaries(grouped as CategoryGroupRow[], true);
+            const localizedNamesBySlug = new Map<string, string>();
+            if (locale === "bn") {
+                const localizedRows = await prisma.post.findMany({
+                    where: {
+                        published: true,
+                        category: { not: null },
+                        categoryBn: { not: null },
+                    },
+                    select: { category: true, categoryBn: true },
+                    orderBy: { createdAt: "desc" },
+                });
+
+                for (const row of localizedRows) {
+                    if (!row.category || !row.categoryBn) continue;
+                    const slug = categoryToSlug(row.category);
+                    if (!slug || localizedNamesBySlug.has(slug)) continue;
+                    localizedNamesBySlug.set(slug, row.categoryBn);
+                }
+            }
+
+            return buildCategorySummaries(
+                grouped as CategoryGroupRow[],
+                true,
+                locale,
+                localizedNamesBySlug
+            );
         } catch {
             console.warn("Failed to fetch public categories. Falling back to base categories.");
             return BASE_CATEGORIES.map((category) => ({
-                name: category,
+                name: getLocalizedCategoryName(category, locale),
+                canonicalName: category,
                 slug: categoryToSlug(category),
                 count: 0,
             }));
@@ -222,7 +311,12 @@ export const getCategoryOptions = unstable_cache(
                 _count: { _all: true },
             });
 
-            return buildCategorySummaries(grouped as CategoryGroupRow[], true).map((summary) => summary.name);
+            return buildCategorySummaries(
+                grouped as CategoryGroupRow[],
+                true,
+                "en",
+                new Map<string, string>()
+            ).map((summary) => summary.canonicalName);
         } catch {
             console.warn("Failed to fetch category options. Falling back to base categories.");
             return [...BASE_CATEGORIES];
@@ -238,7 +332,7 @@ export const getCategoryOptions = unstable_cache(
 // --- Cached Functions ---
 
 export const getHotTopics = unstable_cache(
-    async (limit: number = 5): Promise<Post[]> => {
+    async (limit: number = 5, locale: Locale = "en"): Promise<Post[]> => {
         try {
             const posts = await prisma.post.findMany({
                 where: { featured: true, published: true },
@@ -246,7 +340,7 @@ export const getHotTopics = unstable_cache(
                 orderBy: { views: 'desc' },
                 take: limit
             });
-            return posts.map(mapPrismaPost);
+            return posts.map((post) => mapPrismaPost(post, locale));
         } catch (error) {
             console.error("Failed to fetch hot topics:", error);
             return [];
@@ -257,7 +351,7 @@ export const getHotTopics = unstable_cache(
 );
 
 export const getRecentPosts = unstable_cache(
-    async (limit: number = 10): Promise<Post[]> => {
+    async (limit: number = 10, locale: Locale = "en"): Promise<Post[]> => {
         try {
             const posts = await prisma.post.findMany({
                 where: { published: true },
@@ -265,7 +359,7 @@ export const getRecentPosts = unstable_cache(
                 orderBy: { createdAt: 'desc' },
                 take: limit
             });
-            return posts.map(mapPrismaPost);
+            return posts.map((post) => mapPrismaPost(post, locale));
         } catch (error) {
             console.error("Failed to fetch recent posts:", error);
             return [];
@@ -276,7 +370,11 @@ export const getRecentPosts = unstable_cache(
 );
 
 export const getPostBySlug = unstable_cache(
-    async (slug: string): Promise<Post | null> => {
+    async (
+        slug: string,
+        locale: Locale = "en",
+        includeUnpublished: boolean = false
+    ): Promise<Post | null> => {
         if (!slug?.trim()) return null;
         try {
             const post = await prisma.post.findUnique({
@@ -284,12 +382,14 @@ export const getPostBySlug = unstable_cache(
                 include: { author: { select: { image: true } } }
             });
 
-            if (!post || !post.published) return null;
+            if (!post || (!includeUnpublished && !post.published)) return null;
 
             // Increment views asynchronously
-            incrementViewCount(slug).catch(console.error);
+            if (!includeUnpublished && post.published) {
+                incrementViewCount(slug).catch(console.error);
+            }
 
-            return mapPrismaPost(post);
+            return mapPrismaPost(post, locale);
         } catch (error) {
             console.error("Failed to fetch post by slug:", error);
             return null;
@@ -311,7 +411,11 @@ async function incrementViewCount(slug: string): Promise<void> {
 }
 
 export const getPostsByCategory = unstable_cache(
-    async (category: string, limit: number = 6): Promise<Post[]> => {
+    async (
+        category: string,
+        limit: number = 6,
+        locale: Locale = "en"
+    ): Promise<Post[]> => {
         if (!category?.trim()) return [];
         try {
             const posts = await prisma.post.findMany({
@@ -327,7 +431,7 @@ export const getPostsByCategory = unstable_cache(
                 take: limit
             });
             // Ensure we verify mapped results
-            return posts.map(mapPrismaPost);
+            return posts.map((post) => mapPrismaPost(post, locale));
         } catch (error) {
             console.error("Failed to fetch posts by category:", error);
             // Return empty array on error
@@ -338,7 +442,11 @@ export const getPostsByCategory = unstable_cache(
     { revalidate: 300, tags: ['posts'] }
 );
 
-export async function searchPosts(query: string, limit: number = 10): Promise<Post[]> {
+export async function searchPosts(
+    query: string,
+    limit: number = 10,
+    locale: Locale = "en"
+): Promise<Post[]> {
     if (!query?.trim()) return [];
 
     const searchTerm = query.trim();
@@ -348,14 +456,17 @@ export async function searchPosts(query: string, limit: number = 10): Promise<Po
                 published: true,
                 OR: [
                     { title: { contains: searchTerm } },
+                    { titleBn: { contains: searchTerm } },
                     { content: { contains: searchTerm } },
-                    { excerpt: { contains: searchTerm } }
+                    { contentBn: { contains: searchTerm } },
+                    { excerpt: { contains: searchTerm } },
+                    { excerptBn: { contains: searchTerm } }
                 ]
             },
             orderBy: { date: 'desc' },
             take: limit
         });
-        return posts.map(mapPrismaPost);
+        return posts.map((post) => mapPrismaPost(post, locale));
     } catch (error) {
         console.error("Search failed:", error);
         return [] as Post[];
@@ -363,7 +474,7 @@ export async function searchPosts(query: string, limit: number = 10): Promise<Po
 }
 
 export const getFeaturedPosts = unstable_cache(
-    async (limit: number = 3): Promise<Post[]> => {
+    async (limit: number = 3, locale: Locale = "en"): Promise<Post[]> => {
         try {
             const posts = await prisma.post.findMany({
                 where: { featured: true, published: true },
@@ -371,7 +482,7 @@ export const getFeaturedPosts = unstable_cache(
                 orderBy: { views: 'desc' },
                 take: limit
             });
-            return posts.map(mapPrismaPost);
+            return posts.map((post) => mapPrismaPost(post, locale));
         } catch (error) {
             console.error("Failed to fetch featured posts:", error);
             return [];
@@ -381,25 +492,23 @@ export const getFeaturedPosts = unstable_cache(
     { revalidate: 7200, tags: ['posts', 'featured'] }
 );
 
-export async function getAllPosts(): Promise<Post[]> {
-    return unstable_cache(
-        async () => {
-            try {
-                const posts = await prisma.post.findMany({
-                    where: { published: true },
-                    include: { author: { select: { image: true } } },
-                    orderBy: { date: 'desc' }
-                });
-                return posts.map(mapPrismaPost);
-            } catch (error) {
-                console.error("Failed to fetch all posts:", error);
-                return [];
-            }
-        },
-        ['all-posts'],
-        { revalidate: 600, tags: ['posts'] }
-    )();
-}
+export const getAllPosts = unstable_cache(
+    async (locale: Locale = "en"): Promise<Post[]> => {
+        try {
+            const posts = await prisma.post.findMany({
+                where: { published: true },
+                include: { author: { select: { image: true } } },
+                orderBy: { date: 'desc' }
+            });
+            return posts.map((post) => mapPrismaPost(post, locale));
+        } catch (error) {
+            console.error("Failed to fetch all posts:", error);
+            return [];
+        }
+    },
+    ['all-posts'],
+    { revalidate: 600, tags: ['posts'] }
+);
 
 // Admin functions
 export async function getAllPostsForAdmin(): Promise<Post[]> {
@@ -408,7 +517,7 @@ export async function getAllPostsForAdmin(): Promise<Post[]> {
             include: { author: { select: { image: true } } },
             orderBy: { createdAt: 'desc' }
         });
-        return posts.map(mapPrismaPost);
+        return posts.map((post) => mapPrismaPost(post, "en"));
     } catch (error) {
         console.error("Failed to fetch admin posts:", error);
         return [];
@@ -417,7 +526,8 @@ export async function getAllPostsForAdmin(): Promise<Post[]> {
 
 export async function getPostsByCategories(
     categories: string[],
-    limit: number = 6
+    limit: number = 6,
+    locale: Locale = "en"
 ): Promise<Record<string, Post[]>> {
     if (!categories?.length) return {};
 
@@ -452,7 +562,7 @@ export async function getPostsByCategories(
 
         results.forEach((posts, index) => {
             const category = cleanCategories[index];
-            result[category] = posts.map(mapPrismaPost);
+            result[category] = posts.map((post) => mapPrismaPost(post, locale));
         });
 
         return result;
@@ -495,7 +605,12 @@ export interface PostStats {
     totalViews: number;
 }
 
-export async function getRelatedPosts(category: string, currentSlug: string, limit: number = 4): Promise<Post[]> {
+export async function getRelatedPosts(
+    category: string,
+    currentSlug: string,
+    limit: number = 4,
+    locale: Locale = "en"
+): Promise<Post[]> {
     if (!category?.trim()) return [];
     try {
         const posts = await prisma.post.findMany({
@@ -511,7 +626,7 @@ export async function getRelatedPosts(category: string, currentSlug: string, lim
             orderBy: { createdAt: 'desc' },
             take: limit
         });
-        return posts.map(mapPrismaPost);
+        return posts.map((post) => mapPrismaPost(post, locale));
     } catch (error) {
         console.error("Failed to fetch related posts:", error);
         return [];

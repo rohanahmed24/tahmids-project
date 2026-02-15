@@ -8,9 +8,10 @@ import { DecorativeBackgrounds } from "@/components/ui/DecorativeBackgrounds";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { Post } from "@/lib/posts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 // Desktop Horizontal Slider Component using Embla
-function FeaturedHorizontalSlider({ items }: { items: Post[] }) {
+function FeaturedHorizontalSlider({ items, previousLabel, nextLabel }: { items: Post[]; previousLabel: string; nextLabel: string }) {
     const [emblaRef, emblaApi] = useEmblaCarousel({
         loop: true,
         align: "start",
@@ -63,7 +64,7 @@ function FeaturedHorizontalSlider({ items }: { items: Post[] }) {
             <button
                 onClick={scrollPrev}
                 className="absolute left-4 top-1/3 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
-                aria-label="Previous"
+                aria-label={previousLabel}
             >
                 <ChevronLeft className="w-6 h-6 text-text-primary" />
             </button>
@@ -71,7 +72,7 @@ function FeaturedHorizontalSlider({ items }: { items: Post[] }) {
             <button
                 onClick={scrollNext}
                 className="absolute right-4 top-1/3 -translate-y-1/2 w-12 h-12 bg-bg-card/90 hover:bg-bg-card rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
-                aria-label="Next"
+                aria-label={nextLabel}
             >
                 <ChevronRight className="w-6 h-6 text-text-primary" />
             </button>
@@ -84,6 +85,11 @@ interface FeaturedTalesProps {
 }
 
 export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? { latest: "সর্বশেষ", articles: "লেখা", previous: "পূর্বের", next: "পরের", mobileLabel: "মোবাইলে সর্বশেষ লেখা" }
+        : { latest: "Latest", articles: "Articles", previous: "Previous", next: "Next", mobileLabel: "Latest Articles Mobile" };
+
     // Mobile Slider
     const [mobileRef, mobileApi] = useEmblaCarousel({
         loop: true,
@@ -123,12 +129,12 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
                         className="font-serif font-medium tracking-tight text-text-primary"
                         style={{ fontSize: 'clamp(1.125rem, 4vw, 3.75rem)' }}
                     >
-                        Latest <span className="italic font-light opacity-60">Articles</span>
+                        {copy.latest} <span className="italic font-light opacity-60">{copy.articles}</span>
                     </h2>
                 </div>
 
                 {/* Mobile: Embla Slider */}
-                <div className="md:hidden relative" role="region" aria-roledescription="carousel" aria-label="Latest Articles Mobile">
+                <div className="md:hidden relative" role="region" aria-roledescription="carousel" aria-label={copy.mobileLabel}>
                     <div className="overflow-hidden" ref={mobileRef}>
                         <div className="flex gap-3">
                             {articles.map((item) => (
@@ -174,7 +180,7 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
                                     ? "bg-accent"
                                     : "bg-text-muted/30 hover:bg-text-muted/50"
                                     }`}
-                                aria-label={`Go to slide ${index + 1}`}
+                                aria-label={locale === "bn" ? `স্লাইড ${index + 1} এ যান` : `Go to slide ${index + 1}`}
                                 aria-current={index === selectedIndex ? "true" : "false"}
                             />
                         ))}
@@ -183,8 +189,8 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
 
                 {/* Desktop: 2 Horizontal Sliders */}
                 <div className="hidden md:block space-y-12">
-                    <FeaturedHorizontalSlider items={topRowItems} />
-                    <FeaturedHorizontalSlider items={bottomRowItems} />
+                    <FeaturedHorizontalSlider items={topRowItems} previousLabel={copy.previous} nextLabel={copy.next} />
+                    <FeaturedHorizontalSlider items={bottomRowItems} previousLabel={copy.previous} nextLabel={copy.next} />
                 </div>
             </div>
         </section>

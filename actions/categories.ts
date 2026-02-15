@@ -1,10 +1,12 @@
 "use server";
 
 import { getPublicCategorySummaries } from "@/lib/posts";
+import { getCurrentLocale } from "@/lib/locale";
 
 export async function getMenuCategories() {
     try {
-        const categories = await getPublicCategorySummaries();
+        const locale = await getCurrentLocale();
+        const categories = await getPublicCategorySummaries(locale);
         const links = categories.map((category) => ({
             name: category.name,
             href: `/topics/${category.slug}`,

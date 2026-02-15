@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { Assets } from "@/lib/assets";
 import { Post } from "@/lib/posts";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface ArticleCardProps {
     article: Post;
@@ -14,6 +15,7 @@ interface ArticleCardProps {
 
 export function ArticleCard({ article, width }: ArticleCardProps) {
     const router = useRouter();
+    const { locale } = useLocale();
 
     const style = width ? { width: `${width}px`, minWidth: `${width}px`, maxWidth: `${width}px` } : { width: '100%' };
 
@@ -55,7 +57,7 @@ export function ArticleCard({ article, width }: ArticleCardProps) {
                 <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-bg-secondary relative overflow-hidden">
-                            <Image src={Assets.imgAvatarImage} alt="Avatar" fill sizes="32px" className="object-cover" />
+                            <Image src={Assets.imgAvatarImage} alt={locale === "bn" ? "প্রোফাইল ছবি" : "Avatar"} fill sizes="32px" className="object-cover" />
                         </div>
                         <span className="text-xs font-sans font-medium text-text-secondary">{article.author}</span>
                     </div>

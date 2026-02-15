@@ -1,5 +1,8 @@
+"use client";
+
 import { MotionWrapper } from "@/components/ui/MotionWrapper";
 import Link from "next/link";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 const topics = [
     {
@@ -48,18 +51,27 @@ const topics = [
     },
 ];
 
+const topicsBn = [
+    { ...topics[0], title: "রাজনীতি ও ক্ষমতা", desc: "ক্ষমতার কাঠামো ও প্রভাব" },
+    { ...topics[1], title: "ইতিহাস ও সাম্রাজ্য", desc: "আমরা এখানে এলাম কীভাবে" },
+    { ...topics[2], title: "অপরাধ ও রহস্য", desc: "অমীমাংসিত রহস্য ও বিশ্লেষণ" },
+    { ...topics[3], title: "সংস্কৃতি ও ঐতিহ্য", desc: "নতুনের মধ্যে শিকড়ের খোঁজ" },
+];
+
 export function StoriesTopics() {
+    const { locale } = useLocale();
+    const topicItems = locale === "bn" ? topicsBn : topics;
     return (
         <section className="bg-[#050505] text-white py-24 px-6 overflow-hidden">
             <div className="max-w-[1280px] mx-auto text-center space-y-16">
                 <MotionWrapper type="fade-in">
-                    <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase opacity-60 block mb-4">Blog</span>
-                    <h2 className="text-3xl md:text-4xl font-serif">Find stories by topic</h2>
-                    <p className="text-white/60 text-sm mt-3">See our curated list</p>
+                    <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase opacity-60 block mb-4">{locale === "bn" ? "ব্লগ" : "Blog"}</span>
+                    <h2 className="text-3xl md:text-4xl font-serif">{locale === "bn" ? "বিষয়ভিত্তিক গল্প খুঁজুন" : "Find stories by topic"}</h2>
+                    <p className="text-white/60 text-sm mt-3">{locale === "bn" ? "আমাদের কিউরেটেড তালিকা দেখুন" : "See our curated list"}</p>
                 </MotionWrapper>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 border-t border-white/10 pt-10 text-left">
-                    {topics.map((topic) => (
+                    {topicItems.map((topic) => (
                         <Link href={`/topics/${topic.slug}`} key={topic.id} className="group block space-y-4 hover:opacity-80 transition-opacity">
                             <div className="w-12 h-12 flex items-center justify-center rounded-full border border-white/20 text-white group-hover:bg-white group-hover:text-[#000000] transition-colors">
                                 {topic.icon}
@@ -69,7 +81,7 @@ export function StoriesTopics() {
                                 <p className="text-xs text-white/50 mt-1">{topic.desc}</p>
                             </div>
                             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mt-4">
-                                <span>Explore</span>
+                                <span>{locale === "bn" ? "দেখুন" : "Explore"}</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                 </svg>

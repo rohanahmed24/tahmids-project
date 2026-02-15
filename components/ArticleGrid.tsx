@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { MobileSlider } from "@/components/ui/MobileSlider";
 import { HorizontalSlider } from "@/components/HorizontalSlider";
 import { Post } from "@/lib/posts";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface ArticleGridProps {
     articles: Post[];
@@ -14,6 +15,20 @@ interface ArticleGridProps {
 
 export function ArticleGrid({ articles = [] }: ArticleGridProps) {
     const router = useRouter();
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            listLabel: "তালিকা",
+            latest: "সর্বশেষ",
+            perspectives: "দৃষ্টিভঙ্গি",
+            viewAll: "সব দেখুন",
+        }
+        : {
+            listLabel: "The List",
+            latest: "Latest",
+            perspectives: "Perspectives",
+            viewAll: "View All",
+        };
 
     // Split articles into top 6 and bottom 6 for desktop slider
     const topRowArticles = articles.slice(0, 6);
@@ -26,9 +41,9 @@ export function ArticleGrid({ articles = [] }: ArticleGridProps) {
                 <div className="max-w-[1400px] mx-auto mb-12 md:mb-16">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-border-subtle">
                         <div className="space-y-3">
-                            <span className="text-text-muted text-xs font-sans font-bold tracking-widest uppercase">The List</span>
+                            <span className="text-text-muted text-xs font-sans font-bold tracking-widest uppercase">{copy.listLabel}</span>
                             <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-semibold text-text-primary leading-tight">
-                                Latest <span className="italic font-light">Perspectives</span>
+                                {copy.latest} <span className="italic font-light">{copy.perspectives}</span>
                             </h2>
                         </div>
 
@@ -36,7 +51,7 @@ export function ArticleGrid({ articles = [] }: ArticleGridProps) {
                             href="/stories"
                             className="group flex items-center gap-2 text-sm font-bold font-sans uppercase tracking-wider text-text-primary hover:text-accent transition-colors"
                         >
-                            View All <span className="group-hover:translate-x-1 transition-transform">→</span>
+                            {copy.viewAll} <span className="group-hover:translate-x-1 transition-transform">→</span>
                         </Link>
                     </div>
                 </div>

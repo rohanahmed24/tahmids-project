@@ -7,12 +7,14 @@ import useEmblaCarousel from "embla-carousel-react";
 import { Post } from "@/lib/posts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface HorizontalSliderProps {
     articles: Post[];
 }
 
 export function HorizontalSlider({ articles }: HorizontalSliderProps) {
+    const { locale } = useLocale();
     // Ensure we have enough items for a smooth loop (Embla recommendation)
     // If fewer than 10 items, repeat them to fill space and allow seamless looping
     const displayArticles = articles.length > 0 && articles.length < 10
@@ -73,7 +75,7 @@ export function HorizontalSlider({ articles }: HorizontalSliderProps) {
             <button
                 onClick={scrollPrev}
                 className="absolute left-[-20px] md:left-[-40px] top-1/3 -translate-y-1/2 w-12 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:scale-110 duration-200"
-                aria-label="Previous"
+                aria-label={locale === "bn" ? "পূর্বের" : "Previous"}
             >
                 <ChevronLeft className="w-8 h-8 text-text-primary/70 hover:text-accent" />
             </button>
@@ -81,7 +83,7 @@ export function HorizontalSlider({ articles }: HorizontalSliderProps) {
             <button
                 onClick={scrollNext}
                 className="absolute right-[-20px] md:right-[-40px] top-1/3 -translate-y-1/2 w-12 h-12 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:scale-110 duration-200"
-                aria-label="Next"
+                aria-label={locale === "bn" ? "পরের" : "Next"}
             >
                 <ChevronRight className="w-8 h-8 text-text-primary/70 hover:text-accent" />
             </button>

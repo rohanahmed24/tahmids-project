@@ -4,8 +4,34 @@ import { useState } from "react";
 import { ArrowRight, Loader2, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { subscribeToNewsletter } from "@/actions/newsletter";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export function Subscription() {
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            successDefault: "সফলভাবে সাবস্ক্রাইব হয়েছে!",
+            failed: "সাবস্ক্রাইব করা যায়নি",
+            error: "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।",
+            stay: "এগিয়ে",
+            ahead: "থাকুন",
+            body: "সপ্তাহে কিউরেটেড প্রজ্ঞা ও নতুন অন্তর্দৃষ্টি পেতে আমাদের সাথে যুক্ত হোন।",
+            placeholder: "আপনার ইমেইল লিখুন...",
+            subscribe: "সাবস্ক্রাইব",
+            noSpam: "স্প্যাম নয়। যেকোনো সময় আনসাবস্ক্রাইব করুন।",
+        }
+        : {
+            successDefault: "Successfully subscribed!",
+            failed: "Failed to subscribe",
+            error: "Something went wrong. Please try again.",
+            stay: "Stay",
+            ahead: "Ahead",
+            body: "Join 50,000+ readers receiving our weekly curation of timeless wisdom and modern insights.",
+            placeholder: "Type your email...",
+            subscribe: "Subscribe",
+            noSpam: "No spam. Unsubscribe anytime.",
+        };
+
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -22,15 +48,15 @@ export function Subscription() {
             const result = await subscribeToNewsletter(email);
             if (result.success) {
                 setStatus("success");
-                setMessage(result.message || "Successfully subscribed!");
+                setMessage(result.message || copy.successDefault);
                 setEmail("");
             } else {
                 setStatus("error");
-                setMessage(result.error || "Failed to subscribe");
+                setMessage(result.error || copy.failed);
             }
         } catch {
             setStatus("error");
-            setMessage("Something went wrong. Please try again.");
+            setMessage(copy.error);
         } finally {
             setIsLoading(false);
         }
@@ -44,10 +70,10 @@ export function Subscription() {
 
             <div className="max-w-xl mx-auto px-6 text-center relative z-10">
                 <h2 className="text-4xl md:text-7xl font-serif font-medium mb-4 md:mb-6 tracking-tight text-white">
-                    Stay <span className="italic opacity-70">Ahead</span>
+                    {copy.stay} <span className="italic opacity-70">{copy.ahead}</span>
                 </h2>
                 <p className="text-base md:text-lg opacity-90 mb-8 md:mb-12 font-sans font-light text-white/90">
-                    Join 50,000+ readers receiving our weekly curation of timeless wisdom and modern insights.
+                    {copy.body}
                 </p>
 
                 {status === "success" ? (
@@ -70,7 +96,7 @@ export function Subscription() {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Type your email..."
+                                placeholder={copy.placeholder}
                                 required
                                 data-testid="input-subscription-email-mobile"
                                 className="w-full bg-white/10 border border-white/30 rounded-full px-6 py-4 text-base placeholder:text-white/60 text-white focus:outline-none focus:border-white transition-colors"
@@ -83,10 +109,10 @@ export function Subscription() {
                                 className="w-full bg-white text-[#4A3428] font-bold text-sm uppercase tracking-widest py-4 rounded-full flex items-center justify-center gap-2 active:opacity-90 disabled:opacity-50"
                             >
                                 {isLoading ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                    <>
-                                        Subscribe
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <>
+                                        {copy.subscribe}
                                         <ArrowRight className="w-4 h-4" />
                                     </>
                                 )}
@@ -99,7 +125,7 @@ export function Subscription() {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Type your email..."
+                                placeholder={copy.placeholder}
                                 required
                                 data-testid="input-subscription-email-desktop"
                                 className="w-full bg-transparent border-b-2 border-white/30 py-6 text-2xl font-serif placeholder:text-white/60 text-white focus:outline-none focus:border-white transition-colors"
@@ -113,10 +139,10 @@ export function Subscription() {
                                 className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 font-bold text-sm uppercase tracking-widest text-white hover:opacity-80 transition-opacity disabled:opacity-50"
                             >
                                 {isLoading ? (
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                ) : (
-                                    <>
-                                        Subscribe
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <>
+                                        {copy.subscribe}
                                         <ArrowRight className="w-5 h-5" />
                                     </>
                                 )}
@@ -130,7 +156,7 @@ export function Subscription() {
                 )}
                 
                 <div data-testid="text-no-spam" className="mt-6 text-xs opacity-60 uppercase tracking-widest text-white/60">
-                    No spam. Unsubscribe anytime.
+                    {copy.noSpam}
                 </div>
             </div>
         </section>

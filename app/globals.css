@@ -99,8 +99,8 @@
 }
 
 @theme {
-  --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
 
   /* Colors (generates text-X and bg-X) */
   /* Base Colors (Explicit for stability) */

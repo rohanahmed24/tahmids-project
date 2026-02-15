@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { MediaOptions } from "@/components/ui/MediaOptions";
+import type { Locale } from "@/lib/locale";
+import { t } from "@/lib/translations";
 
 interface ArticleHeaderProps {
     title?: string;
@@ -16,6 +18,7 @@ interface ArticleHeaderProps {
     coverImage?: string;
     slug?: string;
     videoUrl?: string | null;
+    locale?: Locale;
 }
 
 export function ArticleHeader({
@@ -28,14 +31,15 @@ export function ArticleHeader({
     coverImage,
     slug = "slow-interfaces",
     videoUrl,
+    locale = "en",
 }: ArticleHeaderProps) {
     const { scrollY } = useScroll();
     const y = useTransform(scrollY, [0, 500], [0, 150]);
     const cleanTranslatorName = translatorName?.trim();
     const cleanEditorName = editorName?.trim();
     const creditItems = [
-        cleanEditorName ? `Edited by ${cleanEditorName}` : null,
-        cleanTranslatorName ? `Translated by ${cleanTranslatorName}` : null,
+        cleanEditorName ? `${t(locale, "editedBy")} ${cleanEditorName}` : null,
+        cleanTranslatorName ? `${t(locale, "translatedBy")} ${cleanTranslatorName}` : null,
     ].filter((item): item is string => Boolean(item));
 
     // Use coverImage if provided, otherwise fallback to default

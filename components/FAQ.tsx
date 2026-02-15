@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 const faqs = [
     { question: "What is Wisdomia?", answer: "Wisdomia is a curated digital publication dedicated to exploring culture, design, and future technology through long-form storytelling." },
@@ -11,27 +12,38 @@ const faqs = [
     { question: "Do you offer student discounts?", answer: "We support lifelong learning. Students with a valid .edu email get 50% off. Contact support@wisdomia.com to apply." },
 ];
 
+const faqsBn = [
+    { question: "Wisdomia কী?", answer: "Wisdomia হলো একটি কিউরেটেড ডিজিটাল প্রকাশনা, যেখানে দীর্ঘ-আকারের লেখার মাধ্যমে সংস্কৃতি, নকশা ও ভবিষ্যৎ প্রযুক্তি নিয়ে আলোচনা করা হয়।" },
+    { question: "সাবস্ক্রিপশন কীভাবে কাজ করে?", answer: "আমাদের সদস্যপদ সহজ: মাসে $9 বা বছরে $90। এতে সব লেখা, সম্পূর্ণ আর্কাইভ এবং সাপ্তাহিক কিউরেটেড নিউজলেটার আনলিমিটেড পাবেন।" },
+    { question: "আমি কি যেকোনো সময় বাতিল করতে পারি?", answer: "হ্যাঁ। আপনি আপনার অ্যাকাউন্ট সেটিংস থেকে যেকোনো সময় অটো-রিনিউ বন্ধ করতে পারবেন।" },
+    { question: "স্টুডেন্ট ডিসকাউন্ট আছে কি?", answer: "আমরা শিক্ষার্থীদের সমর্থন করি। বৈধ .edu ইমেইল থাকলে ৫০% ছাড় পাবেন। আবেদন করতে support@wisdomia.com এ যোগাযোগ করুন।" },
+];
+
 export function FAQ() {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
+    const { locale } = useLocale();
+    const items = locale === "bn" ? faqsBn : faqs;
 
     return (
         <section className="w-full bg-bg-primary py-12 md:py-32 px-6 md:px-12 border-b border-border-subtle">
             <div className="max-w-[1800px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
                 {/* Header */}
                 <div className="lg:col-span-4 space-y-6">
-                    <span className="text-xs font-bold uppercase tracking-[0.3em] text-text-muted">Support</span>
+                    <span className="text-xs font-bold uppercase tracking-[0.3em] text-text-muted">{locale === "bn" ? "সহায়তা" : "Support"}</span>
                     <h2 className="text-4xl md:text-5xl font-serif font-medium text-text-primary leading-tight">
-                        Common <br />
-                        <span className="italic opacity-60">Queries</span>
+                        {locale === "bn" ? "সাধারণ" : "Common"} <br />
+                        <span className="italic opacity-60">{locale === "bn" ? "প্রশ্ন" : "Queries"}</span>
                     </h2>
                     <p className="text-lg text-text-secondary font-sans max-w-xs">
-                        Everything you need to know about the platform and membership.
+                        {locale === "bn"
+                            ? "প্ল্যাটফর্ম ও সদস্যপদ সম্পর্কে আপনার দরকারি তথ্য।"
+                            : "Everything you need to know about the platform and membership."}
                     </p>
                 </div>
 
                 {/* Accordion */}
                 <div className="lg:col-span-8 space-y-4">
-                    {faqs.map((faq, idx) => (
+                    {items.map((faq, idx) => (
                         <div key={idx} className="border-b border-border-subtle last:border-0">
                             <button
                                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}

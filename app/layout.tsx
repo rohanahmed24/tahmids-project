@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { LocaleProvider } from "@/components/providers/LocaleProvider";
 import { SessionProvider } from "next-auth/react";
 import { SessionSync } from "@/components/SessionSync";
 import { getGoogleVerificationTag } from "@/actions/seo";
+import { getCurrentLocale } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   const googleVerificationTag = await getGoogleVerificationTag();
@@ -61,38 +63,42 @@ import { Inter, Playfair_Display } from "next/font/google";
 
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-inter",
   display: "swap",
 });
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-serif",
+  variable: "--font-playfair",
   display: "swap",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getCurrentLocale();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         suppressHydrationWarning
         className={`${inter.variable} ${playfair.variable} antialiased bg-base text-main transition-colors duration-300`}
       >
         <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <SessionSync />
-            {children}
-            <Toaster richColors position="top-center" />
-          </ThemeProvider>
+          <LocaleProvider initialLocale={locale}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <SessionSync />
+              {children}
+              <Toaster richColors position="top-center" />
+            </ThemeProvider>
+          </LocaleProvider>
         </SessionProvider>
       </body>
     </html>

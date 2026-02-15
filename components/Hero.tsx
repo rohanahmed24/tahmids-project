@@ -4,8 +4,33 @@ import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export function Hero() {
+    const { locale } = useLocale();
+    const copy = locale === "bn"
+        ? {
+            volume: "ভলিউম ২৪ — সংস্করণ ০৯",
+            titleTop: "ডিজিটাল",
+            titleBottom: "নীরবতার শিল্প",
+            body: "ধারাবাহিক শব্দের যুগে মিনিমালিজমের নতুন ঢেউ।",
+            readStory: "গল্প পড়ুন",
+            editorsNote: "— সম্পাদকীয় নোট",
+            scroll: "স্ক্রল",
+            editorialHero: "এডিটোরিয়াল হিরো",
+            secondaryFeature: "সেকেন্ডারি ফিচার",
+        }
+        : {
+            volume: "Vol. 24 — Edit. 09",
+            titleTop: "The Art of",
+            titleBottom: "Digital Silence",
+            body: "Exploring the new wave of minimalism in an era of constant noise.",
+            readStory: "Read Story",
+            editorsNote: "— Editor's Note",
+            scroll: "Scroll",
+            editorialHero: "Editorial Hero",
+            secondaryFeature: "Secondary Feature",
+        };
     const { scrollY } = useScroll();
     const y1 = useTransform(scrollY, [0, 500], [0, 200]);
     const y2 = useTransform(scrollY, [0, 500], [0, -150]);
@@ -30,7 +55,7 @@ export function Hero() {
                 <div className="relative w-full h-[55vh] mt-20">
                     <Image
                         src={Assets.imgPlaceholderImage7}
-                        alt="Editorial Hero"
+                        alt={copy.editorialHero}
                         fill
                         sizes="(max-width: 768px) 100vw"
                         className="object-cover"
@@ -41,16 +66,16 @@ export function Hero() {
 
                 {/* Mobile Content */}
                 <div className="relative -mt-16 px-6 pb-8 flex flex-col items-center text-center space-y-5">
-                    <span className="text-[10px] font-bold tracking-[0.3em] uppercase opacity-50">Vol. 24 — Edit. 09</span>
+                    <span className="text-[10px] font-bold tracking-[0.3em] uppercase opacity-50">{copy.volume}</span>
                     <h2 className="text-4xl font-serif leading-tight">
-                        The Art of<br />
-                        <span className="italic text-accent">Digital Silence</span>
+                        {copy.titleTop}<br />
+                        <span className="italic text-accent">{copy.titleBottom}</span>
                     </h2>
                     <p className="text-sm opacity-70 leading-relaxed max-w-[280px]">
-                        Exploring the new wave of minimalism in an era of constant noise.
+                        {copy.body}
                     </p>
                     <button className="group flex items-center gap-2 text-xs font-bold uppercase tracking-widest border border-border-subtle px-6 py-3 rounded-full active:scale-95 transition-transform">
-                        Read Story
+                        {copy.readStory}
                         <ArrowRight className="w-3 h-3" />
                     </button>
                 </div>
@@ -62,16 +87,16 @@ export function Hero() {
                 {/* Left Column: Editorial Text */}
                 <div className="col-span-3 flex flex-col justify-end pb-32 space-y-6">
                     <div className="w-12 h-[1px] bg-text-primary/30 mb-4"></div>
-                    <p className="text-xs font-bold tracking-[0.2em] uppercase opacity-60">Vol. 24 — Edit. 09</p>
+                    <p className="text-xs font-bold tracking-[0.2em] uppercase opacity-60">{copy.volume}</p>
                     <h2 className="text-4xl font-serif leading-tight">
-                        The Art of <br />
-                        <span className="italic text-accent">Digital Silence</span>
+                        {copy.titleTop} <br />
+                        <span className="italic text-accent">{copy.titleBottom}</span>
                     </h2>
                     <p className="text-sm opacity-70 leading-relaxed max-w-[250px]">
-                        Exploring the new wave of minimalism in an era of constant noise.
+                        {copy.body}
                     </p>
                     <button className="group w-fit text-xs font-bold uppercase tracking-widest border-b border-text-primary pb-1 hover:opacity-50 transition-opacity mt-4 flex items-center gap-2">
-                        Read Story
+                        {copy.readStory}
                         <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
@@ -83,8 +108,8 @@ export function Hero() {
                 >
                     <div className="relative w-full h-full overflow-hidden" style={{ clipPath: "polygon(0 0, 100% 0, 100% 85%, 0% 100%)" }}>
                         <Image
-                            src={Assets.imgPlaceholderImage7}
-                            alt="Editorial Hero"
+                                src={Assets.imgPlaceholderImage7}
+                                alt={copy.editorialHero}
                             fill
                             sizes="50vw"
                             className="object-cover"
@@ -103,7 +128,7 @@ export function Hero() {
                         <div className="relative w-full h-full overflow-hidden" style={{ clipPath: "polygon(0 15%, 100% 0, 100% 100%, 0% 100%)" }}>
                             <Image
                                 src={Assets.imgPlaceholderImage5}
-                                alt="Secondary Feature"
+                                alt={copy.secondaryFeature}
                                 fill
                                 sizes="33vw"
                                 className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
@@ -118,14 +143,14 @@ export function Hero() {
                         <p className="font-serif italic text-2xl leading-snug">
                             &quot;Fashion is not just about clothes, it&apos;s about a clear mind.&quot;
                         </p>
-                        <p className="text-xs mt-4 font-bold tracking-widest uppercase opacity-50">— Editor&apos;s Note</p>
+                        <p className="text-xs mt-4 font-bold tracking-widest uppercase opacity-50">{copy.editorsNote}</p>
                     </div>
                 </motion.div>
             </div>
 
             {/* Scroll Indicator - Desktop only */}
             <div className="hidden md:flex absolute bottom-10 left-1/2 -translate-x-1/2 flex-col items-center gap-2 opacity-50">
-                <span className="text-[10px] uppercase tracking-widest">Scroll</span>
+                <span className="text-[10px] uppercase tracking-widest">{copy.scroll}</span>
                 <div className="w-[1px] h-12 bg-current animate-pulse"></div>
             </div>
         </section>
