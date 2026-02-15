@@ -435,6 +435,8 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
+        formData.set("content", content);
+        formData.set("contentBn", contentBn);
         formData.set("published", String(published));
         formData.set("authorName", authorName);
         formData.set("authorNameBn", authorNameBn);
@@ -443,7 +445,6 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
         formData.set("editorName", editorName);
         formData.set("editorNameBn", editorNameBn);
         formData.set("titleBn", titleBn);
-        formData.set("contentBn", contentBn);
         formData.set("categoryBn", categoryBn);
         formData.set("subtitleBn", subtitleBn);
         formData.set("metaDescriptionBn", metaDescriptionBn);
@@ -590,14 +591,12 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                     {/* Bengali Content */}
                     <div className="bg-bg-card border border-border-primary rounded-2xl p-6 space-y-3">
                         <label className="text-sm font-medium text-text-secondary">Bengali Content (Optional)</label>
-                        <textarea
-                            name="contentBn"
-                            value={contentBn}
-                            onChange={(e) => setContentBn(e.target.value)}
+                        <RichTextEditor
+                            content={contentBn}
+                            onChange={setContentBn}
                             placeholder="বাংলা অনুবাদ কনটেন্ট এখানে লিখুন..."
-                            rows={14}
-                            className="w-full px-3 py-3 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm resize-y"
                         />
+                        <input type="hidden" name="contentBn" value={contentBn} />
                     </div>
                 </div>
 

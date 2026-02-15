@@ -248,57 +248,59 @@ function buildCategorySummaries(
         });
 }
 
-export const getPublicCategorySummaries = unstable_cache(
-    async (locale: Locale = "en"): Promise<CategorySummary[]> => {
-        try {
-            const grouped = await prisma.post.groupBy({
-                by: ["category"],
-                where: {
-                    published: true,
-                    category: { not: null },
-                },
-                _count: { _all: true },
-            });
-
-            const localizedNamesBySlug = new Map<string, string>();
-            if (locale === "bn") {
-                const localizedRows = await prisma.post.findMany({
+export async function getPublicCategorySummaries(locale: Locale = "en"): Promise<CategorySummary[]> {
+    return unstable_cache(
+        async (): Promise<CategorySummary[]> => {
+            try {
+                const grouped = await prisma.post.groupBy({
+                    by: ["category"],
                     where: {
                         published: true,
                         category: { not: null },
-                        categoryBn: { not: null },
                     },
-                    select: { category: true, categoryBn: true },
-                    orderBy: { createdAt: "desc" },
+                    _count: { _all: true },
                 });
 
-                for (const row of localizedRows) {
-                    if (!row.category || !row.categoryBn) continue;
-                    const slug = categoryToSlug(row.category);
-                    if (!slug || localizedNamesBySlug.has(slug)) continue;
-                    localizedNamesBySlug.set(slug, row.categoryBn);
-                }
-            }
+                const localizedNamesBySlug = new Map<string, string>();
+                if (locale === "bn") {
+                    const localizedRows = await prisma.post.findMany({
+                        where: {
+                            published: true,
+                            category: { not: null },
+                            categoryBn: { not: null },
+                        },
+                        select: { category: true, categoryBn: true },
+                        orderBy: { createdAt: "desc" },
+                    });
 
-            return buildCategorySummaries(
-                grouped as CategoryGroupRow[],
-                true,
-                locale,
-                localizedNamesBySlug
-            );
-        } catch {
-            console.warn("Failed to fetch public categories. Falling back to base categories.");
-            return BASE_CATEGORIES.map((category) => ({
-                name: getLocalizedCategoryName(category, locale),
-                canonicalName: category,
-                slug: categoryToSlug(category),
-                count: 0,
-            }));
-        }
-    },
-    ["public-category-summaries"],
-    { revalidate: 300, tags: ["posts", "categories"] }
-);
+                    for (const row of localizedRows) {
+                        if (!row.category || !row.categoryBn) continue;
+                        const slug = categoryToSlug(row.category);
+                        if (!slug || localizedNamesBySlug.has(slug)) continue;
+                        localizedNamesBySlug.set(slug, row.categoryBn);
+                    }
+                }
+
+                return buildCategorySummaries(
+                    grouped as CategoryGroupRow[],
+                    true,
+                    locale,
+                    localizedNamesBySlug
+                );
+            } catch {
+                console.warn("Failed to fetch public categories. Falling back to base categories.");
+                return BASE_CATEGORIES.map((category) => ({
+                    name: getLocalizedCategoryName(category, locale),
+                    canonicalName: category,
+                    slug: categoryToSlug(category),
+                    count: 0,
+                }));
+            }
+        },
+        ["public-category-summaries", locale],
+        { revalidate: 300, tags: ["posts", "categories"] }
+    )();
+}
 
 export const getCategoryOptions = unstable_cache(
     async (): Promise<string[]> => {
@@ -331,73 +333,80 @@ export const getCategoryOptions = unstable_cache(
 
 // --- Cached Functions ---
 
-export const getHotTopics = unstable_cache(
-    async (limit: number = 5, locale: Locale = "en"): Promise<Post[]> => {
-        try {
-            const posts = await prisma.post.findMany({
-                where: { featured: true, published: true },
-                include: { author: { select: { image: true } } },
-                orderBy: { views: 'desc' },
-                take: limit
-            });
-            return posts.map((post) => mapPrismaPost(post, locale));
-        } catch (error) {
-            console.error("Failed to fetch hot topics:", error);
-            return [];
-        }
-    },
-    ['hot-topics'],
-    { revalidate: 60, tags: ['posts', 'hot-topics'] }
-);
-
-export const getRecentPosts = unstable_cache(
-    async (limit: number = 10, locale: Locale = "en"): Promise<Post[]> => {
-        try {
-            const posts = await prisma.post.findMany({
-                where: { published: true },
-                include: { author: { select: { image: true } } },
-                orderBy: { createdAt: 'desc' },
-                take: limit
-            });
-            return posts.map((post) => mapPrismaPost(post, locale));
-        } catch (error) {
-            console.error("Failed to fetch recent posts:", error);
-            return [];
-        }
-    },
-    ['recent-posts'],
-    { revalidate: 300, tags: ['posts', 'recent'] }
-);
-
-export const getPostBySlug = unstable_cache(
-    async (
-        slug: string,
-        locale: Locale = "en",
-        includeUnpublished: boolean = false
-    ): Promise<Post | null> => {
-        if (!slug?.trim()) return null;
-        try {
-            const post = await prisma.post.findUnique({
-                where: { slug },
-                include: { author: { select: { image: true } } }
-            });
-
-            if (!post || (!includeUnpublished && !post.published)) return null;
-
-            // Increment views asynchronously
-            if (!includeUnpublished && post.published) {
-                incrementViewCount(slug).catch(console.error);
+export async function getHotTopics(limit: number = 5, locale: Locale = "en"): Promise<Post[]> {
+    return unstable_cache(
+        async (): Promise<Post[]> => {
+            try {
+                const posts = await prisma.post.findMany({
+                    where: { featured: true, published: true },
+                    include: { author: { select: { image: true } } },
+                    orderBy: { views: 'desc' },
+                    take: limit
+                });
+                return posts.map((post) => mapPrismaPost(post, locale));
+            } catch (error) {
+                console.error("Failed to fetch hot topics:", error);
+                return [];
             }
+        },
+        ['hot-topics', locale, String(limit)],
+        { revalidate: 60, tags: ['posts', 'hot-topics'] }
+    )();
+}
 
-            return mapPrismaPost(post, locale);
-        } catch (error) {
-            console.error("Failed to fetch post by slug:", error);
-            return null;
-        }
-    },
-    ['post-by-slug'],
-    { revalidate: 300, tags: ['posts'] }
-);
+export async function getRecentPosts(limit: number = 10, locale: Locale = "en"): Promise<Post[]> {
+    return unstable_cache(
+        async (): Promise<Post[]> => {
+            try {
+                const posts = await prisma.post.findMany({
+                    where: { published: true },
+                    include: { author: { select: { image: true } } },
+                    orderBy: { createdAt: 'desc' },
+                    take: limit
+                });
+                return posts.map((post) => mapPrismaPost(post, locale));
+            } catch (error) {
+                console.error("Failed to fetch recent posts:", error);
+                return [];
+            }
+        },
+        ['recent-posts', locale, String(limit)],
+        { revalidate: 300, tags: ['posts', 'recent'] }
+    )();
+}
+
+export async function getPostBySlug(
+    slug: string,
+    locale: Locale = "en",
+    includeUnpublished: boolean = false
+): Promise<Post | null> {
+    if (!slug?.trim()) return null;
+
+    return unstable_cache(
+        async (): Promise<Post | null> => {
+            try {
+                const post = await prisma.post.findUnique({
+                    where: { slug },
+                    include: { author: { select: { image: true } } }
+                });
+
+                if (!post || (!includeUnpublished && !post.published)) return null;
+
+                // Increment views asynchronously
+                if (!includeUnpublished && post.published) {
+                    incrementViewCount(slug).catch(console.error);
+                }
+
+                return mapPrismaPost(post, locale);
+            } catch (error) {
+                console.error("Failed to fetch post by slug:", error);
+                return null;
+            }
+        },
+        ['post-by-slug', slug, locale, String(includeUnpublished)],
+        { revalidate: 300, tags: ['posts'] }
+    )();
+}
 
 async function incrementViewCount(slug: string): Promise<void> {
     try {
@@ -410,37 +419,42 @@ async function incrementViewCount(slug: string): Promise<void> {
     }
 }
 
-export const getPostsByCategory = unstable_cache(
-    async (
-        category: string,
-        limit: number = 6,
-        locale: Locale = "en"
-    ): Promise<Post[]> => {
-        if (!category?.trim()) return [];
-        try {
-            const posts = await prisma.post.findMany({
-                where: {
-                    category: {
-                        equals: category.trim(),
-                        mode: "insensitive",
+export async function getPostsByCategory(
+    category: string,
+    limit: number = 6,
+    locale: Locale = "en"
+): Promise<Post[]> {
+    if (!category?.trim()) return [];
+
+    const normalizedCategory = category.trim();
+
+    return unstable_cache(
+        async (): Promise<Post[]> => {
+            try {
+                const posts = await prisma.post.findMany({
+                    where: {
+                        category: {
+                            equals: normalizedCategory,
+                            mode: "insensitive",
+                        },
+                        published: true
                     },
-                    published: true
-                },
-                include: { author: { select: { image: true } } },
-                orderBy: { date: 'desc' },
-                take: limit
-            });
-            // Ensure we verify mapped results
-            return posts.map((post) => mapPrismaPost(post, locale));
-        } catch (error) {
-            console.error("Failed to fetch posts by category:", error);
-            // Return empty array on error
-            return [] as Post[];
-        }
-    },
-    ['posts-by-category'],
-    { revalidate: 300, tags: ['posts'] }
-);
+                    include: { author: { select: { image: true } } },
+                    orderBy: { date: 'desc' },
+                    take: limit
+                });
+                // Ensure we verify mapped results
+                return posts.map((post) => mapPrismaPost(post, locale));
+            } catch (error) {
+                console.error("Failed to fetch posts by category:", error);
+                // Return empty array on error
+                return [] as Post[];
+            }
+        },
+        ['posts-by-category', normalizedCategory, locale, String(limit)],
+        { revalidate: 300, tags: ['posts'] }
+    )();
+}
 
 export async function searchPosts(
     query: string,
@@ -473,42 +487,46 @@ export async function searchPosts(
     }
 }
 
-export const getFeaturedPosts = unstable_cache(
-    async (limit: number = 3, locale: Locale = "en"): Promise<Post[]> => {
-        try {
-            const posts = await prisma.post.findMany({
-                where: { featured: true, published: true },
-                include: { author: { select: { image: true } } },
-                orderBy: { views: 'desc' },
-                take: limit
-            });
-            return posts.map((post) => mapPrismaPost(post, locale));
-        } catch (error) {
-            console.error("Failed to fetch featured posts:", error);
-            return [];
-        }
-    },
-    ['featured-posts'],
-    { revalidate: 7200, tags: ['posts', 'featured'] }
-);
+export async function getFeaturedPosts(limit: number = 3, locale: Locale = "en"): Promise<Post[]> {
+    return unstable_cache(
+        async (): Promise<Post[]> => {
+            try {
+                const posts = await prisma.post.findMany({
+                    where: { featured: true, published: true },
+                    include: { author: { select: { image: true } } },
+                    orderBy: { views: 'desc' },
+                    take: limit
+                });
+                return posts.map((post) => mapPrismaPost(post, locale));
+            } catch (error) {
+                console.error("Failed to fetch featured posts:", error);
+                return [];
+            }
+        },
+        ['featured-posts', locale, String(limit)],
+        { revalidate: 7200, tags: ['posts', 'featured'] }
+    )();
+}
 
-export const getAllPosts = unstable_cache(
-    async (locale: Locale = "en"): Promise<Post[]> => {
-        try {
-            const posts = await prisma.post.findMany({
-                where: { published: true },
-                include: { author: { select: { image: true } } },
-                orderBy: { date: 'desc' }
-            });
-            return posts.map((post) => mapPrismaPost(post, locale));
-        } catch (error) {
-            console.error("Failed to fetch all posts:", error);
-            return [];
-        }
-    },
-    ['all-posts'],
-    { revalidate: 600, tags: ['posts'] }
-);
+export async function getAllPosts(locale: Locale = "en"): Promise<Post[]> {
+    return unstable_cache(
+        async (): Promise<Post[]> => {
+            try {
+                const posts = await prisma.post.findMany({
+                    where: { published: true },
+                    include: { author: { select: { image: true } } },
+                    orderBy: { date: 'desc' }
+                });
+                return posts.map((post) => mapPrismaPost(post, locale));
+            } catch (error) {
+                console.error("Failed to fetch all posts:", error);
+                return [];
+            }
+        },
+        ['all-posts', locale],
+        { revalidate: 600, tags: ['posts'] }
+    )();
+}
 
 // Admin functions
 export async function getAllPostsForAdmin(): Promise<Post[]> {
