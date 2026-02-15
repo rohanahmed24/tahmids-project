@@ -24,7 +24,11 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import { BASE_CATEGORIES, categoryToSlug } from "@/lib/categories";
+import {
+    BASE_CATEGORIES,
+    canonicalizeCategoryName,
+    categoryToSlug,
+} from "@/lib/categories";
 
 interface EditorProps {
     initialData?: {
@@ -79,21 +83,37 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioFileInputRef = useRef<HTMLInputElement>(null);
 
-    const availableCategories = useMemo(() => {
-        const unique = new Set<string>();
+    const categoryMap = useMemo(() => {
+        const map = new Map<string, string>();
         for (const item of [...BASE_CATEGORIES, ...categoryOptions]) {
-            const normalized = item.trim();
-            if (!normalized) continue;
-            unique.add(normalized);
+            const trimmed = item.trim();
+            const key = canonicalizeCategoryName(trimmed);
+            if (!key) continue;
+            if (!map.has(key)) {
+                map.set(key, trimmed);
+            }
         }
+
         if (initialData?.category?.trim()) {
-            unique.add(initialData.category.trim());
+            const trimmed = initialData.category.trim();
+            const key = canonicalizeCategoryName(trimmed);
+            if (key && !map.has(key)) {
+                map.set(key, trimmed);
+            }
         }
-        return Array.from(unique);
+
+        return map;
     }, [categoryOptions, initialData?.category]);
 
-    const knownCategories = useMemo(() => new Set(availableCategories), [availableCategories]);
-    const categorySelectValue = knownCategories.has(category.trim()) ? category.trim() : "__custom__";
+    const availableCategories = useMemo(() => Array.from(categoryMap.values()), [categoryMap]);
+    const knownCategories = useMemo(() => new Set(categoryMap.keys()), [categoryMap]);
+    const categorySelectValue = useMemo(() => {
+        const key = canonicalizeCategoryName(category.trim());
+        if (key && knownCategories.has(key)) {
+            return categoryMap.get(key) ?? category.trim();
+        }
+        return "__custom__";
+    }, [category, knownCategories, categoryMap]);
     const computedTopicSlug = useMemo(() => categoryToSlug(category), [category]);
 
     // Initial Auto-save Recovery
@@ -553,7 +573,8 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                     onChange={(e) => {
                                         const next = e.target.value;
                                         if (next === "__custom__") {
-                                            if (knownCategories.has(category.trim())) {
+                                            const selectedKey = canonicalizeCategoryName(category.trim());
+                                            if (selectedKey && knownCategories.has(selectedKey)) {
                                                 setCategory("");
                                             }
                                             return;

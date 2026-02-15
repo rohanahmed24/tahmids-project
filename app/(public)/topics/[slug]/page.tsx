@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { getPublicCategorySummaries } from "@/lib/posts";
-import { categoryToSlug } from "@/lib/categories";
 
 interface TopicPageProps {
     params: Promise<{ slug: string }>;
@@ -169,7 +168,7 @@ export async function generateMetadata({ params }: TopicPageProps) {
         title: `${categoryName} Stories | Wisdomia`,
         description: `Explore the latest ${categoryName} stories and analysis on Wisdomia.`,
         alternates: {
-            canonical: `/topics/${categoryToSlug(categoryName)}`,
+            canonical: `/topics/${slug}`,
         },
     };
 }

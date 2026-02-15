@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import path from "path";
 
+function buildResponseHeaders(
+    contentType: string,
+    cacheControl: string,
+    filename: string,
+    isSvg: boolean
+) {
+    const headers: Record<string, string> = {
+        "Content-Type": contentType,
+        "Cache-Control": cacheControl,
+        "X-Content-Type-Options": "nosniff",
+    };
+
+    if (isSvg) {
+        const safeFilename = path.basename(filename).replace(/"/g, "");
+        headers["Content-Disposition"] = `attachment; filename="${safeFilename}"`;
+        headers["Content-Security-Policy"] = "default-src 'none'; sandbox";
+    }
+
+    return headers;
+}
+
 // Serve uploaded files dynamically (for standalone mode)
 export async function GET(
     request: NextRequest,
@@ -36,12 +57,15 @@ export async function GET(
             };
 
             const contentType = contentTypes[ext] || "application/octet-stream";
+            const isSvg = ext === ".svg";
 
             return new NextResponse(file, {
-                headers: {
-                    "Content-Type": contentType,
-                    "Cache-Control": "public, max-age=31536000, immutable",
-                },
+                headers: buildResponseHeaders(
+                    contentType,
+                    "public, max-age=31536000, immutable",
+                    filename,
+                    isSvg
+                ),
             });
         } catch {
             const remoteBase = process.env.NEXT_PUBLIC_UPLOADS_BASE_URL?.replace(/\/$/, "");
@@ -55,11 +79,17 @@ export async function GET(
                         const remoteRes = await fetch(fetchUrl);
                         if (remoteRes.ok) {
                             const arrayBuffer = await remoteRes.arrayBuffer();
+                            const remoteContentType = remoteRes.headers.get("content-type") || "application/octet-stream";
+                            const isSvg =
+                                ext === ".svg" ||
+                                remoteContentType.toLowerCase().startsWith("image/svg+xml");
                             return new NextResponse(Buffer.from(arrayBuffer), {
-                                headers: {
-                                    "Content-Type": remoteRes.headers.get("content-type") || "application/octet-stream",
-                                    "Cache-Control": "public, max-age=3600",
-                                },
+                                headers: buildResponseHeaders(
+                                    remoteContentType,
+                                    "public, max-age=3600",
+                                    filename,
+                                    isSvg
+                                ),
                             });
                         }
                     }
@@ -70,7 +100,7 @@ export async function GET(
 
             return NextResponse.json({ error: "File not found" }, { status: 404 });
         }
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 }

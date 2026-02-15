@@ -75,21 +75,16 @@ export async function getAllUsers(): Promise<User[]> {
 }
 
 export async function getFeaturedWriters(): Promise<User[]> {
-    try {
-        const users = await prisma.user.findMany({
-            where: { isFeatured: true },
-            orderBy: { featuredOrder: 'asc' },
-            include: {
-                _count: {
-                    select: { posts: true }
-                }
+    const users = await prisma.user.findMany({
+        where: { isFeatured: true },
+        orderBy: { featuredOrder: 'asc' },
+        include: {
+            _count: {
+                select: { posts: true }
             }
-        });
-        return users.map(mapPrismaUser);
-    } catch (error) {
-        console.error("Error fetching featured writers:", error);
-        return [];
-    }
+        }
+    });
+    return users.map(mapPrismaUser);
 }
 
 export async function getUserById(id: number): Promise<User | null> {

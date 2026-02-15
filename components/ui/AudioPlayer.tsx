@@ -22,11 +22,7 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
   const [progress, setProgress] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-  // Lazy initialization to check support without needing useEffect
-  const [isSupported] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return !!window.speechSynthesis;
-  });
+  const [isSupported, setIsSupported] = useState(false);
   const [currentTime, setCurrentTime] = useState("0:00");
   const [totalTime, setTotalTime] = useState("0:00");
   const [isExpanded, setIsExpanded] = useState(false);
@@ -57,9 +53,9 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
 
   // Calculate estimated duration (average 150 words per minute)
   const estimateDuration = useCallback(
-    (text: string) => {
+    (text: string, playbackSpeed = speed) => {
       const words = text.split(/\s+/).length;
-      const minutes = words / (150 * speed);
+      const minutes = words / (150 * playbackSpeed);
       return Math.ceil(minutes * 60);
     },
     [speed],
@@ -98,59 +94,87 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
     setTotalTime(formattedTotalTime);
   }, [formattedTotalTime]);
 
-  const speak = useCallback(() => {
-    if (!window.speechSynthesis) return;
-
-    // Cancel any ongoing speech
-    window.speechSynthesis.cancel();
-
-    const words = textRef.current.split(/\s+/).filter(Boolean);
-    const safeSeekIndex = Math.max(
-      0,
-      Math.min(words.length - 1, seekWordIndexRef.current),
+  // Detect browser TTS support on client only to avoid hydration mismatches.
+  useEffect(() => {
+    setIsSupported(
+      typeof window !== "undefined" && !!window.speechSynthesis,
     );
-    const textToSpeak = words.slice(safeSeekIndex).join(" ");
-    const utterance = new SpeechSynthesisUtterance(
-      textToSpeak || textRef.current,
-    );
-    utterance.rate = speed;
-    utterance.volume = isMuted ? 0 : 1;
+  }, []);
 
-    // Try to use a natural voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoice =
-      voices.find(
-        (v) => v.lang.startsWith("en") && v.name.includes("Natural"),
-      ) || voices.find((v) => v.lang.startsWith("en"));
-
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-
-    utterance.onstart = () => {
-      setIsPlaying(true);
-      setIsPaused(false);
-      startTimeRef.current = Date.now() - pausedAtRef.current;
+  // Ensure speech does not continue after navigation/unmount.
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
     };
+  }, []);
 
-    utterance.onend = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-      setProgress(100);
-      setCurrentTime(formatTime(estimateDuration(textRef.current)));
-      pausedAtRef.current = 0;
-      startOffsetRef.current = estimateDuration(textRef.current);
-      seekWordIndexRef.current = words.length;
-    };
+  const speak = useCallback(
+    (options?: { playbackSpeed?: number; muted?: boolean }) => {
+      if (!window.speechSynthesis) return;
+      const playbackSpeed = options?.playbackSpeed ?? speed;
+      const muted = options?.muted ?? isMuted;
 
-    utterance.onerror = () => {
-      setIsPlaying(false);
-      setIsPaused(false);
-    };
+      // Cancel any ongoing speech
+      utteranceRef.current = null;
+      window.speechSynthesis.cancel();
 
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  }, [speed, isMuted, estimateDuration, formatTime]);
+      const words = textRef.current.split(/\s+/).filter(Boolean);
+      const safeSeekIndex = Math.max(
+        0,
+        Math.min(words.length - 1, seekWordIndexRef.current),
+      );
+      const textToSpeak = words.slice(safeSeekIndex).join(" ");
+      const utterance = new SpeechSynthesisUtterance(
+        textToSpeak || textRef.current,
+      );
+      utterance.rate = playbackSpeed;
+      utterance.volume = muted ? 0 : 1;
+
+      // Try to use a natural voice
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice =
+        voices.find(
+          (v) => v.lang.startsWith("en") && v.name.includes("Natural"),
+        ) || voices.find((v) => v.lang.startsWith("en"));
+
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+
+      utterance.onstart = () => {
+        if (utteranceRef.current !== utterance) return;
+        setIsPlaying(true);
+        setIsPaused(false);
+        startTimeRef.current = Date.now() - pausedAtRef.current;
+      };
+
+      utterance.onend = () => {
+        if (utteranceRef.current !== utterance) return;
+        const duration = estimateDuration(textRef.current, playbackSpeed);
+        setIsPlaying(false);
+        setIsPaused(false);
+        setProgress(100);
+        setCurrentTime(formatTime(duration));
+        pausedAtRef.current = 0;
+        startOffsetRef.current = duration;
+        seekWordIndexRef.current = words.length;
+        utteranceRef.current = null;
+      };
+
+      utterance.onerror = () => {
+        if (utteranceRef.current !== utterance) return;
+        setIsPlaying(false);
+        setIsPaused(false);
+        utteranceRef.current = null;
+      };
+
+      utteranceRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+    },
+    [speed, isMuted, estimateDuration, formatTime],
+  );
 
   // Update progress
   useEffect(() => {
@@ -203,6 +227,7 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
 
   const handleRestart = () => {
     if (!window.speechSynthesis) return;
+    utteranceRef.current = null;
     window.speechSynthesis.cancel();
     setProgress(0);
     setCurrentTime("0:00");
@@ -214,26 +239,41 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
 
   const handleSpeedChange = (newSpeed: number) => {
     setSpeed(newSpeed);
+    const duration = estimateDuration(textRef.current, newSpeed);
+    setTotalTime(formatTime(duration));
+    setCurrentTime(formatTime((progress / 100) * duration));
+
     if (isPlaying) {
       const wasPlaying = !isPaused;
-      window.speechSynthesis.cancel();
+      const words = textRef.current.split(/\s+/).filter(Boolean);
+      seekWordIndexRef.current = Math.floor((progress / 100) * words.length);
+      startOffsetRef.current = (progress / 100) * duration;
       pausedAtRef.current = 0;
+      utteranceRef.current = null;
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+      setIsPaused(false);
       if (wasPlaying) {
-        const words = textRef.current.split(/\s+/).filter(Boolean);
-        seekWordIndexRef.current = Math.floor((progress / 100) * words.length);
-        startOffsetRef.current =
-          (progress / 100) * estimateDuration(textRef.current);
-        setTimeout(speak, 100);
+        setTimeout(() => speak({ playbackSpeed: newSpeed }), 100);
       }
     }
-    const duration = estimateDuration(textRef.current);
-    setTotalTime(formatTime(duration));
   };
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
-    if (utteranceRef.current) {
-      utteranceRef.current.volume = isMuted ? 1 : 0;
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+
+    if (isPlaying && !isPaused && window.speechSynthesis) {
+      const duration = estimateDuration(textRef.current);
+      const words = textRef.current.split(/\s+/).filter(Boolean);
+      seekWordIndexRef.current = Math.floor((progress / 100) * words.length);
+      startOffsetRef.current = (progress / 100) * duration;
+      pausedAtRef.current = 0;
+      utteranceRef.current = null;
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+      setIsPaused(false);
+      setTimeout(() => speak({ muted: nextMuted }), 100);
     }
   };
 
@@ -259,6 +299,7 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
 
       if (window.speechSynthesis && isPlaying) {
         const wasPlaying = !isPaused;
+        utteranceRef.current = null;
         window.speechSynthesis.cancel();
         setIsPlaying(false);
         setIsPaused(false);

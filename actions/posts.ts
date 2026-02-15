@@ -124,7 +124,9 @@ export async function createPost(formData: FormData) {
     revalidatePath("/admin/dashboard");
     revalidatePath("/");
     revalidatePath("/topics");
-    revalidatePath(`/topics/${topic_slug}`);
+    if (topic_slug) {
+        revalidatePath(`/topics/${topic_slug}`);
+    }
     redirect("/admin/dashboard");
 }
 
@@ -239,7 +241,9 @@ export async function updatePost(originalSlug: string, formData: FormData) {
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
         revalidatePath("/topics");
-        revalidatePath(`/topics/${topic_slug}`);
+        if (topic_slug) {
+            revalidatePath(`/topics/${topic_slug}`);
+        }
         if (previousTopicSlug && previousTopicSlug !== topic_slug) {
             revalidatePath(`/topics/${previousTopicSlug}`);
         }
