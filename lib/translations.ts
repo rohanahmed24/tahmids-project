@@ -15,7 +15,7 @@ const messages = {
     translatorLabel: "Translator",
     editedBy: "Edited by",
     translatedBy: "Translated by",
-    switchToBangla: "Switch to Bangla",
+    switchToBangla: "বাংলা",
     switchToEnglish: "Switch to English",
     topicNotFound: "Topic Not Found",
     topicNotFoundBody: "The topic you're looking for doesn't exist.",
@@ -52,7 +52,7 @@ const messages = {
     editedBy: "সম্পাদনা",
     translatedBy: "অনুবাদ",
     switchToBangla: "বাংলায় দেখুন",
-    switchToEnglish: "ইংরেজিতে দেখুন",
+    switchToEnglish: "English",
     topicNotFound: "বিষয়টি পাওয়া যায়নি",
     topicNotFoundBody: "আপনি যে বিষয়টি খুঁজছেন তা নেই।",
     browseAllTopics: "সব বিষয় দেখুন",
@@ -80,4 +80,3 @@ export type TranslationKey = keyof (typeof messages)["en"];
 export function t(locale: Locale, key: TranslationKey): string {
   return messages[locale][key] ?? messages.en[key] ?? key;
 }
-

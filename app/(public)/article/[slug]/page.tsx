@@ -44,7 +44,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
           {/* Article Content */}
           <div className="space-y-8 min-w-0">
-            {post.content && (
+            {locale !== "bn" && post.content && (
               <ArticleAudioPlayer title={post.title} content={post.content} />
             )}
 
