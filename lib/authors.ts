@@ -1,29 +1,29 @@
-import { Assets } from "@/lib/assets";
+const DEFAULT_AUTHOR_AVATAR = "/imgs/default-avatar.svg";
 
 export const authors = [
     {
         name: "Sarah Jenkins",
         role: "Design Lead",
         bio: "Exploring the intersection of design and humanity.",
-        img: Assets.imgAvatarImage1
+        img: DEFAULT_AUTHOR_AVATAR
     },
     {
         name: "David Miller",
         role: "Tech Journalist",
         bio: "Reporting on the future of AI and robotics.",
-        img: Assets.imgAvatarImage2
+        img: DEFAULT_AUTHOR_AVATAR
     },
     {
         name: "Emily Rose",
         role: "Cultural Critic",
         bio: "Writing about movies, music, and modern life.",
-        img: Assets.imgAvatarImage3
+        img: DEFAULT_AUTHOR_AVATAR
     },
     {
         name: "James L.",
         role: "Architect",
         bio: "Designing sustainable homes for tomorrow.",
-        img: Assets.imgAvatarImage4
+        img: DEFAULT_AUTHOR_AVATAR
     },
 ];
 
@@ -34,7 +34,7 @@ export function getAuthorByName(name?: string | null) {
             name: "Anonymous",
             role: "Contributor",
             bio: "A valued contributor to Wisdomia.",
-            img: Assets.imgAvatarImage
+            img: DEFAULT_AUTHOR_AVATAR
         };
     }
 
@@ -46,6 +46,6 @@ export function getAuthorByName(name?: string | null) {
         name: safeName,
         role: "Contributor",
         bio: "A valued contributor to Wisdomia.",
-        img: Assets.imgAvatarImage
+        img: DEFAULT_AUTHOR_AVATAR
     };
 }

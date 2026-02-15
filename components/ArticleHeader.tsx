@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import type { Locale } from "@/lib/locale";
 import { t } from "@/lib/translations";
+import { FallbackImage } from "@/components/ui/FallbackImage";
 
 interface ArticleHeaderProps {
     title?: string;
@@ -50,10 +50,11 @@ export function ArticleHeader({
             {/* Mobile Layout - Image on top, content below */}
             <header className="md:hidden relative w-full">
                 {/* Hero Image - 55% screen height on mobile */}
-                <div className="relative w-full h-[55svh] overflow-hidden">
-                    <Image
+                    <div className="relative w-full h-[55svh] overflow-hidden">
+                    <FallbackImage
                         src={heroImage}
                         alt={title}
+                        fallbackSrc={Assets.imgArticleHero}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover"
@@ -116,10 +117,11 @@ export function ArticleHeader({
                     style={{ y }}
                     className="absolute inset-0 z-0"
                 >
-                    <div className="relative w-full h-[120%] -top-[10%]">
-                        <Image
+                        <div className="relative w-full h-[120%] -top-[10%]">
+                        <FallbackImage
                             src={heroImage}
                             alt={title}
+                            fallbackSrc={Assets.imgArticleHero}
                             fill
                             sizes="100vw"
                             className="object-cover"

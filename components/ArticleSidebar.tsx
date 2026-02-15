@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { getAuthorByName } from "@/lib/authors";
 import type { Post } from "@/lib/posts";
 import type { Locale } from "@/lib/locale";
 import { t } from "@/lib/translations";
+import { FallbackImage } from "@/components/ui/FallbackImage";
 
 interface ArticleSidebarProps {
     post: Post;
@@ -32,7 +32,7 @@ export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: Arti
             <div className="bg-[#f4f1ea] dark:bg-[#1a1a1a] text-[#1a1a1a] dark:text-white p-8 rounded-none border border-black/5 dark:border-white/5 space-y-6">
                 <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden relative">
-                        <Image src={author.img} alt={author.name} fill sizes="64px" className="object-cover" />
+                        <FallbackImage src={author.img} fallbackSrc="/imgs/default-avatar.svg" alt={author.name} fill sizes="64px" className="object-cover" />
                     </div>
                     <div>
                         <h3 className="font-serif text-xl font-bold leading-none">{author.name}</h3>
@@ -67,9 +67,10 @@ export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: Arti
                             <Link href={`/article/${post.slug}`} key={post.slug} className="group block space-y-3" data-testid={`link-related-post-${post.slug}`}>
                                 {/* Mobile: square aspect, PC: 3:2 aspect for larger display */}
                                 <div className="relative w-full aspect-square md:aspect-[3/2] overflow-hidden rounded-sm bg-bg-secondary">
-                                    <Image
+                                    <FallbackImage
                                         src={post.coverImage || "/placeholder.jpg"}
                                         alt={post.title}
+                                        fallbackSrc="/placeholder.jpg"
                                         fill
                                         sizes="(max-width: 768px) 50vw, 350px"
                                         className="object-cover transition-transform duration-700 group-hover:scale-105"
