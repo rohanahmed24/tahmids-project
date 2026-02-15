@@ -67,13 +67,16 @@ export async function GET(
         } catch {
             const remoteBase = process.env.NEXT_PUBLIC_UPLOADS_BASE_URL?.replace(/\/$/, "");
             if (remoteBase) {
+                let fetchUrl: string | undefined;
                 try {
                     const requestUrl = new URL(request.url);
                     const remoteUrl = new URL(remoteBase);
                     if (remoteUrl.host !== requestUrl.host) {
                         const encodedPath = pathSegments.map(encodeURIComponent).join("/");
-                        const fetchUrl = `${remoteBase}/imgs/uploads/${encodedPath}`;
-                        const remoteRes = await fetch(fetchUrl);
+                        fetchUrl = `${remoteBase}/imgs/uploads/${encodedPath}`;
+                        const remoteRes = await fetch(fetchUrl, {
+                            signal: AbortSignal.timeout(5000),
+                        });
                         if (remoteRes.ok) {
                             const arrayBuffer = await remoteRes.arrayBuffer();
                             const remoteContentType = remoteRes.headers.get("content-type") || contentType;
@@ -90,8 +93,8 @@ export async function GET(
                             });
                         }
                     }
-                } catch {
-                    // fall through
+                } catch (error) {
+                    console.warn("Remote upload fetch failed:", { fetchUrl, error });
                 }
             }
 
