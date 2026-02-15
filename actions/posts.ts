@@ -179,9 +179,9 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     }
     const videoUrl = (formData.get("videoUrl") as string) || undefined;
     const audioUrl = (formData.get("audioUrl") as string) || undefined;
-    const authorName = ((formData.get("authorName") as string) || "").trim() || null;
-    const translatorName = ((formData.get("translatorName") as string) || "").trim() || null;
-    const editorName = ((formData.get("editorName") as string) || "").trim() || null;
+    const authorNameInput = ((formData.get("authorName") as string) || "").trim();
+    const translatorNameInput = ((formData.get("translatorName") as string) || "").trim();
+    const editorNameInput = ((formData.get("editorName") as string) || "").trim();
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = categoryToSlug(category) || undefined;
     const accent_color = (formData.get("accent_color") as string) || "#3B82F6";
@@ -194,8 +194,21 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     const excerpt = content ? content.substring(0, 200) + "..." : "";
     const existingPost = await prisma.post.findUnique({
         where: { slug: originalSlug },
-        select: { category: true }
+        select: {
+            category: true,
+            authorName: true,
+            translatorName: true,
+            editorName: true,
+        }
     });
+    if (!existingPost) {
+        throw new Error("Post not found");
+    }
+
+    const authorName = authorNameInput || existingPost.authorName || null;
+    const translatorName = translatorNameInput || existingPost.translatorName || null;
+    const editorName = editorNameInput || existingPost.editorName || null;
+
     const previousTopicSlug = existingPost?.category ? categoryToSlug(existingPost.category) : null;
 
     const coverImageFile = formData.get("coverImageFile") as File;

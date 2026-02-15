@@ -29,6 +29,7 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
   const textRef = useRef<string>("");
   const startTimeRef = useRef<number>(0);
@@ -101,6 +102,22 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
     );
   }, []);
 
+  // Web Speech voices load asynchronously in many browsers.
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+
+    const updateVoices = () => {
+      voicesRef.current = window.speechSynthesis.getVoices();
+    };
+
+    updateVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", updateVoices);
+
+    return () => {
+      window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
+    };
+  }, []);
+
   // Ensure speech does not continue after navigation/unmount.
   useEffect(() => {
     return () => {
@@ -133,7 +150,7 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
       utterance.volume = muted ? 0 : 1;
 
       // Try to use a natural voice
-      const voices = window.speechSynthesis.getVoices();
+      const voices = voicesRef.current;
       const preferredVoice =
         voices.find(
           (v) => v.lang.startsWith("en") && v.name.includes("Natural"),
@@ -199,6 +216,24 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
 
     return () => clearInterval(interval);
   }, [isPlaying, isPaused, estimateDuration, formatTime]);
+
+  // Keep synthesis alive on browsers that may stop long-running speech.
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      !window.speechSynthesis ||
+      !isPlaying ||
+      isPaused
+    ) {
+      return;
+    }
+
+    const keepAliveInterval = setInterval(() => {
+      window.speechSynthesis.resume();
+    }, 14000);
+
+    return () => clearInterval(keepAliveInterval);
+  }, [isPlaying, isPaused]);
 
   const handlePlayPause = () => {
     if (!window.speechSynthesis) return;
@@ -342,6 +377,59 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
     commitSeek(newProgress);
   };
 
+  const handleProgressKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (isDraggingRef.current) return;
+
+      const width = progressBarRef.current?.getBoundingClientRect().width ?? 0;
+      const baseStep = width > 0 ? Math.max(1, (10 / width) * 100) : 5;
+      const pageStep = Math.min(baseStep * 5, 25);
+
+      let nextProgress = progress;
+      let handled = true;
+
+      switch (e.key) {
+        case "ArrowLeft":
+        case "ArrowDown":
+          nextProgress = progress - baseStep;
+          break;
+        case "ArrowRight":
+        case "ArrowUp":
+          nextProgress = progress + baseStep;
+          break;
+        case "PageDown":
+          nextProgress = progress - pageStep;
+          break;
+        case "PageUp":
+          nextProgress = progress + pageStep;
+          break;
+        case "Home":
+          nextProgress = 0;
+          break;
+        case "End":
+          nextProgress = 100;
+          break;
+        default:
+          handled = false;
+      }
+
+      if (!handled) return;
+      e.preventDefault();
+
+      const normalized = Math.max(0, Math.min(100, nextProgress));
+      const duration = estimateDuration(textRef.current);
+
+      isDraggingRef.current = true;
+      setIsDragging(true);
+      setProgress(normalized);
+      setCurrentTime(formatTime((normalized / 100) * duration));
+      commitSeek(normalized);
+      isDraggingRef.current = false;
+      setIsDragging(false);
+    },
+    [progress, estimateDuration, formatTime, commitSeek],
+  );
+
   if (!isSupported) {
     return null;
   }
@@ -406,11 +494,19 @@ export function AudioPlayer({ content, title }: AudioPlayerProps) {
               <div className="space-y-2">
                                 <div
                                     ref={progressBarRef}
-                                    className="relative w-full h-4 flex items-center rounded-full cursor-pointer touch-none overflow-hidden"
+                                    className="relative w-full h-4 flex items-center rounded-full cursor-pointer touch-none overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                                    role="slider"
+                                    tabIndex={0}
+                                    aria-label="Audio progress"
+                                    aria-valuenow={Math.round(progress)}
+                                    aria-valuemin={0}
+                                    aria-valuemax={100}
+                                    aria-valuetext={`${currentTime} of ${totalTime}`}
                                     onPointerDown={handleProgressPointerDown}
                                     onPointerMove={handleProgressPointerMove}
                                     onPointerUp={handleProgressPointerUp}
                                     onPointerCancel={handleProgressPointerUp}
+                                    onKeyDown={handleProgressKeyDown}
                 >
                   <div className="absolute inset-x-0 h-2 bg-bg-primary rounded-full overflow-hidden">
                     <motion.div

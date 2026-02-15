@@ -38,25 +38,22 @@ export async function GET(
         }
 
         const filePath = path.join(process.cwd(), "public/imgs/uploads", filename);
+        const ext = path.extname(filename).toLowerCase();
+        const contentTypes: Record<string, string> = {
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".png": "image/png",
+            ".gif": "image/gif",
+            ".webp": "image/webp",
+            ".svg": "image/svg+xml",
+            ".mp3": "audio/mpeg",
+            ".wav": "audio/wav",
+            ".mp4": "video/mp4",
+        };
+        const contentType = contentTypes[ext] || "application/octet-stream";
 
         try {
             const file = await readFile(filePath);
-
-            // Determine content type
-            const ext = path.extname(filename).toLowerCase();
-            const contentTypes: Record<string, string> = {
-                ".jpg": "image/jpeg",
-                ".jpeg": "image/jpeg",
-                ".png": "image/png",
-                ".gif": "image/gif",
-                ".webp": "image/webp",
-                ".svg": "image/svg+xml",
-                ".mp3": "audio/mpeg",
-                ".wav": "audio/wav",
-                ".mp4": "video/mp4",
-            };
-
-            const contentType = contentTypes[ext] || "application/octet-stream";
             const isSvg = ext === ".svg";
 
             return new NextResponse(file, {
@@ -79,7 +76,7 @@ export async function GET(
                         const remoteRes = await fetch(fetchUrl);
                         if (remoteRes.ok) {
                             const arrayBuffer = await remoteRes.arrayBuffer();
-                            const remoteContentType = remoteRes.headers.get("content-type") || "application/octet-stream";
+                            const remoteContentType = remoteRes.headers.get("content-type") || contentType;
                             const isSvg =
                                 ext === ".svg" ||
                                 remoteContentType.toLowerCase().startsWith("image/svg+xml");
