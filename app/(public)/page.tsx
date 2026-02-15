@@ -1,8 +1,9 @@
 import { HeroSlider } from "@/components/HeroSlider";
 import { FeaturedTales } from "@/components/FeaturedTales";
-import { getHotTopics, getRecentPosts, getPostsByCategories } from "@/lib/posts";
+import { getHotTopics, getRecentPosts, getPostsByCategories, getPublicCategorySummaries } from "@/lib/posts";
 import dynamic from "next/dynamic";
 import { Metadata } from "next";
+import { BASE_CATEGORIES, categoryToSlug } from "@/lib/categories";
 
 // Dynamic Imports for Code Splitting (Below the fold components)
 const Subscription = dynamic(() => import("@/components/Subscription").then(mod => mod.Subscription));
@@ -18,22 +19,28 @@ const CategorySection = dynamic(() => import("@/components/CategorySection").the
 // SEO Metadata
 export const metadata: Metadata = {
   title: "Wisdomia - Your Digital Magazine",
-  description: "Explore stories that matter across politics, mystery, crime, history, news, and science. Thoughtful, well-researched content that informs and inspires.",
-  keywords: ["digital magazine", "politics", "mystery", "crime", "history", "news", "science"],
+  description: "Explore stories that matter across technology, design, culture, business, self-growth, and politics.",
+  keywords: ["digital magazine", "technology", "design", "culture", "business", "self", "politics"],
   openGraph: {
     title: "Wisdomia - Your Digital Magazine",
-    description: "Explore stories that matter across politics, mystery, crime, history, news, and science.",
+    description: "Explore stories that matter across technology, design, culture, business, self-growth, and politics.",
     type: "website",
   },
 };
 
 export default async function Home() {
+  const homepageCategories = BASE_CATEGORIES.map((category) => ({
+    title: category,
+    slug: categoryToSlug(category),
+  }));
+
   // Parallel data fetching for better performance
-  const [hotTopics, recentPosts, categoryData] = await Promise.all([
+  const [hotTopics, recentPosts, categoryData, categories] = await Promise.all([
     getHotTopics(),
     getRecentPosts(),
     // Single optimized query for all categories
-    getPostsByCategories(['Politics', 'Mystery', 'Crime', 'History', 'News', 'Science'])
+    getPostsByCategories(homepageCategories.map((category) => category.title)),
+    getPublicCategorySummaries(),
   ]);
 
   return (
@@ -42,17 +49,19 @@ export default async function Home() {
       <FeaturedTales articles={recentPosts} />
 
       {/* Category Sections */}
-      <CategorySection title="Politics" slug="politics" articles={categoryData.Politics} />
-      <CategorySection title="Mystery" slug="mystery" articles={categoryData.Mystery} />
-      <CategorySection title="Crime" slug="crime" articles={categoryData.Crime} />
-      <CategorySection title="History" slug="history" articles={categoryData.History} />
-      <CategorySection title="Breaking News" slug="news" articles={categoryData.News} />
-      <CategorySection title="Science" slug="science" articles={categoryData.Science} />
+      {homepageCategories.map((category) => (
+        <CategorySection
+          key={category.slug}
+          title={category.title}
+          slug={category.slug}
+          articles={categoryData[category.title] || []}
+        />
+      ))}
 
       <DailyQuote />
       <Subscription />
       <ArticleGrid articles={recentPosts} />
-      <TopicExplore />
+      <TopicExplore categories={categories} />
       <AuthorsGrid />
       <Testimonials />
       <FAQ />

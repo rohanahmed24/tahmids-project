@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import {
     Image as ImageIcon,
@@ -24,6 +24,11 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import {
+    BASE_CATEGORIES,
+    canonicalizeCategoryName,
+    categoryToSlug,
+} from "@/lib/categories";
 
 interface EditorProps {
     initialData?: {
@@ -40,22 +45,26 @@ interface EditorProps {
         featured?: boolean;
         published?: boolean;
         authorName?: string;
+        translatorName?: string;
+        editorName?: string;
         metaDescription?: string;
         backlinks?: string[];
     };
     action: (formData: FormData) => Promise<void>;
+    categoryOptions?: string[];
 }
 
-export default function Editor({ initialData, action }: EditorProps) {
+export default function Editor({ initialData, action, categoryOptions = [] }: EditorProps) {
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const [title, setTitle] = useState(initialData?.title || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [content, setContent] = useState(initialData?.content || "");
     const [coverImage, setCoverImage] = useState(initialData?.coverImage || "");
     const [category, setCategory] = useState(initialData?.category || "Technology");
-    const [topicSlug, setTopicSlug] = useState(initialData?.topic_slug || "");
     const [published, setPublished] = useState(initialData?.published ?? true);
     const [authorName, setAuthorName] = useState(initialData?.authorName || "");
+    const [translatorName, setTranslatorName] = useState(initialData?.translatorName || "");
+    const [editorName, setEditorName] = useState(initialData?.editorName || "");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.coverImage || null);
     const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl || "");
@@ -73,6 +82,39 @@ export default function Editor({ initialData, action }: EditorProps) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const audioFileInputRef = useRef<HTMLInputElement>(null);
+
+    const categoryMap = useMemo(() => {
+        const map = new Map<string, string>();
+        for (const item of [...BASE_CATEGORIES, ...categoryOptions]) {
+            const trimmed = item.trim();
+            const key = canonicalizeCategoryName(trimmed);
+            if (!key) continue;
+            if (!map.has(key)) {
+                map.set(key, trimmed);
+            }
+        }
+
+        if (initialData?.category?.trim()) {
+            const trimmed = initialData.category.trim();
+            const key = canonicalizeCategoryName(trimmed);
+            if (key && !map.has(key)) {
+                map.set(key, trimmed);
+            }
+        }
+
+        return map;
+    }, [categoryOptions, initialData?.category]);
+
+    const availableCategories = useMemo(() => Array.from(categoryMap.values()), [categoryMap]);
+    const knownCategories = useMemo(() => new Set(categoryMap.keys()), [categoryMap]);
+    const categorySelectValue = useMemo(() => {
+        const key = canonicalizeCategoryName(category.trim());
+        if (key && knownCategories.has(key)) {
+            return categoryMap.get(key) ?? category.trim();
+        }
+        return "__custom__";
+    }, [category, knownCategories, categoryMap]);
+    const computedTopicSlug = useMemo(() => categoryToSlug(category), [category]);
 
     // Initial Auto-save Recovery
     useEffect(() => {
@@ -377,7 +419,9 @@ export default function Editor({ initialData, action }: EditorProps) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         formData.set("published", String(published));
-        if (authorName) formData.set("authorName", authorName);
+        formData.set("authorName", authorName);
+        formData.set("translatorName", translatorName);
+        formData.set("editorName", editorName);
         // Ensure other states are set if not controlled inputs (they are mostly named inputs)
         handleSubmit(formData);
     };
@@ -523,38 +567,56 @@ export default function Editor({ initialData, action }: EditorProps) {
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-text-secondary">Category</label>
+                                <input type="hidden" name="category" value={category} />
                                 <select
-                                    name="category"
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
+                                    value={categorySelectValue}
+                                    onChange={(e) => {
+                                        const next = e.target.value;
+                                        if (next === "__custom__") {
+                                            const selectedKey = canonicalizeCategoryName(category.trim());
+                                            if (selectedKey && knownCategories.has(selectedKey)) {
+                                                setCategory("");
+                                            }
+                                            return;
+                                        }
+                                        setCategory(next);
+                                    }}
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-sm text-text-primary"
                                 >
-                                    <option value="Technology">Technology</option>
-                                    <option value="Philosophy">Philosophy</option>
-                                    <option value="History">History</option>
-                                    <option value="Culture">Culture</option>
-                                    <option value="Science">Science</option>
-                                    <option value="Art">Art</option>
-                                    <option value="Politics">Politics</option>
-                                    <option value="Mystery">Mystery</option>
-                                    <option value="Crime">Crime</option>
-                                    <option value="News">News</option>
-                                    <option value="Business">Business</option>
-                                    <option value="Health">Health</option>
-                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="" disabled>Select a category</option>
+                                    {availableCategories.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                    <option value="__custom__">Custom category...</option>
                                 </select>
+                                {categorySelectValue === "__custom__" && (
+                                    <input
+                                        type="text"
+                                        value={category}
+                                        onChange={(e) => setCategory(e.target.value)}
+                                        placeholder="Type new category"
+                                        className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-sm text-text-primary"
+                                        required
+                                    />
+                                )}
+                                <p className="text-[10px] text-text-muted">Select an existing category or create a new one.</p>
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-text-secondary">Topic Slug</label>
                                 <input
-                                    type="text"
+                                    type="hidden"
                                     name="topic_slug"
-                                    value={topicSlug}
-                                    onChange={(e) => setTopicSlug(e.target.value)}
-                                    placeholder="e.g. artificial-intelligence"
+                                    value={computedTopicSlug}
+                                />
+                                <input
+                                    type="text"
+                                    value={computedTopicSlug}
+                                    readOnly
+                                    placeholder="auto-generated from category"
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-sm text-text-primary"
                                 />
+                                <p className="text-[10px] text-text-muted">Auto-generated to match the selected category.</p>
                             </div>
 
                             <div className="space-y-2">
@@ -598,7 +660,7 @@ export default function Editor({ initialData, action }: EditorProps) {
                             </div>
 
                             <div className="space-y-2 pt-4 border-t border-gray-800">
-                                <label className="text-sm font-medium text-text-secondary">Author Name</label>
+                                <label className="text-sm font-medium text-text-secondary">Writer Name</label>
                                 <input
                                     type="text"
                                     name="authorName"
@@ -608,6 +670,30 @@ export default function Editor({ initialData, action }: EditorProps) {
                                     className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
                                 />
                                 <p className="text-[10px] text-text-muted">Leave empty to use your profile name.</p>
+                            </div>
+
+                            <div className="space-y-2 pt-4 border-t border-gray-800">
+                                <label className="text-sm font-medium text-text-secondary">Translator Name</label>
+                                <input
+                                    type="text"
+                                    name="translatorName"
+                                    value={translatorName}
+                                    onChange={(e) => setTranslatorName(e.target.value)}
+                                    placeholder="e.g. Ayesha Rahman"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                            </div>
+
+                            <div className="space-y-2 pt-4 border-t border-gray-800">
+                                <label className="text-sm font-medium text-text-secondary">Editor Name</label>
+                                <input
+                                    type="text"
+                                    name="editorName"
+                                    value={editorName}
+                                    onChange={(e) => setEditorName(e.target.value)}
+                                    placeholder="e.g. Editorial Team"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
                             </div>
 
                             <div className="space-y-2 pt-4 border-t border-gray-800">

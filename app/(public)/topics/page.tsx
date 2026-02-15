@@ -1,13 +1,14 @@
-"use client";
-
 import { TopicExplore } from "@/components/TopicExplore";
 import { Subscription } from "@/components/Subscription";
 import { MotionWrapper } from "@/components/ui/MotionWrapper";
 import Link from "next/link";
 import Image from "next/image";
 import { Assets } from "@/lib/assets";
+import { getPublicCategorySummaries } from "@/lib/posts";
 
-export default function TopicsPage() {
+export default async function TopicsPage() {
+    const categories = await getPublicCategorySummaries();
+
     return (
         <main className="min-h-screen bg-bg-primary transition-colors duration-300">
             {/* 1. Hero Section */}
@@ -22,7 +23,7 @@ export default function TopicsPage() {
             </section>
 
             {/* 2. Topic Grid (Using existing component) */}
-            <TopicExplore />
+            <TopicExplore categories={categories} />
 
             {/* 3. Featured Collection Section */}
             <section className="py-24 px-6 md:px-12 bg-bg-secondary border-y border-border-subtle">

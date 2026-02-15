@@ -8,6 +8,8 @@ import { MediaOptions } from "@/components/ui/MediaOptions";
 interface ArticleHeaderProps {
     title?: string;
     author?: string;
+    translatorName?: string | null;
+    editorName?: string | null;
     date?: string;
     category?: string;
     subtitle?: string;
@@ -19,6 +21,8 @@ interface ArticleHeaderProps {
 export function ArticleHeader({
     title = "The Art of Digital Silence",
     author = "Sarah Jenkins",
+    translatorName,
+    editorName,
     date = "Oct 24, 2024",
     category = "Design",
     coverImage,
@@ -27,6 +31,12 @@ export function ArticleHeader({
 }: ArticleHeaderProps) {
     const { scrollY } = useScroll();
     const y = useTransform(scrollY, [0, 500], [0, 150]);
+    const cleanTranslatorName = translatorName?.trim();
+    const cleanEditorName = editorName?.trim();
+    const creditItems = [
+        cleanEditorName ? `Edited by ${cleanEditorName}` : null,
+        cleanTranslatorName ? `Translated by ${cleanTranslatorName}` : null,
+    ].filter((item): item is string => Boolean(item));
 
     // Use coverImage if provided, otherwise fallback to default
     const heroImage = coverImage || Assets.imgArticleHero;
@@ -52,8 +62,7 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.4 }}
-                            className="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full font-bold uppercase tracking-widest text-white mb-3"
-                            style={{ fontSize: 'clamp(0.5rem, 2vw, 0.625rem)' }}
+                            className="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full font-bold uppercase tracking-widest text-white mb-3 text-[clamp(0.5rem,2vw,0.625rem)]"
                         >
                             {category}
                         </motion.span>
@@ -61,8 +70,7 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
-                            className="font-serif font-bold text-white leading-tight mb-3 break-words hyphens-auto"
-                            style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)' }}
+                            className="font-serif font-bold text-white leading-tight mb-3 break-words hyphens-auto text-[clamp(1.5rem,6vw,2rem)]"
                         >
                             {title}
                         </motion.h1>
@@ -74,19 +82,24 @@ export function ArticleHeader({
 
                 {/* Author section below image */}
                 <div className="bg-bg-primary px-4 py-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span
-                            className="font-medium text-text-primary"
-                            style={{ fontSize: 'clamp(0.75rem, 2.5vw, 0.875rem)' }}
+                            className="font-medium text-text-primary text-[clamp(0.75rem,2.5vw,0.875rem)]"
                         >
                             by {author}
                         </span>
-                        <span className="text-text-muted">•</span>
+                        {creditItems.map((item) => (
+                            <span
+                                key={item}
+                                className="text-text-muted text-[clamp(0.625rem,2vw,0.75rem)]"
+                            >
+                                • {item}
+                            </span>
+                        ))}
                         <span
-                            className="text-text-muted"
-                            style={{ fontSize: 'clamp(0.625rem, 2vw, 0.75rem)' }}
+                            className="text-text-muted text-[clamp(0.625rem,2vw,0.75rem)]"
                         >
-                            {date}
+                            • {date}
                         </span>
                     </div>
                 </div>
@@ -122,14 +135,12 @@ export function ArticleHeader({
                             className="flex items-center gap-4"
                         >
                             <span
-                                className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full font-bold uppercase tracking-[0.2em] text-white"
-                                style={{ fontSize: 'clamp(0.625rem, 1vw, 0.75rem)' }}
+                                className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full font-bold uppercase tracking-[0.2em] text-white text-[clamp(0.625rem,1vw,0.75rem)]"
                             >
                                 {category}
                             </span>
                             <span
-                                className="text-white/60"
-                                style={{ fontSize: 'clamp(0.75rem, 1vw, 0.875rem)' }}
+                                className="text-white/60 text-[clamp(0.75rem,1vw,0.875rem)]"
                             >
                                 {date}
                             </span>
@@ -139,8 +150,7 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.3 }}
-                            className="font-serif font-bold text-white leading-tight"
-                            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
+                            className="font-serif font-bold text-white leading-tight text-[clamp(2rem,4vw,3rem)]"
                         >
                             {title}
                         </motion.h1>
@@ -150,14 +160,19 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.5 }}
-                            className="flex items-center gap-2"
+                            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[clamp(0.75rem,1vw,0.875rem)]"
                         >
                             <span
-                                className="font-medium text-white"
-                                style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
+                                className="font-medium text-white text-[clamp(0.875rem,1.2vw,1rem)]"
                             >
                                 by {author}
                             </span>
+                            {creditItems.map((item) => (
+                                <span key={item} className="text-white/75">
+                                    • {item}
+                                </span>
+                            ))}
+                            <span className="text-white/60">• {date}</span>
                         </motion.div>
 
                         {/* Media Options - Read, Listen, Watch */}

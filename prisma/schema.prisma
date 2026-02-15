@@ -38,6 +38,8 @@ model Post {
   subtitle    String?
   date        String?
   authorName  String?  @map("author")
+  translatorName String? @map("translator_name")
+  editorName  String?  @map("editor_name")
   category    String?
   content     String?
   coverImage  String?

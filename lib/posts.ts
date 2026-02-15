@@ -1,6 +1,12 @@
 import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import { Post as PrismaPost } from "@prisma/client";
+import {
+    BASE_CATEGORIES,
+    canonicalizeCategoryName,
+    categoryToSlug,
+    normalizeCategoryName,
+} from "@/lib/categories";
 
 // Re-exporting the type compatible with the frontend
 export type Post = {
@@ -11,6 +17,8 @@ export type Post = {
     date: string;
     author: string;
     authorName?: string | null;
+    translatorName?: string | null;
+    editorName?: string | null;
     authorId?: number | null;
     category: string;
     content?: string | null;
@@ -30,11 +38,38 @@ export type Post = {
     backlinks?: string[] | null;
 };
 
+export type CategorySummary = {
+    name: string;
+    slug: string;
+    count: number;
+};
+
 // Helper function to format date nicely (date only, no time)
 function formatDate(dateInput: Date | string | null): string {
     if (!dateInput) return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function normalizeImageUrl(url?: string | null): string | null | undefined {
+    if (!url) return url;
+    // Keep upload paths local so newly uploaded local files resolve correctly.
+    // Missing local files are already handled by /api/uploads fallback logic.
+    if (url.startsWith("/imgs/uploads/")) {
+        return url;
+    }
+    if (url.startsWith("https://ui-avatars.com/") || url.startsWith("http://ui-avatars.com/")) {
+        try {
+            const parsed = new URL(url);
+            if (!parsed.searchParams.get("format")) {
+                parsed.searchParams.set("format", "png");
+            }
+            return parsed.toString();
+        } catch {
+            return url;
+        }
+    }
+    return url;
 }
 
 // Mapper function to convert Prisma result to frontend Post type
@@ -59,6 +94,8 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         }
     }
 
+    const normalizedCategory = canonicalizeCategoryName(post.category || "") || "Uncategorized";
+
     return {
         id: post.id,
         slug: post.slug,
@@ -67,25 +104,133 @@ function mapPrismaPost(post: PrismaPost & { author?: { image: string | null } | 
         date: formatDate(post.date),
         author: post.authorName || "Anonymous",
         authorName: post.authorName,
+        translatorName: post.translatorName,
+        editorName: post.editorName,
         authorId: post.authorId,
-        category: post.category || "Uncategorized",
+        category: normalizedCategory,
         content: post.content,
         excerpt: post.excerpt,
-        coverImage: post.coverImage,
+        coverImage: normalizeImageUrl(post.coverImage),
         videoUrl: post.videoUrl,
         audioUrl: post.audioUrl,
         views: post.views || 0,
         featured: post.featured || false,
         published: post.published || false,
-        topic_slug: post.topicSlug,
+        topic_slug: post.topicSlug || (normalizedCategory !== "Uncategorized" ? categoryToSlug(normalizedCategory) : null),
         accent_color: post.accentColor,
         created_at: post.createdAt.toISOString(),
         updated_at: post.updatedAt.toISOString(),
-        authorImage: post.author?.image,
+        authorImage: normalizeImageUrl(post.author?.image || undefined),
         backlinks: backlinks,
         metaDescription: post.metaDescription
     };
 }
+
+type CategoryGroupRow = {
+    category: string | null;
+    _count: { _all: number };
+};
+
+function buildCategorySummaries(
+    rows: CategoryGroupRow[],
+    includeBaseCategories: boolean
+): CategorySummary[] {
+    const summariesBySlug = new Map<string, CategorySummary>();
+    const baseOrder = new Map(BASE_CATEGORIES.map((category, index) => [categoryToSlug(category), index]));
+
+    if (includeBaseCategories) {
+        for (const category of BASE_CATEGORIES) {
+            const slug = categoryToSlug(category);
+            summariesBySlug.set(slug, { name: category, slug, count: 0 });
+        }
+    }
+
+    for (const row of rows) {
+        const rawCategory = row.category ? normalizeCategoryName(row.category) : "";
+        if (!rawCategory) continue;
+
+        const slug = categoryToSlug(rawCategory);
+        if (!slug) continue;
+
+        const canonicalName = canonicalizeCategoryName(rawCategory);
+        const existing = summariesBySlug.get(slug);
+
+        if (existing) {
+            existing.count += row._count._all;
+            if (!baseOrder.has(slug)) {
+                existing.name = canonicalName;
+            }
+            continue;
+        }
+
+        summariesBySlug.set(slug, {
+            name: canonicalName,
+            slug,
+            count: row._count._all,
+        });
+    }
+
+    return [...summariesBySlug.values()]
+        .filter((summary) => includeBaseCategories || summary.count > 0)
+        .sort((a, b) => {
+            const leftBaseOrder = baseOrder.get(a.slug);
+            const rightBaseOrder = baseOrder.get(b.slug);
+
+            if (leftBaseOrder !== undefined && rightBaseOrder !== undefined) {
+                return leftBaseOrder - rightBaseOrder;
+            }
+            if (leftBaseOrder !== undefined) return -1;
+            if (rightBaseOrder !== undefined) return 1;
+            return a.name.localeCompare(b.name);
+        });
+}
+
+export const getPublicCategorySummaries = unstable_cache(
+    async (): Promise<CategorySummary[]> => {
+        try {
+            const grouped = await prisma.post.groupBy({
+                by: ["category"],
+                where: {
+                    published: true,
+                    category: { not: null },
+                },
+                _count: { _all: true },
+            });
+
+            return buildCategorySummaries(grouped as CategoryGroupRow[], true);
+        } catch {
+            console.warn("Failed to fetch public categories. Falling back to base categories.");
+            return BASE_CATEGORIES.map((category) => ({
+                name: category,
+                slug: categoryToSlug(category),
+                count: 0,
+            }));
+        }
+    },
+    ["public-category-summaries"],
+    { revalidate: 300, tags: ["posts", "categories"] }
+);
+
+export const getCategoryOptions = unstable_cache(
+    async (): Promise<string[]> => {
+        try {
+            const grouped = await prisma.post.groupBy({
+                by: ["category"],
+                where: {
+                    category: { not: null },
+                },
+                _count: { _all: true },
+            });
+
+            return buildCategorySummaries(grouped as CategoryGroupRow[], true).map((summary) => summary.name);
+        } catch {
+            console.warn("Failed to fetch category options. Falling back to base categories.");
+            return [...BASE_CATEGORIES];
+        }
+    },
+    ["category-options"],
+    { revalidate: 300, tags: ["posts", "categories"] }
+);
 
 // Fallback demo data
 
@@ -171,7 +316,10 @@ export const getPostsByCategory = unstable_cache(
         try {
             const posts = await prisma.post.findMany({
                 where: {
-                    category: category.trim(),
+                    category: {
+                        equals: category.trim(),
+                        mode: "insensitive",
+                    },
                     published: true
                 },
                 include: { author: { select: { image: true } } },
@@ -287,7 +435,13 @@ export async function getPostsByCategories(
     try {
         const promises = cleanCategories.map(cat =>
             prisma.post.findMany({
-                where: { category: cat, published: true },
+                where: {
+                    category: {
+                        equals: cat,
+                        mode: "insensitive",
+                    },
+                    published: true
+                },
                 include: { author: { select: { image: true } } },
                 orderBy: { date: 'desc' },
                 take: limit
@@ -346,7 +500,10 @@ export async function getRelatedPosts(category: string, currentSlug: string, lim
     try {
         const posts = await prisma.post.findMany({
             where: {
-                category: category.trim(),
+                category: {
+                    equals: category.trim(),
+                    mode: "insensitive",
+                },
                 published: true,
                 slug: { not: currentSlug }
             },

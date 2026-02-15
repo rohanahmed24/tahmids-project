@@ -3,17 +3,21 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { getAuthorByName } from "@/lib/authors";
-import { getRelatedPosts } from "@/lib/posts";
+import type { Post } from "@/lib/posts";
 
 interface ArticleSidebarProps {
-    authorName: string;
-    category: string;
-    currentSlug: string;
+    post: Post;
+    relatedPosts: Post[];
 }
 
-export async function ArticleSidebar({ authorName, category, currentSlug }: ArticleSidebarProps) {
-    const author = getAuthorByName(authorName);
-    const relatedPosts = await getRelatedPosts(category, currentSlug, 4);
+export async function ArticleSidebar({ post, relatedPosts }: ArticleSidebarProps) {
+    const author = getAuthorByName(post.authorName || post.author);
+    const cleanEditorName = post.editorName?.trim();
+    const cleanTranslatorName = post.translatorName?.trim();
+    const roleCredits = [
+        cleanEditorName ? { label: "Editor", value: cleanEditorName } : null,
+        cleanTranslatorName ? { label: "Translator", value: cleanTranslatorName } : null,
+    ].filter((item): item is { label: string; value: string } => Boolean(item));
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -36,6 +40,16 @@ export async function ArticleSidebar({ authorName, category, currentSlug }: Arti
                 <p className="text-sm opacity-90 leading-relaxed font-sans">
                     {author.bio}
                 </p>
+                {roleCredits.length > 0 && (
+                    <div className="space-y-1 border-y border-black/10 dark:border-white/10 py-3">
+                        {roleCredits.map((credit) => (
+                            <p key={credit.label} className="text-xs leading-relaxed">
+                                <span className="uppercase tracking-widest opacity-60 mr-2">{credit.label}</span>
+                                <span className="font-medium">{credit.value}</span>
+                            </p>
+                        ))}
+                    </div>
+                )}
                 <div className="flex gap-2">
                     <button className="flex-1 py-3 border border-black/10 dark:border-white/10 font-bold text-xs uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
                         Follow
@@ -93,4 +107,3 @@ export async function ArticleSidebar({ authorName, category, currentSlug }: Arti
         </aside>
     );
 }
-

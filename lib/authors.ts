@@ -27,13 +27,23 @@ export const authors = [
     },
 ];
 
-export function getAuthorByName(name: string) {
-    const found = authors.find(author => author.name.toLowerCase() === name.toLowerCase());
+export function getAuthorByName(name?: string | null) {
+    const safeName = typeof name === "string" ? name.trim() : "";
+    if (!safeName) {
+        return {
+            name: "Anonymous",
+            role: "Contributor",
+            bio: "A valued contributor to Wisdomia.",
+            img: "/imgs/default-avatar.svg"
+        };
+    }
+
+    const found = authors.find(author => author.name.toLowerCase() === safeName.toLowerCase());
     if (found) return found;
     
     // Return dynamic author object for custom author names
     return {
-        name: name || "Anonymous",
+        name: safeName,
         role: "Contributor",
         bio: "A valued contributor to Wisdomia.",
         img: "/imgs/default-avatar.svg"

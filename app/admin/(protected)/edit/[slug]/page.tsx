@@ -3,6 +3,7 @@ import { updatePost } from "@/actions/posts";
 import { verifyAdmin } from "@/actions/admin-auth";
 import { redirect, notFound } from "next/navigation";
 import Editor from "@/app/admin/components/Editor";
+import { getCategoryOptions } from "@/lib/posts";
 
 export default async function EditPage({ params }: { params: Promise<{ slug: string }> }) {
     const isAdmin = await verifyAdmin();
@@ -16,6 +17,8 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
     if (!post) {
         notFound();
     }
+
+    const categoryOptions = await getCategoryOptions();
 
     // Bind the slug to the server action
     const updateAction = updatePost.bind(null, slug);
@@ -43,10 +46,13 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                         featured: post.featured,
                         published: post.published ?? true,
                         authorName: post.authorName || undefined,
+                        translatorName: post.translatorName || undefined,
+                        editorName: post.editorName || undefined,
                         metaDescription: post.metaDescription || undefined,
                         backlinks: post.backlinks || []
                     }}
                     action={updateAction}
+                    categoryOptions={categoryOptions}
                 />
             </div>
         </main>
