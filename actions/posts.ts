@@ -182,6 +182,8 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     const authorNameInput = ((formData.get("authorName") as string) || "").trim();
     const translatorNameInput = ((formData.get("translatorName") as string) || "").trim();
     const editorNameInput = ((formData.get("editorName") as string) || "").trim();
+    const hasTranslatorNameField = formData.has("translatorName");
+    const hasEditorNameField = formData.has("editorName");
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = categoryToSlug(category) || undefined;
     const accent_color = (formData.get("accent_color") as string) || "#3B82F6";
@@ -206,8 +208,12 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     }
 
     const authorName = authorNameInput || existingPost.authorName || null;
-    const translatorName = translatorNameInput || existingPost.translatorName || null;
-    const editorName = editorNameInput || existingPost.editorName || null;
+    const translatorName = hasTranslatorNameField
+        ? (translatorNameInput || null)
+        : (existingPost.translatorName || null);
+    const editorName = hasEditorNameField
+        ? (editorNameInput || null)
+        : (existingPost.editorName || null);
 
     const previousTopicSlug = existingPost?.category ? categoryToSlug(existingPost.category) : null;
 
