@@ -32,8 +32,8 @@ export function getAuthorByName(name?: string | null) {
     if (!safeName) {
         return {
             name: "Anonymous",
-            role: "Contributor",
-            bio: "A valued contributor to Wisdomia.",
+            role: "",
+            bio: "",
             img: DEFAULT_AUTHOR_AVATAR
         };
     }
@@ -44,8 +44,8 @@ export function getAuthorByName(name?: string | null) {
     // Return dynamic author object for custom author names
     return {
         name: safeName,
-        role: "Contributor",
-        bio: "A valued contributor to Wisdomia.",
+        role: "",
+        bio: "",
         img: DEFAULT_AUTHOR_AVATAR
     };
 }

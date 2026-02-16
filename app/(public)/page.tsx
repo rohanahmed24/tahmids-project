@@ -12,7 +12,6 @@ const ArticleGrid = dynamic(() => import("@/components/ArticleGrid").then(mod =>
 const Testimonials = dynamic(() => import("@/components/Testimonials").then(mod => mod.Testimonials));
 const FAQ = dynamic(() => import("@/components/FAQ").then(mod => mod.FAQ));
 const CTABanner = dynamic(() => import("@/components/CTABanner").then(mod => mod.CTABanner));
-const DailyQuote = dynamic(() => import("@/components/DailyQuote").then(mod => mod.DailyQuote));
 const TopicExplore = dynamic(() => import("@/components/TopicExplore").then(mod => mod.TopicExplore));
 const AuthorsGrid = dynamic(() => import("@/components/AuthorsGrid").then(mod => mod.AuthorsGrid));
 const CategorySection = dynamic(() => import("@/components/CategorySection").then(mod => mod.CategorySection));
@@ -75,7 +74,6 @@ export default async function Home() {
         />
       ))}
 
-      <DailyQuote />
       <Subscription />
       <ArticleGrid articles={recentPosts} />
       <TopicExplore categories={categories} locale={locale} />

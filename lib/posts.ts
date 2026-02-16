@@ -339,12 +339,46 @@ export const getCategoryOptions = unstable_cache(
                 _count: { _all: true },
             });
 
-            return buildCategorySummaries(
+            const categoryNames = buildCategorySummaries(
                 grouped as CategoryGroupRow[],
                 true,
                 "en",
                 new Map<string, string>()
             ).map((summary) => summary.canonicalName);
+
+            const managedCategoriesRaw = await prisma.setting.findUnique({
+                where: { keyName: "managed_categories" },
+                select: { value: true },
+            });
+
+            const uniqueBySlug = new Map<string, string>();
+            for (const name of categoryNames) {
+                const canonicalName = canonicalizeCategoryName(name);
+                if (!canonicalName) continue;
+                const slug = categoryToSlug(canonicalName);
+                if (!slug || uniqueBySlug.has(slug)) continue;
+                uniqueBySlug.set(slug, canonicalName);
+            }
+
+            if (managedCategoriesRaw?.value) {
+                try {
+                    const parsed = JSON.parse(managedCategoriesRaw.value);
+                    if (Array.isArray(parsed)) {
+                        for (const item of parsed) {
+                            const rawName = String((item as { name?: unknown })?.name || "");
+                            const canonicalName = canonicalizeCategoryName(rawName);
+                            if (!canonicalName) continue;
+                            const slug = categoryToSlug(canonicalName);
+                            if (!slug || uniqueBySlug.has(slug)) continue;
+                            uniqueBySlug.set(slug, canonicalName);
+                        }
+                    }
+                } catch (error) {
+                    console.warn("Failed to parse managed_categories setting:", error);
+                }
+            }
+
+            return [...uniqueBySlug.values()];
         } catch {
             console.warn("Failed to fetch category options. Falling back to base categories.");
             return [...BASE_CATEGORIES];

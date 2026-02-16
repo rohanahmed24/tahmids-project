@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AdminSidebar, NavItem } from "@/app/admin/components/AdminSidebar";
-import { LayoutDashboard, PenTool, Image, Users, BarChart3, Settings, Upload, Menu, X, Bell, Search, Globe } from "lucide-react";
+import { LayoutDashboard, PenTool, Image, Users, BarChart3, Settings, Upload, Menu, Bell, Search, Globe, FolderTree } from "lucide-react";
 import { logoutAdmin } from "@/actions/admin-auth";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -13,6 +13,7 @@ const NAV_ITEMS: NavItem[] = [
     { id: "/admin/users", label: "Users", icon: Users },
     { id: "/admin/analytics", label: "Analytics", icon: BarChart3 },
     { id: "/admin/seo", label: "SEO", icon: Globe },
+    { id: "/admin/categories", label: "Categories", icon: FolderTree },
     { id: "/admin/import", label: "Import", icon: Upload },
     { id: "/admin/navbar", label: "Navbar", icon: Settings },
     { id: "/admin/settings", label: "Settings", icon: Settings },

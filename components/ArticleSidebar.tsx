@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { getAuthorByName } from "@/lib/authors";
 import type { Post } from "@/lib/posts";
 import type { Locale } from "@/lib/locale";
 import { t } from "@/lib/translations";
@@ -13,13 +12,16 @@ interface ArticleSidebarProps {
 }
 
 export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: ArticleSidebarProps) {
-    const author = getAuthorByName(post.authorName || post.author);
+    const displayAuthor = post.authorName?.trim() || post.author || "Anonymous";
     const cleanEditorName = post.editorName?.trim();
     const cleanTranslatorName = post.translatorName?.trim();
-    const roleCredits = [
-        cleanEditorName ? { label: "Editor", value: cleanEditorName } : null,
-        cleanTranslatorName ? { label: "Translator", value: cleanTranslatorName } : null,
-    ].filter((item): item is { label: string; value: string } => Boolean(item));
+    const roleCredits: { key: "translatedBy" | "editedBy"; value: string }[] = [];
+    if (cleanTranslatorName) {
+        roleCredits.push({ key: "translatedBy", value: cleanTranslatorName });
+    }
+    if (cleanEditorName) {
+        roleCredits.push({ key: "editedBy", value: cleanEditorName });
+    }
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr);
@@ -30,23 +32,14 @@ export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: Arti
         <aside className="space-y-12 shrink-0">
             {/* Author Card - Bento Style */}
             <div className="bg-[#f4f1ea] dark:bg-[#1a1a1a] text-[#1a1a1a] dark:text-white p-8 rounded-none border border-black/5 dark:border-white/5 space-y-6">
-                <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full overflow-hidden relative">
-                        <FallbackImage src={author.img} fallbackSrc="/imgs/default-avatar.svg" alt={author.name} fill sizes="64px" className="object-cover" />
-                    </div>
-                    <div>
-                        <h3 className="font-serif text-xl font-bold leading-none">{author.name}</h3>
-                        <p className="text-[10px] uppercase tracking-widest opacity-70 mt-1">{author.role}</p>
-                    </div>
+                <div>
+                    <h3 className="font-serif text-xl font-bold leading-none">{displayAuthor}</h3>
                 </div>
-                <p className="text-sm opacity-90 leading-relaxed font-sans">
-                    {author.bio}
-                </p>
-        {roleCredits.length > 0 && (
+                {roleCredits.length > 0 && (
                     <div className="space-y-1 border-y border-black/10 dark:border-white/10 py-3">
                         {roleCredits.map((credit) => (
-                            <p key={credit.label} className="text-xs leading-relaxed">
-                                <span className="uppercase tracking-widest opacity-60 mr-2">{credit.label === "Editor" ? t(locale, "editorLabel") : t(locale, "translatorLabel")}</span>
+                            <p key={credit.key} className="text-xs leading-relaxed">
+                                <span className="uppercase tracking-widest opacity-60 mr-2">{t(locale, credit.key)}</span>
                                 <span className="font-medium">{credit.value}</span>
                             </p>
                         ))}
@@ -83,7 +76,7 @@ export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: Arti
                                         <span>{formatDate(post.date)}</span>
                                     </p>
                                     <h5 className="font-serif text-sm md:text-base leading-tight group-hover:underline decoration-1 underline-offset-4 text-text-primary dark:text-gray-200 line-clamp-2">
-                                        {post.title}
+                                        {post.title?.trim() || post.slug.replace(/-/g, " ")}
                                     </h5>
                                 </div>
                             </Link>

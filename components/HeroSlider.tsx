@@ -178,14 +178,14 @@ export function HeroSlider({ items }: HeroSliderProps) {
             </button>
 
             {/* Slide Indicators */}
-            <div className="absolute bottom-3 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex lg:hidden items-center gap-2 md:gap-3 pointer-events-auto">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex md:hidden items-center gap-2 pointer-events-auto">
                 {validItems.map((topic, index) => (
                     <button
                         key={topic.slug}
                         onClick={() => scrollTo(index)}
-                        className={`w-[4px] h-[4px] !p-0 rounded-full transition-all duration-300 ${index === selectedIndex
-                            ? "bg-white"
-                            : "bg-white/30"
+                        className={`w-2.5 h-2.5 !p-0 rounded-full transition-all duration-300 border ${index === selectedIndex
+                            ? "bg-white border-white scale-110"
+                            : "bg-white/20 border-white/50"
                             }`}
                         aria-label={locale === "bn" ? `স্লাইড ${index + 1} এ যান` : `Go to slide ${index + 1}`}
                     />
@@ -206,7 +206,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
             </div>
 
             {/* Progress Bar */}
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 md:h-1 bg-white/10 z-20">
+            <div className="hidden md:block absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-20">
                 <div
                     className="h-full bg-white transition-[width] ease-linear duration-100" // using js for progress might be smoother but this is okay
                     style={{ width: `${((selectedIndex + 1) / validItems.length) * 100}%` }}

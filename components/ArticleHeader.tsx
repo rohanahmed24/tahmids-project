@@ -37,10 +37,13 @@ export function ArticleHeader({
     const y = useTransform(scrollY, [0, 500], [0, 150]);
     const cleanTranslatorName = translatorName?.trim();
     const cleanEditorName = editorName?.trim();
-    const creditItems = [
-        cleanEditorName ? `${t(locale, "editedBy")} ${cleanEditorName}` : null,
-        cleanTranslatorName ? `${t(locale, "translatedBy")} ${cleanTranslatorName}` : null,
-    ].filter((item): item is string => Boolean(item));
+    const creditItems: string[] = [];
+    if (cleanTranslatorName) {
+        creditItems.push(`${t(locale, "translatedBy")} ${cleanTranslatorName}`);
+    }
+    if (cleanEditorName) {
+        creditItems.push(`${t(locale, "editedBy")} ${cleanEditorName}`);
+    }
 
     // Use coverImage if provided, otherwise fallback to default
     const heroImage = coverImage || Assets.imgArticleHero;

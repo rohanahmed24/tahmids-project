@@ -39,9 +39,36 @@ interface RichTextEditorProps {
     placeholder?: string;
 }
 
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+function toEditorContent(value: string): string {
+    const trimmed = value.trim();
+    if (!trimmed) return "<p></p>";
+
+    // If content already contains HTML, use it directly.
+    if (/<\/?[a-z][\s\S]*>/i.test(trimmed)) {
+        return value;
+    }
+
+    // Fallback for legacy plain text/markdown-ish content.
+    const paragraphs = value
+        .split(/\n{2,}/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean)
+        .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, "<br />")}</p>`);
+
+    return paragraphs.length > 0 ? paragraphs.join("") : "<p></p>";
+}
+
 export function RichTextEditor({ content, onChange, placeholder = "Start writing your article..." }: RichTextEditorProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const latestExternalContent = useRef(content);
 
     const editor = useEditor({
         immediatelyRender: false,
@@ -70,14 +97,17 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
                 placeholder,
             }),
         ],
-        content,
+        content: toEditorContent(content),
         editorProps: {
             attributes: {
                 class: "prose prose-lg max-w-none min-h-[400px] focus:outline-none text-text-primary prose-headings:text-text-primary prose-p:text-text-primary prose-strong:text-text-primary prose-em:text-text-primary prose-blockquote:text-text-secondary prose-blockquote:border-l-accent-main prose-a:text-accent-main prose-code:text-accent-main prose-pre:bg-bg-tertiary prose-pre:text-text-primary",
             },
         },
         onUpdate: ({ editor }) => {
-            onChange(editor.getHTML());
+            const html = editor.getHTML();
+            if (html !== latestExternalContent.current) {
+                onChange(html);
+            }
         },
     });
 
@@ -97,7 +127,7 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
             } else {
                 toast.error(result.error || "Failed to upload image");
             }
-        } catch (error) {
+        } catch {
             toast.error("An unexpected error occurred");
         } finally {
             setIsUploading(false);
@@ -108,8 +138,13 @@ export function RichTextEditor({ content, onChange, placeholder = "Start writing
 
     // Sync external content changes
     useEffect(() => {
-        if (editor && content !== editor.getHTML()) {
-            editor.commands.setContent(content);
+        latestExternalContent.current = content;
+
+        if (!editor) return;
+
+        const normalizedContent = toEditorContent(content);
+        if (normalizedContent !== editor.getHTML()) {
+            editor.commands.setContent(normalizedContent, { emitUpdate: false });
         }
     }, [content, editor]);
 
