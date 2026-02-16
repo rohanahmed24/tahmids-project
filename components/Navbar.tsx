@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, Menu, X, LogOut, Loader2, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -12,12 +13,14 @@ import { useLocale } from "@/components/providers/LocaleProvider";
 import { t } from "@/lib/translations";
 
 export default function Navbar() {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const { locale } = useLocale();
   const user = session?.user;
   const isLoading = status === "loading";
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [sectionLinks, setSectionLinks] = useState<
     { name: string; href: string }[]
   >([]);
@@ -47,6 +50,27 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/" });
+  };
+
+  const searchCopy =
+    locale === "bn"
+      ? {
+          searchPlaceholder: "লেখা খুঁজুন...",
+          searchButton: "সার্চ",
+          searchLabel: "সার্চ",
+        }
+      : {
+          searchPlaceholder: "Search stories...",
+          searchButton: "Search",
+          searchLabel: "Search",
+        };
+
+  const handleMenuSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const query = searchQuery.trim();
+    const href = query ? `/search?q=${encodeURIComponent(query)}` : "/search";
+    router.push(href);
+    setIsMenuOpen(false);
   };
 
   return (
@@ -157,10 +181,32 @@ export default function Navbar() {
               </div>
 
               {/* Secondary Bar: Search (Left) | Quick Links (Right) */}
-              <div className="flex justify-between items-center px-4 py-4 border-b border-border">
-                <div className="text-text-primary">
-                  <Search className="w-6 h-6" />
-                </div>
+              <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 px-4 py-4 border-b border-border">
+                <form
+                  onSubmit={handleMenuSearch}
+                  className="w-full lg:max-w-xl flex items-center gap-2"
+                >
+                  <label htmlFor="menu-search" className="sr-only">
+                    {searchCopy.searchLabel}
+                  </label>
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                    <input
+                      id="menu-search"
+                      type="search"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={searchCopy.searchPlaceholder}
+                      className="w-full rounded-full border border-border bg-bg-secondary pl-9 pr-4 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="rounded-full bg-bg-secondary border border-border px-4 py-2 text-xs font-bold uppercase tracking-widest text-text-primary hover:bg-bg-tertiary transition-colors"
+                  >
+                    {searchCopy.searchButton}
+                  </button>
+                </form>
 
                 <div className="flex items-center gap-4 text-sm font-sans text-text-secondary">
                   <Link

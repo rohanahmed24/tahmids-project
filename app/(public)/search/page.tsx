@@ -39,14 +39,14 @@ export default async function SearchPage({
         };
 
     return (
-        <main className="min-h-screen bg-gray-950 text-white pt-32 pb-20 px-6 md:px-12">
+        <main className="min-h-screen bg-bg-primary text-text-primary pt-32 pb-20 px-6 md:px-12">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-12 text-center">
-                    <p className="text-purple-400 font-mono text-sm mb-4 uppercase tracking-widest">{copy.results}</p>
+                    <p className="text-accent font-mono text-sm mb-4 uppercase tracking-widest">{copy.results}</p>
                     <h1 className="text-4xl md:text-6xl font-serif font-black mb-6">
                         {searchTerm ? `"${searchTerm}"` : copy.allStories}
                     </h1>
-                    <p className="text-gray-400 text-lg">
+                    <p className="text-text-muted text-lg">
                         {posts.length} {posts.length === 1 ? copy.story : copy.stories} {copy.found}
                     </p>
                 </div>
@@ -59,18 +59,18 @@ export default async function SearchPage({
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
-                        <div className="w-20 h-20 bg-gray-900 rounded-full flex items-center justify-center">
-                            <Search className="w-8 h-8 text-gray-600" />
+                        <div className="w-20 h-20 bg-bg-secondary border border-border-subtle rounded-full flex items-center justify-center">
+                            <Search className="w-8 h-8 text-text-muted" />
                         </div>
                         <div className="max-w-md space-y-2">
-                            <h2 className="text-2xl font-bold">{copy.noStories}</h2>
-                            <p className="text-gray-400">
+                            <h2 className="text-2xl font-bold text-text-primary">{copy.noStories}</h2>
+                            <p className="text-text-muted">
                                 {copy.noStoriesBody}
                             </p>
                         </div>
                         <Link
                             href="/topics"
-                            className="px-8 py-3 bg-white text-black font-bold uppercase tracking-widest text-xs hover:bg-gray-200 transition-colors rounded-full"
+                            className="px-8 py-3 bg-accent text-white font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity rounded-full"
                         >
                             {copy.browseTopics}
                         </Link>
