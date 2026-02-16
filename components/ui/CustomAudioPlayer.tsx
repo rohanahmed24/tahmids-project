@@ -139,8 +139,13 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
 
   const seekToPosition = useCallback(
     (progressPercent: number) => {
-      if (!audioRef.current || !duration) return;
-      const time = (progressPercent / 100) * duration;
+      if (!audioRef.current) return;
+      const mediaDuration =
+        audioRef.current.duration > 0 && Number.isFinite(audioRef.current.duration)
+          ? audioRef.current.duration
+          : duration;
+      if (!mediaDuration || !Number.isFinite(mediaDuration)) return;
+      const time = (progressPercent / 100) * mediaDuration;
       if (Number.isFinite(time)) {
         audioRef.current.currentTime = time;
         setCurrentTime(time);
@@ -151,6 +156,12 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
 
   const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const nextProgress = Number(e.target.value);
+    setProgress(nextProgress);
+    seekToPosition(nextProgress);
+  };
+
+  const handleSeekInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const nextProgress = Number(e.currentTarget.value);
     setProgress(nextProgress);
     seekToPosition(nextProgress);
   };
@@ -198,7 +209,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
       </div>
 
       <div className="px-4 py-4 space-y-4">
-        <div className="relative w-full h-4 flex items-center rounded-full cursor-pointer touch-none overflow-hidden focus-within:ring-2 focus-within:ring-accent/40">
+        <div className="relative w-full h-4 flex items-center rounded-full cursor-pointer overflow-hidden focus-within:ring-2 focus-within:ring-accent/40">
           <input
             type="range"
             min={0}
@@ -206,6 +217,11 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
             step={0.1}
             value={Number.isFinite(progress) ? progress : 0}
             onChange={handleSeekChange}
+            onInput={handleSeekInput}
+            onPointerDown={() => setIsSeeking(true)}
+            onPointerUp={() => setIsSeeking(false)}
+            onPointerCancel={() => setIsSeeking(false)}
+            onBlur={() => setIsSeeking(false)}
             onMouseDown={() => setIsSeeking(true)}
             onMouseUp={() => setIsSeeking(false)}
             onTouchStart={() => setIsSeeking(true)}
