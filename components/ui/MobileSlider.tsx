@@ -188,7 +188,7 @@ export function MobileSlider({
                         <button
                             key={index}
                             onClick={() => scrollToIndex(index)}
-                            className={`w-2.5 h-2.5 !p-0 rounded-full border transition-all duration-300 ${index === currentIndex
+                            className={`btn-sm w-2.5 h-2.5 !min-h-0 !p-0 rounded-full border transition-all duration-300 ${index === currentIndex
                                 ? "bg-accent border-accent scale-110"
                                 : "bg-white/20 border-white/40 hover:bg-white/35"
                                 }`}

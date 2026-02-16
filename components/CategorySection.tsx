@@ -136,7 +136,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                                 <button
                                     key={index}
                                     onClick={() => snapToPage(index)}
-                                    className={`w-2.5 h-2.5 !p-0 rounded-full border transition-all duration-300 ${index === currentPage
+                                    className={`btn-sm w-2.5 h-2.5 !min-h-0 !p-0 rounded-full border transition-all duration-300 ${index === currentPage
                                         ? "bg-accent border-accent scale-110"
                                         : "bg-text-muted/20 border-text-muted/40 hover:bg-text-muted/35"
                                         }`}

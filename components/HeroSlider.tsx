@@ -213,7 +213,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
           <button
             key={topic.slug}
             onClick={() => scrollTo(index)}
-            className={`w-2.5 h-2.5 !p-0 rounded-full transition-all duration-300 border ${
+            className={`btn-sm w-2.5 h-2.5 !min-h-0 !p-0 rounded-full transition-all duration-300 border ${
               index === selectedIndex
                 ? "bg-white border-white scale-110"
                 : "bg-white/20 border-white/50"
@@ -246,7 +246,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
           <button
             key={`desktop-dot-${topic.slug}`}
             onClick={() => scrollTo(index)}
-            className={`w-2.5 h-2.5 !p-0 rounded-full transition-all duration-300 border ${
+            className={`btn-sm w-2.5 h-2.5 !min-h-0 !p-0 rounded-full transition-all duration-300 border ${
               index === selectedIndex
                 ? "bg-white border-white scale-110"
                 : "bg-white/20 border-white/50 hover:bg-white/35"
