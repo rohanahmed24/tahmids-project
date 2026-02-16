@@ -44,15 +44,13 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
         };
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const progressBarRef = useRef<HTMLDivElement | null>(null);
-  const isDraggingRef = useRef(false);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
 
   useEffect(() => {
@@ -60,7 +58,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     if (!audio) return;
 
     const updateTime = () => {
-      if (!isDraggingRef.current) {
+      if (!isSeeking) {
         setCurrentTime(audio.currentTime);
         if (audio.duration > 0) {
           setProgress((audio.currentTime / audio.duration) * 100);
@@ -103,7 +101,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("ratechange", onRateChange);
     };
-  }, []);
+  }, [isSeeking]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -139,13 +137,6 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     setPlaybackRate(nextRate);
   };
 
-  const calculateProgress = useCallback((clientX: number) => {
-    if (!progressBarRef.current) return 0;
-    const rect = progressBarRef.current.getBoundingClientRect();
-    const clickPosition = (clientX - rect.left) / rect.width;
-    return Math.max(0, Math.min(100, clickPosition * 100));
-  }, []);
-
   const seekToPosition = useCallback(
     (progressPercent: number) => {
       if (!audioRef.current || !duration) return;
@@ -158,63 +149,10 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     [duration],
   );
 
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    isDraggingRef.current = true;
-    setIsDragging(true);
-
-    if (progressBarRef.current) {
-      progressBarRef.current.setPointerCapture(e.pointerId);
-    }
-
-    const newProgress = calculateProgress(e.clientX);
-    setProgress(newProgress);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDraggingRef.current) return;
-
-    e.preventDefault();
-    const newProgress = calculateProgress(e.clientX);
-    setProgress(newProgress);
-  };
-
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDraggingRef.current) return;
-
-    isDraggingRef.current = false;
-    setIsDragging(false);
-
-    if (progressBarRef.current) {
-      progressBarRef.current.releasePointerCapture(e.pointerId);
-    }
-
-    const newProgress = calculateProgress(e.clientX);
-    seekToPosition(newProgress);
-  };
-
-  const handleProgressKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!duration) return;
-
-    const step = 5;
-    let nextProgress = progress;
-
-    if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
-      nextProgress = progress - step;
-    } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
-      nextProgress = progress + step;
-    } else if (e.key === "Home") {
-      nextProgress = 0;
-    } else if (e.key === "End") {
-      nextProgress = 100;
-    } else {
-      return;
-    }
-
-    e.preventDefault();
-    const normalized = Math.max(0, Math.min(100, nextProgress));
-    setProgress(normalized);
-    seekToPosition(normalized);
+  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextProgress = Number(e.target.value);
+    setProgress(nextProgress);
+    seekToPosition(nextProgress);
   };
 
   const formatTime = (time: number) => {
@@ -260,27 +198,27 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
       </div>
 
       <div className="px-4 py-4 space-y-4">
-        <div
-          ref={progressBarRef}
-          className="relative w-full h-4 flex items-center rounded-full cursor-pointer touch-none overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          role="slider"
-          tabIndex={0}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round(progress)}
-          aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onKeyDown={handleProgressKeyDown}
-        >
+        <div className="relative w-full h-4 flex items-center rounded-full cursor-pointer touch-none overflow-hidden focus-within:ring-2 focus-within:ring-accent/40">
+          <input
+            type="range"
+            min={0}
+            max={100}
+            step={0.1}
+            value={Number.isFinite(progress) ? progress : 0}
+            onChange={handleSeekChange}
+            onMouseDown={() => setIsSeeking(true)}
+            onMouseUp={() => setIsSeeking(false)}
+            onTouchStart={() => setIsSeeking(true)}
+            onTouchEnd={() => setIsSeeking(false)}
+            aria-label={`${copy.listenToArticle} progress`}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+          />
           <div className="absolute inset-x-0 h-2 bg-bg-primary rounded-full overflow-hidden">
             <div
               className="absolute inset-y-0 left-0 bg-accent rounded-full"
               style={{
                 width: `${progress}%`,
-                transition: isDragging ? "none" : "width 0.12s ease",
+                transition: isSeeking ? "none" : "width 0.12s ease",
               }}
             />
           </div>
@@ -288,7 +226,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
             className="absolute w-4 h-4 rounded-full border-2 border-white bg-accent shadow-md z-10"
             style={{
               left: `clamp(0px, calc(${progress}% - 8px), calc(100% - 16px))`,
-              transition: isDragging ? "none" : "left 0.12s ease",
+              transition: isSeeking ? "none" : "left 0.12s ease",
             }}
           />
         </div>
