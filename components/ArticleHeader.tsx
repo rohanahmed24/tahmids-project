@@ -88,8 +88,8 @@ export function ArticleHeader({
                         {/* Media Options - Read, Listen, Watch */}
                         <MediaOptions
                             slug={slug}
-                            hasAudio={!!audioUrl && audioUrl.length > 5}
-                            hasVideo={!!videoUrl && videoUrl.length > 5}
+                            hasAudio={Boolean(audioUrl?.trim())}
+                            hasVideo={Boolean(videoUrl?.trim())}
                             variant="prominent"
                         />
                     </div>
@@ -199,8 +199,8 @@ export function ArticleHeader({
                         >
                             <MediaOptions
                                 slug={slug}
-                                hasAudio={!!audioUrl && audioUrl.length > 5}
-                                hasVideo={!!videoUrl && videoUrl.length > 5}
+                                hasAudio={Boolean(audioUrl?.trim())}
+                                hasVideo={Boolean(videoUrl?.trim())}
                                 variant="overlay"
                             />
                         </motion.div>

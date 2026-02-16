@@ -62,8 +62,8 @@ export function ArticleCard({ article, width }: ArticleCardProps) {
                     </div>
                     <MediaOptions
                         slug={article.slug}
-                        hasAudio={!!article.audioUrl && article.audioUrl.length > 5}
-                        hasVideo={!!article.videoUrl && article.videoUrl.length > 5}
+                        hasAudio={Boolean(article.audioUrl?.trim())}
+                        hasVideo={Boolean(article.videoUrl?.trim())}
                         variant="compact"
                     />
                 </div>

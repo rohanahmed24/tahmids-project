@@ -5,21 +5,32 @@ import { ArticleContent } from "@/components/ArticleContent";
 import { ArticleSidebar } from "@/components/ArticleSidebar";
 import { BacklinksSection } from "@/components/BacklinksSection";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
+import { ArticleVideoPlayer } from "@/components/ArticleVideoPlayer";
 import { getCurrentLocale } from "@/lib/locale";
 import { Assets } from "@/lib/assets";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ mode?: string }>;
 }
 
-export default async function ArticlePage({ params }: ArticlePageProps) {
+export default async function ArticlePage({
+  params,
+  searchParams,
+}: ArticlePageProps) {
   const locale = await getCurrentLocale();
-  const { slug } = await params;
+  const [{ slug }, { mode }] = await Promise.all([params, searchParams]);
   const post = await getPostBySlug(slug, locale);
 
   if (!post) {
     notFound();
   }
+
+  const audioUrl = post.audioUrl?.trim() || "";
+  const videoUrl = post.videoUrl?.trim() || "";
+  const hasAudio = Boolean(audioUrl);
+  const hasVideo = Boolean(videoUrl);
+  const activeMode = mode === "watch" || mode === "listen" ? mode : "read";
 
   const relatedPosts = await getRelatedPosts(post.categoryEn, post.slug, 4, locale);
 
@@ -36,8 +47,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         subtitle={post.subtitle || undefined}
         coverImage={post.coverImage || undefined}
         slug={post.slug}
-        audioUrl={post.audioUrl || undefined}
-        videoUrl={post.videoUrl || undefined}
+        audioUrl={hasAudio ? audioUrl : undefined}
+        videoUrl={hasVideo ? videoUrl : undefined}
         locale={locale}
       />
 
@@ -46,8 +57,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
           {/* Article Content */}
           <div className="space-y-8 min-w-0">
-            {post.audioUrl && (
-              <ArticleAudioPlayer title={post.title} audioUrl={post.audioUrl} />
+            {activeMode === "watch" && hasVideo && (
+              <ArticleVideoPlayer title={post.title} videoUrl={videoUrl} />
+            )}
+
+            {hasAudio && (
+              <ArticleAudioPlayer title={post.title} audioUrl={audioUrl} />
             )}
 
             <ArticleContent>

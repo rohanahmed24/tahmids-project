@@ -172,23 +172,15 @@ export function HeroSlider({ items }: HeroSliderProps) {
               <div className="mt-4 md:mt-0">
                 <MediaOptions
                   slug={currentTopic.slug}
-                  hasAudio={
-                    !!currentTopic.audioUrl && currentTopic.audioUrl.length > 5
-                  }
-                  hasVideo={
-                    !!currentTopic.videoUrl && currentTopic.videoUrl.length > 5
-                  }
+                  hasAudio={Boolean(currentTopic.audioUrl?.trim())}
+                  hasVideo={Boolean(currentTopic.videoUrl?.trim())}
                   variant="prominent"
                   className="md:hidden"
                 />
                 <MediaOptions
                   slug={currentTopic.slug}
-                  hasAudio={
-                    !!currentTopic.audioUrl && currentTopic.audioUrl.length > 5
-                  }
-                  hasVideo={
-                    !!currentTopic.videoUrl && currentTopic.videoUrl.length > 5
-                  }
+                  hasAudio={Boolean(currentTopic.audioUrl?.trim())}
+                  hasVideo={Boolean(currentTopic.videoUrl?.trim())}
                   variant="overlay"
                   className="hidden md:flex"
                 />

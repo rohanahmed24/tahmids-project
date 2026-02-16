@@ -66,8 +66,8 @@ export function HorizontalSlider({ articles }: HorizontalSliderProps) {
                                 </h3>
                                 <MediaOptions
                                     slug={item.slug}
-                                    hasAudio={!!item.audioUrl && item.audioUrl.length > 5}
-                                    hasVideo={!!item.videoUrl && item.videoUrl.length > 5}
+                                    hasAudio={Boolean(item.audioUrl?.trim())}
+                                    hasVideo={Boolean(item.videoUrl?.trim())}
                                     variant="compact"
                                     className="mt-2"
                                 />

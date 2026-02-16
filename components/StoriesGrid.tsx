@@ -111,8 +111,8 @@ export function StoriesGrid({ category, categoryLabel }: StoriesGridProps) {
                                         </h3>
                                         <MediaOptions
                                             slug={story.slug}
-                                            hasAudio={!!story.audioUrl && story.audioUrl.length > 5}
-                                            hasVideo={!!story.videoUrl && story.videoUrl.length > 5}
+                                            hasAudio={Boolean(story.audioUrl?.trim())}
+                                            hasVideo={Boolean(story.videoUrl?.trim())}
                                             variant="compact"
                                         />
                                     </div>
@@ -172,8 +172,8 @@ export function StoriesGrid({ category, categoryLabel }: StoriesGridProps) {
                                             </h3>
                                             <MediaOptions
                                                 slug={story.slug}
-                                                hasAudio={!!story.audioUrl && story.audioUrl.length > 5}
-                                                hasVideo={!!story.videoUrl && story.videoUrl.length > 5}
+                                                hasAudio={Boolean(story.audioUrl?.trim())}
+                                                hasVideo={Boolean(story.videoUrl?.trim())}
                                                 variant="compact"
                                             />
                                         </div>
