@@ -8,7 +8,6 @@ import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useSession, signOut } from "next-auth/react";
 import { getMenuCategories } from "@/actions/categories";
-import { BASE_CATEGORIES, categoryToSlug } from "@/lib/categories";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { t } from "@/lib/translations";
 
@@ -197,30 +196,22 @@ export default function Navbar() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-y-6 gap-x-4">
-                  {sectionLinks.length > 0
-                    ? sectionLinks.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setIsMenuOpen(false)}
-                          className="text-lg font-sans text-text-primary hover:text-accent transition-colors"
-                        >
-                          {item.name}
-                        </Link>
-                      ))
-                    : BASE_CATEGORIES.map((name) => ({
-                        name,
-                        href: `/topics/${categoryToSlug(name)}`,
-                      })).map((item) => (
-                        <Link
-                          key={item.name}
-                          href={item.href}
-                          onClick={() => setIsMenuOpen(false)}
-                          className="text-lg font-sans text-text-primary hover:text-accent transition-colors"
-                        >
-                          {item.name}
-                        </Link>
-                      ))}
+                  {sectionLinks.length > 0 ? (
+                    sectionLinks.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="text-lg font-sans text-text-primary hover:text-accent transition-colors"
+                      >
+                        {item.name}
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="col-span-2 text-sm text-text-muted">
+                      No categories configured yet.
+                    </p>
+                  )}
                 </div>
               </div>
 

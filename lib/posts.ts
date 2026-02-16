@@ -2,11 +2,8 @@ import { prisma } from "@/lib/db";
 import { unstable_cache } from "next/cache";
 import { Post as PrismaPost } from "@prisma/client";
 import {
-    BASE_CATEGORIES,
     canonicalizeCategoryName,
     categoryToSlug,
-    getBengaliCategoryName,
-    getLocalizedCategoryName,
     normalizeCategoryName,
 } from "@/lib/categories";
 import type { Locale } from "@/lib/locale";
@@ -141,7 +138,7 @@ function mapPrismaPost(
     const normalizedCategory = canonicalizeCategoryName(post.category || "") || "Uncategorized";
     const localizedCategory =
         locale === "bn"
-            ? (post.categoryBn?.trim() || getBengaliCategoryName(normalizedCategory) || normalizedCategory)
+            ? (post.categoryBn?.trim() || normalizedCategory)
             : normalizedCategory;
 
     const localizedTitle =
@@ -208,25 +205,66 @@ type CategoryGroupRow = {
     _count: { _all: number };
 };
 
+type ManagedCategory = {
+    name: string;
+    nameBn?: string;
+};
+
+function parseManagedCategories(raw: string | null | undefined): ManagedCategory[] {
+    if (!raw?.trim()) return [];
+
+    try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+
+        const uniqueBySlug = new Map<string, ManagedCategory>();
+        for (const item of parsed) {
+            if (!item || typeof item !== "object") continue;
+
+            const name = canonicalizeCategoryName(String((item as { name?: unknown }).name || ""));
+            if (!name) continue;
+
+            const slug = categoryToSlug(name);
+            if (!slug || uniqueBySlug.has(slug)) continue;
+
+            const nameBn = String((item as { nameBn?: unknown }).nameBn || "").trim() || undefined;
+            uniqueBySlug.set(slug, { name, nameBn });
+        }
+
+        return [...uniqueBySlug.values()];
+    } catch (error) {
+        console.warn("Failed to parse managed_categories setting:", error);
+        return [];
+    }
+}
+
+async function readManagedCategories(): Promise<ManagedCategory[]> {
+    const row = await prisma.setting.findUnique({
+        where: { keyName: "managed_categories" },
+        select: { value: true },
+    });
+
+    return parseManagedCategories(row?.value);
+}
+
 function buildCategorySummaries(
     rows: CategoryGroupRow[],
-    includeBaseCategories: boolean,
+    managedCategories: ManagedCategory[],
     locale: Locale,
     localizedNamesBySlug: Map<string, string>
 ): CategorySummary[] {
     const summariesBySlug = new Map<string, CategorySummary>();
-    const baseOrder = new Map(BASE_CATEGORIES.map((category, index) => [categoryToSlug(category), index]));
 
-    if (includeBaseCategories) {
-        for (const category of BASE_CATEGORIES) {
-            const slug = categoryToSlug(category);
-            summariesBySlug.set(slug, {
-                name: getLocalizedCategoryName(category, locale),
-                canonicalName: category,
-                slug,
-                count: 0,
-            });
-        }
+    for (const category of managedCategories) {
+        const slug = categoryToSlug(category.name);
+        if (!slug || summariesBySlug.has(slug)) continue;
+
+        summariesBySlug.set(slug, {
+            name: locale === "bn" ? (category.nameBn || category.name) : category.name,
+            canonicalName: category.name,
+            slug,
+            count: 0,
+        });
     }
 
     for (const row of rows) {
@@ -237,17 +275,15 @@ function buildCategorySummaries(
         if (!slug) continue;
 
         const canonicalName = canonicalizeCategoryName(rawCategory);
-        const localizedName = locale === "bn"
-            ? (localizedNamesBySlug.get(slug) || getBengaliCategoryName(canonicalName))
-            : canonicalName;
         const existing = summariesBySlug.get(slug);
+        const localizedName = locale === "bn"
+            ? (localizedNamesBySlug.get(slug) || existing?.name || canonicalName)
+            : (existing?.canonicalName || canonicalName);
 
         if (existing) {
             existing.count += row._count._all;
-            if (!baseOrder.has(slug)) {
-                existing.name = localizedName;
-                existing.canonicalName = canonicalName;
-            }
+            existing.name = localizedName;
+            existing.canonicalName = canonicalName;
             continue;
         }
 
@@ -260,16 +296,9 @@ function buildCategorySummaries(
     }
 
     return [...summariesBySlug.values()]
-        .filter((summary) => includeBaseCategories || summary.count > 0)
         .sort((a, b) => {
-            const leftBaseOrder = baseOrder.get(a.slug);
-            const rightBaseOrder = baseOrder.get(b.slug);
-
-            if (leftBaseOrder !== undefined && rightBaseOrder !== undefined) {
-                return leftBaseOrder - rightBaseOrder;
-            }
-            if (leftBaseOrder !== undefined) return -1;
-            if (rightBaseOrder !== undefined) return 1;
+            if (a.count === 0 && b.count > 0) return 1;
+            if (b.count === 0 && a.count > 0) return -1;
             return a.name.localeCompare(b.name);
         });
 }
@@ -287,8 +316,16 @@ export async function getPublicCategorySummaries(locale: Locale = "en"): Promise
                     _count: { _all: true },
                 });
 
+                const managedCategories = await readManagedCategories();
                 const localizedNamesBySlug = new Map<string, string>();
                 if (locale === "bn") {
+                    for (const category of managedCategories) {
+                        if (!category.nameBn) continue;
+                        const slug = categoryToSlug(category.name);
+                        if (!slug || localizedNamesBySlug.has(slug)) continue;
+                        localizedNamesBySlug.set(slug, category.nameBn);
+                    }
+
                     const localizedRows = await prisma.post.findMany({
                         where: {
                             published: true,
@@ -309,18 +346,13 @@ export async function getPublicCategorySummaries(locale: Locale = "en"): Promise
 
                 return buildCategorySummaries(
                     grouped as CategoryGroupRow[],
-                    true,
+                    managedCategories,
                     locale,
                     localizedNamesBySlug
                 );
             } catch {
-                console.warn("Failed to fetch public categories. Falling back to base categories.");
-                return BASE_CATEGORIES.map((category) => ({
-                    name: getLocalizedCategoryName(category, locale),
-                    canonicalName: category,
-                    slug: categoryToSlug(category),
-                    count: 0,
-                }));
+                console.warn("Failed to fetch public categories.");
+                return [];
             }
         },
         ["public-category-summaries", locale],
@@ -339,49 +371,27 @@ export const getCategoryOptions = unstable_cache(
                 _count: { _all: true },
             });
 
-            const categoryNames = buildCategorySummaries(
-                grouped as CategoryGroupRow[],
-                true,
-                "en",
-                new Map<string, string>()
-            ).map((summary) => summary.canonicalName);
-
-            const managedCategoriesRaw = await prisma.setting.findUnique({
-                where: { keyName: "managed_categories" },
-                select: { value: true },
-            });
-
+            const managedCategories = await readManagedCategories();
             const uniqueBySlug = new Map<string, string>();
-            for (const name of categoryNames) {
-                const canonicalName = canonicalizeCategoryName(name);
+
+            for (const category of managedCategories) {
+                const slug = categoryToSlug(category.name);
+                if (!slug || uniqueBySlug.has(slug)) continue;
+                uniqueBySlug.set(slug, category.name);
+            }
+
+            for (const row of grouped as CategoryGroupRow[]) {
+                const canonicalName = canonicalizeCategoryName(row.category || "");
                 if (!canonicalName) continue;
                 const slug = categoryToSlug(canonicalName);
                 if (!slug || uniqueBySlug.has(slug)) continue;
                 uniqueBySlug.set(slug, canonicalName);
             }
 
-            if (managedCategoriesRaw?.value) {
-                try {
-                    const parsed = JSON.parse(managedCategoriesRaw.value);
-                    if (Array.isArray(parsed)) {
-                        for (const item of parsed) {
-                            const rawName = String((item as { name?: unknown })?.name || "");
-                            const canonicalName = canonicalizeCategoryName(rawName);
-                            if (!canonicalName) continue;
-                            const slug = categoryToSlug(canonicalName);
-                            if (!slug || uniqueBySlug.has(slug)) continue;
-                            uniqueBySlug.set(slug, canonicalName);
-                        }
-                    }
-                } catch (error) {
-                    console.warn("Failed to parse managed_categories setting:", error);
-                }
-            }
-
             return [...uniqueBySlug.values()];
         } catch {
-            console.warn("Failed to fetch category options. Falling back to base categories.");
-            return [...BASE_CATEGORIES];
+            console.warn("Failed to fetch category options.");
+            return [];
         }
     },
     ["category-options"],

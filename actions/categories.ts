@@ -56,6 +56,65 @@ async function readManagedCategories(): Promise<ManagedCategory[]> {
     return parseManagedCategories(row?.value);
 }
 
+async function readPostDerivedCategories(): Promise<ManagedCategory[]> {
+    const rows = await prisma.post.findMany({
+        where: {
+            category: { not: null },
+        },
+        select: {
+            category: true,
+            categoryBn: true,
+        },
+        orderBy: { createdAt: "desc" },
+    });
+
+    const categoriesBySlug = new Map<string, ManagedCategory>();
+
+    for (const row of rows) {
+        const name = canonicalizeCategoryName(row.category || "");
+        if (!name) continue;
+
+        const slug = categoryToSlug(name);
+        if (!slug) continue;
+
+        const nameBn = row.categoryBn?.trim() || undefined;
+        const existing = categoriesBySlug.get(slug);
+
+        if (!existing) {
+            categoriesBySlug.set(slug, { name, nameBn });
+            continue;
+        }
+
+        if (!existing.nameBn && nameBn) {
+            categoriesBySlug.set(slug, { ...existing, nameBn });
+        }
+    }
+
+    return [...categoriesBySlug.values()];
+}
+
+function mergeCategories(managed: ManagedCategory[], derived: ManagedCategory[]): ManagedCategory[] {
+    const merged = new Map<string, ManagedCategory>();
+
+    for (const category of derived) {
+        const slug = categoryToSlug(category.name);
+        if (!slug) continue;
+        merged.set(slug, category);
+    }
+
+    for (const category of managed) {
+        const slug = categoryToSlug(category.name);
+        if (!slug) continue;
+        const existing = merged.get(slug);
+        merged.set(slug, {
+            name: category.name,
+            nameBn: category.nameBn || existing?.nameBn,
+        });
+    }
+
+    return [...merged.values()];
+}
+
 async function writeManagedCategories(categories: ManagedCategory[]): Promise<void> {
     await prisma.setting.upsert({
         where: { keyName: MANAGED_CATEGORIES_KEY },
@@ -101,7 +160,11 @@ export async function getAdminCategories() {
     }
 
     try {
-        const categories = await readManagedCategories();
+        const [managed, derived] = await Promise.all([
+            readManagedCategories(),
+            readPostDerivedCategories(),
+        ]);
+        const categories = mergeCategories(managed, derived);
         return { success: true, categories: sortManagedCategories(categories) };
     } catch (error) {
         console.error("Failed to fetch admin categories:", error);
@@ -123,18 +186,22 @@ export async function addAdminCategory(input: { name: string; nameBn?: string })
     const normalizedNameBn = input.nameBn?.trim() || undefined;
 
     try {
-        const categories = await readManagedCategories();
-        const exists = categories.some((category) => category.name.toLowerCase() === normalizedName.toLowerCase());
+        const [managed, derived] = await Promise.all([
+            readManagedCategories(),
+            readPostDerivedCategories(),
+        ]);
+        const allCategories = mergeCategories(managed, derived);
+        const exists = allCategories.some((category) => categoryToSlug(category.name) === categoryToSlug(normalizedName));
         if (exists) {
-            return { success: false, error: "Category already exists", categories: sortManagedCategories(categories) };
+            return { success: false, error: "Category already exists", categories: sortManagedCategories(allCategories) };
         }
 
-        categories.push({ name: normalizedName, nameBn: normalizedNameBn });
-        const sorted = sortManagedCategories(categories);
-        await writeManagedCategories(sorted);
+        const nextManaged = [...managed, { name: normalizedName, nameBn: normalizedNameBn }];
+        await writeManagedCategories(sortManagedCategories(nextManaged));
         revalidateCategorySurfaces();
 
-        return { success: true, categories: sorted };
+        const refreshed = mergeCategories(nextManaged, derived);
+        return { success: true, categories: sortManagedCategories(refreshed) };
     } catch (error) {
         console.error("Failed to add admin category:", error);
         return { success: false, error: "Failed to add category", categories: [] as ManagedCategory[] };
@@ -156,20 +223,39 @@ export async function updateAdminCategory(input: { previousName: string; name: s
     const nextNameBn = input.nameBn?.trim() || undefined;
 
     try {
-        const categories = await readManagedCategories();
-        const existingIndex = categories.findIndex((category) => category.name.toLowerCase() === previousName.toLowerCase());
-        if (existingIndex === -1) {
-            return { success: false, error: "Category not found", categories: sortManagedCategories(categories) };
+        const [managed, derived] = await Promise.all([
+            readManagedCategories(),
+            readPostDerivedCategories(),
+        ]);
+        const combined = mergeCategories(managed, derived);
+        const previousSlug = categoryToSlug(previousName);
+        const nextSlug = categoryToSlug(nextName);
+
+        const previousCategory = combined.find((category) => categoryToSlug(category.name) === previousSlug);
+        if (!previousCategory) {
+            return { success: false, error: "Category not found", categories: sortManagedCategories(combined) };
         }
 
-        const duplicateIndex = categories.findIndex((category) => category.name.toLowerCase() === nextName.toLowerCase());
-        if (duplicateIndex !== -1 && duplicateIndex !== existingIndex) {
-            return { success: false, error: "Another category already uses this name", categories: sortManagedCategories(categories) };
+        const duplicate = combined.find((category) => categoryToSlug(category.name) === nextSlug);
+        if (duplicate && previousSlug !== nextSlug) {
+            return { success: false, error: "Another category already uses this name", categories: sortManagedCategories(combined) };
         }
 
-        categories[existingIndex] = { name: nextName, nameBn: nextNameBn };
-        const sorted = sortManagedCategories(categories);
-        await writeManagedCategories(sorted);
+        const managedBySlug = new Map<string, ManagedCategory>();
+        for (const category of managed) {
+            const slug = categoryToSlug(category.name);
+            if (!slug) continue;
+            managedBySlug.set(slug, category);
+        }
+
+        managedBySlug.delete(previousSlug);
+        managedBySlug.set(nextSlug, {
+            name: nextName,
+            nameBn: nextNameBn || previousCategory.nameBn,
+        });
+
+        const nextManaged = sortManagedCategories([...managedBySlug.values()]);
+        await writeManagedCategories(nextManaged);
 
         await prisma.post.updateMany({
             where: {
@@ -186,7 +272,9 @@ export async function updateAdminCategory(input: { previousName: string; name: s
         });
 
         revalidateCategorySurfaces();
-        return { success: true, categories: sorted };
+        const refreshedDerived = await readPostDerivedCategories();
+        const refreshed = mergeCategories(nextManaged, refreshedDerived);
+        return { success: true, categories: sortManagedCategories(refreshed) };
     } catch (error) {
         console.error("Failed to update admin category:", error);
         return { success: false, error: "Failed to update category", categories: [] as ManagedCategory[] };
@@ -205,14 +293,19 @@ export async function deleteAdminCategory(input: { name: string }) {
     }
 
     try {
-        const categories = await readManagedCategories();
-        const nextCategories = categories.filter((category) => category.name.toLowerCase() !== normalizedName.toLowerCase());
-
-        if (nextCategories.length === categories.length) {
-            return { success: false, error: "Category not found", categories: sortManagedCategories(categories) };
+        const [managed, derived] = await Promise.all([
+            readManagedCategories(),
+            readPostDerivedCategories(),
+        ]);
+        const combined = mergeCategories(managed, derived);
+        const targetSlug = categoryToSlug(normalizedName);
+        const exists = combined.some((category) => categoryToSlug(category.name) === targetSlug);
+        if (!exists) {
+            return { success: false, error: "Category not found", categories: sortManagedCategories(combined) };
         }
 
-        await writeManagedCategories(sortManagedCategories(nextCategories));
+        const nextManaged = managed.filter((category) => categoryToSlug(category.name) !== targetSlug);
+        await writeManagedCategories(sortManagedCategories(nextManaged));
 
         await prisma.post.updateMany({
             where: {
@@ -229,7 +322,9 @@ export async function deleteAdminCategory(input: { name: string }) {
         });
 
         revalidateCategorySurfaces();
-        return { success: true, categories: sortManagedCategories(nextCategories) };
+        const refreshedDerived = await readPostDerivedCategories();
+        const refreshed = mergeCategories(nextManaged, refreshedDerived);
+        return { success: true, categories: sortManagedCategories(refreshed) };
     } catch (error) {
         console.error("Failed to delete admin category:", error);
         return { success: false, error: "Failed to delete category", categories: [] as ManagedCategory[] };

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "@/components/providers/LocaleProvider";
-import { getLocalizedCategoryName } from "@/lib/categories";
+import { getMenuCategories } from "@/actions/categories";
 
 export function Footer() {
     const { locale } = useLocale();
@@ -32,12 +33,22 @@ export function Footer() {
             member: "Become a Member",
         };
 
-    const exploreLinks = [
-        { href: "/topics/design-culture", label: getLocalizedCategoryName("Design", locale) },
-        { href: "/topics/culture", label: getLocalizedCategoryName("Culture", locale) },
-        { href: "/topics/technology-ai", label: getLocalizedCategoryName("Technology", locale) },
-        { href: "/topics/philosophy", label: locale === "bn" ? "দর্শন" : "Philosophy" },
-    ];
+    const [sectionLinks, setSectionLinks] = useState<{ name: string; href: string }[]>([]);
+
+    useEffect(() => {
+        const loadSections = async () => {
+            const result = await getMenuCategories();
+            if (result.success && result.links) {
+                setSectionLinks(result.links);
+            } else {
+                setSectionLinks([]);
+            }
+        };
+
+        loadSections();
+    }, [locale]);
+
+    const exploreLinks = useMemo(() => sectionLinks.slice(0, 4), [sectionLinks]);
 
     return (
         <footer className="relative w-full bg-bg-primary border-t border-border-subtle pt-16 md:pt-20 pb-10 px-6 md:px-12 text-text-primary transition-colors duration-500 safe-bottom overflow-hidden">
@@ -63,11 +74,17 @@ export function Footer() {
                 <div className="col-span-1 md:col-span-2 space-y-4 md:space-y-6">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-text-muted">{copy.explore}</h4>
                     <ul className="space-y-3 md:space-y-4 text-sm font-medium">
-                        {exploreLinks.map((link) => (
-                            <li key={link.href}>
-                                <Link href={link.href} className="hover:text-accent active:opacity-70 transition-colors">{link.label}</Link>
+                        {exploreLinks.length > 0 ? (
+                            exploreLinks.map((link) => (
+                                <li key={link.href}>
+                                    <Link href={link.href} className="hover:text-accent active:opacity-70 transition-colors">{link.name}</Link>
+                                </li>
+                            ))
+                        ) : (
+                            <li className="text-text-muted text-xs">
+                                No categories yet
                             </li>
-                        ))}
+                        )}
                     </ul>
                 </div>
 

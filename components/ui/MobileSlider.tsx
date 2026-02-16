@@ -188,10 +188,11 @@ export function MobileSlider({
                         <button
                             key={index}
                             onClick={() => scrollToIndex(index)}
-                            className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
-                                ? "bg-accent scale-125"
-                                : "bg-white/30 hover:bg-white/50"
+                            className={`w-2.5 h-2.5 !p-0 rounded-full border transition-all duration-300 ${index === currentIndex
+                                ? "bg-accent border-accent scale-110"
+                                : "bg-white/20 border-white/40 hover:bg-white/35"
                                 }`}
+                            aria-current={index === currentIndex ? "true" : "false"}
                             aria-label={`Go to slide ${index + 1}`}
                         />
                     ))}
@@ -200,4 +201,3 @@ export function MobileSlider({
         </div>
     );
 }
-

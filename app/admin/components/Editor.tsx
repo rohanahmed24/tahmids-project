@@ -24,10 +24,8 @@ import { motion } from "framer-motion";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import {
-    BASE_CATEGORIES,
     canonicalizeCategoryName,
     categoryToSlug,
-    getBengaliCategoryName,
 } from "@/lib/categories";
 
 interface EditorProps {
@@ -70,8 +68,8 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const [content, setContent] = useState(initialData?.content || "");
     const [contentBn, setContentBn] = useState(initialData?.contentBn || "");
     const [coverImage, setCoverImage] = useState(initialData?.coverImage || "");
-    const [category, setCategory] = useState(initialData?.category || "Technology");
-    const [categoryBn, setCategoryBn] = useState(initialData?.categoryBn || getBengaliCategoryName(initialData?.category || "Technology"));
+    const [category, setCategory] = useState(initialData?.category || categoryOptions[0] || "");
+    const [categoryBn, setCategoryBn] = useState(initialData?.categoryBn || "");
     const [published, setPublished] = useState(initialData?.published ?? true);
     const [authorName, setAuthorName] = useState(initialData?.authorName || "");
     const [authorNameBn, setAuthorNameBn] = useState(initialData?.authorNameBn || "");
@@ -99,7 +97,7 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
 
     const categoryMap = useMemo(() => {
         const map = new Map<string, string>();
-        for (const item of [...BASE_CATEGORIES, ...categoryOptions]) {
+        for (const item of categoryOptions) {
             const trimmed = item.trim();
             const key = canonicalizeCategoryName(trimmed);
             if (!key) continue;

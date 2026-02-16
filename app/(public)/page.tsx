@@ -3,7 +3,6 @@ import { FeaturedTales } from "@/components/FeaturedTales";
 import { getHotTopics, getRecentPosts, getPostsByCategories, getPublicCategorySummaries } from "@/lib/posts";
 import dynamic from "next/dynamic";
 import { Metadata } from "next";
-import { BASE_CATEGORIES, categoryToSlug, getLocalizedCategoryName } from "@/lib/categories";
 import { getCurrentLocale } from "@/lib/locale";
 
 // Dynamic Imports for Code Splitting (Below the fold components)
@@ -44,20 +43,21 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const locale = await getCurrentLocale();
-  const homepageCategories = BASE_CATEGORIES.map((category) => ({
-    key: category,
-    title: getLocalizedCategoryName(category, locale),
-    slug: categoryToSlug(category),
-  }));
 
   // Parallel data fetching for better performance
-  const [hotTopics, recentPosts, categoryData, categories] = await Promise.all([
+  const [hotTopics, recentPosts, categories] = await Promise.all([
     getHotTopics(5, locale),
     getRecentPosts(10, locale),
-    // Single optimized query for all categories
-    getPostsByCategories(homepageCategories.map((category) => category.key), 6, locale),
     getPublicCategorySummaries(locale),
   ]);
+  const homepageCategories = categories.filter(
+    (category) => category.slug !== "uncategorized" && category.count > 0
+  );
+  const categoryData = await getPostsByCategories(
+    homepageCategories.map((category) => category.canonicalName),
+    6,
+    locale
+  );
 
   return (
     <main className="min-h-screen bg-bg-primary text-text-primary font-sans selection:bg-bg-secondary selection:text-text-primary">
@@ -68,9 +68,9 @@ export default async function Home() {
       {homepageCategories.map((category) => (
         <CategorySection
           key={category.slug}
-          title={category.title}
+          title={category.name}
           slug={category.slug}
-          articles={categoryData[category.key] || []}
+          articles={categoryData[category.canonicalName] || []}
         />
       ))}
 

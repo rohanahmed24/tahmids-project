@@ -176,9 +176,9 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
                             <button
                                 key={index}
                                 onClick={() => scrollTo(index)}
-                                className={`w-[4px] h-[4px] !p-0 rounded-full transition-all ${index === selectedIndex
-                                    ? "bg-accent"
-                                    : "bg-text-muted/30 hover:bg-text-muted/50"
+                                className={`w-2.5 h-2.5 !p-0 rounded-full border transition-all duration-300 ${index === selectedIndex
+                                    ? "bg-accent border-accent scale-110"
+                                    : "bg-text-muted/20 border-text-muted/40 hover:bg-text-muted/35"
                                     }`}
                                 aria-label={locale === "bn" ? `স্লাইড ${index + 1} এ যান` : `Go to slide ${index + 1}`}
                                 aria-current={index === selectedIndex ? "true" : "false"}

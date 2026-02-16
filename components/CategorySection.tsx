@@ -136,11 +136,12 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                                 <button
                                     key={index}
                                     onClick={() => snapToPage(index)}
-                                    className={`h-1.5 rounded-full transition-all ${index === currentPage
-                                        ? "bg-accent w-4"
-                                        : "bg-text-muted/30 w-1.5 hover:bg-text-muted/50"
+                                    className={`w-2.5 h-2.5 !p-0 rounded-full border transition-all duration-300 ${index === currentPage
+                                        ? "bg-accent border-accent scale-110"
+                                        : "bg-text-muted/20 border-text-muted/40 hover:bg-text-muted/35"
                                         }`}
                                     aria-label={locale === "bn" ? `স্লাইড পেজ ${index + 1} এ যান` : `Go to slider page ${index + 1}`}
+                                    aria-current={index === currentPage ? "true" : "false"}
                                 />
                             ))}
                         </div>

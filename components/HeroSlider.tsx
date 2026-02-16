@@ -242,14 +242,25 @@ export function HeroSlider({ items }: HeroSliderProps) {
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="hidden md:block absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-20">
-        <div
-          className="h-full bg-white transition-[width] ease-linear duration-100" // using js for progress might be smoother but this is okay
-          style={{
-            width: `${((selectedIndex + 1) / validItems.length) * 100}%`,
-          }}
-        />
+      {/* Desktop Slide Dots */}
+      <div className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 z-20 items-center gap-2 pointer-events-auto">
+        {validItems.map((topic, index) => (
+          <button
+            key={`desktop-dot-${topic.slug}`}
+            onClick={() => scrollTo(index)}
+            className={`w-2.5 h-2.5 !p-0 rounded-full transition-all duration-300 border ${
+              index === selectedIndex
+                ? "bg-white border-white scale-110"
+                : "bg-white/20 border-white/50 hover:bg-white/35"
+            }`}
+            aria-label={
+              locale === "bn"
+                ? `স্লাইড ${index + 1} এ যান`
+                : `Go to slide ${index + 1}`
+            }
+            aria-current={index === selectedIndex ? "true" : "false"}
+          />
+        ))}
       </div>
 
       {/* Thumbnail Preview - Desktop Only */}
