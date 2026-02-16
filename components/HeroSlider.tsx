@@ -164,7 +164,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
               {/* Title */}
               <h1
                 className="font-serif font-bold text-white leading-tight mb-6 md:mb-8"
-                style={{ fontSize: "clamp(1.25rem, 5vw, 4.5rem)" }}
+                style={{ fontSize: "clamp(1.25rem, 4.0vw, 3.5rem)" }}
               >
                 {currentTopic.title}
               </h1>
