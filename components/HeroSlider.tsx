@@ -123,9 +123,10 @@ export function HeroSlider({ items }: HeroSliderProps) {
                 alt={item.title}
                 fill
                 sizes="100vw"
-                quality={85}
+                quality={72}
                 className="object-cover"
                 priority={index === 0}
+                fetchPriority={index === 0 ? "high" : "auto"}
                 loading={index === 0 ? "eager" : "lazy"}
               />
               {/* Gradient Overlays */}
@@ -283,6 +284,7 @@ export function HeroSlider({ items }: HeroSliderProps) {
               alt={topic.title}
               fill
               sizes="120px"
+              quality={55}
               className="object-cover"
               loading="lazy"
             />

@@ -27,7 +27,7 @@ function FeaturedHorizontalSlider({ items, previousLabel, nextLabel }: { items: 
         <div className="relative group mx-auto max-w-[1472px]">
             <div className="overflow-hidden" ref={emblaRef}>
                 <div className="flex gap-6">
-                    {items.map((item) => (
+                    {items.map((item, index) => (
                         <Link
                             key={item.slug}
                             href={`/article/${item.slug}`}
@@ -38,8 +38,12 @@ function FeaturedHorizontalSlider({ items, previousLabel, nextLabel }: { items: 
                                     src={item.coverImage || '/placeholder.jpg'}
                                     fill
                                     sizes="350px"
+                                    quality={65}
                                     alt={item.title}
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    priority={index === 0}
+                                    fetchPriority={index === 0 ? "high" : "auto"}
+                                    loading={index === 0 ? "eager" : "lazy"}
                                 />
                                 <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                             </div>
@@ -143,7 +147,7 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
                 <div className="md:hidden relative" role="region" aria-roledescription="carousel" aria-label={copy.mobileLabel}>
                     <div className="overflow-hidden" ref={mobileRef}>
                         <div className="flex gap-3">
-                            {articles.map((item) => (
+                            {articles.map((item, index) => (
                                 <Link
                                     key={item.slug}
                                     href={`/article/${item.slug}`}
@@ -157,8 +161,12 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
                                             src={item.coverImage || '/placeholder.jpg'}
                                             fill
                                             sizes="(max-width: 768px) 85vw, 350px"
+                                            quality={62}
                                             alt={item.title}
                                             className="object-cover"
+                                            priority={index === 0}
+                                            fetchPriority={index === 0 ? "high" : "auto"}
+                                            loading={index === 0 ? "eager" : "lazy"}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                                     </div>

@@ -49,8 +49,12 @@ export function HorizontalSlider({ articles }: HorizontalSliderProps) {
                                     src={item.coverImage || '/placeholder.jpg'}
                                     fill
                                     sizes="350px"
+                                    quality={65}
                                     alt={item.title}
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    priority={index === 0}
+                                    fetchPriority={index === 0 ? "high" : "auto"}
+                                    loading={index === 0 ? "eager" : "lazy"}
                                 />
                                 <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
                             </div>
