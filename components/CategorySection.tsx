@@ -186,7 +186,13 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                                     >
                                         {item.title}
                                     </h3>
-                                    <MediaOptions slug={item.slug} hasVideo={!!item.videoUrl && item.videoUrl.length > 5} variant="compact" className="mt-2" />
+                                    <MediaOptions
+                                        slug={item.slug}
+                                        hasAudio={!!item.audioUrl && item.audioUrl.length > 5}
+                                        hasVideo={!!item.videoUrl && item.videoUrl.length > 5}
+                                        variant="compact"
+                                        className="mt-2"
+                                    />
                                 </div>
                             </Link>
                         </motion.div>

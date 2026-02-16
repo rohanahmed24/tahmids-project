@@ -60,7 +60,12 @@ export function ArticleCard({ article, width }: ArticleCardProps) {
                         </div>
                         <span className="text-xs font-sans font-medium text-text-secondary">{article.author}</span>
                     </div>
-                    <MediaOptions slug={article.slug} hasVideo={!!article.videoUrl && article.videoUrl.length > 5} variant="compact" />
+                    <MediaOptions
+                        slug={article.slug}
+                        hasAudio={!!article.audioUrl && article.audioUrl.length > 5}
+                        hasVideo={!!article.videoUrl && article.videoUrl.length > 5}
+                        variant="compact"
+                    />
                 </div>
             </div>
         </div>

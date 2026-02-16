@@ -7,12 +7,13 @@ import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface MediaOptionsProps {
     slug: string;
+    hasAudio?: boolean;
     hasVideo?: boolean;
     variant?: "default" | "compact" | "overlay" | "minimal" | "prominent";
     className?: string;
 }
 
-export function MediaOptions({ slug, hasVideo = false, variant = "default", className = "" }: MediaOptionsProps) {
+export function MediaOptions({ slug, hasAudio = false, hasVideo = false, variant = "default", className = "" }: MediaOptionsProps) {
     const router = useRouter();
     const { locale } = useLocale();
     const labels = locale === "bn"
@@ -26,12 +27,12 @@ export function MediaOptions({ slug, hasVideo = false, variant = "default", clas
             icon: BookOpen,
             href: `/article/${slug}#article-content`,
         },
-        {
+        ...(hasAudio ? [{
             id: "listen",
             label: labels.listen,
             icon: Headphones,
             href: `/article/${slug}?mode=listen#article-content`,
-        },
+        }] : []),
         ...(hasVideo ? [{
             id: "watch",
             label: labels.watch,
@@ -135,6 +136,5 @@ export function MediaOptions({ slug, hasVideo = false, variant = "default", clas
         </div>
     );
 }
-
 
 

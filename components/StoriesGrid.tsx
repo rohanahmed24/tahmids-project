@@ -109,7 +109,12 @@ export function StoriesGrid({ category, categoryLabel }: StoriesGridProps) {
                                         <h3 className="text-lg font-serif text-white leading-snug mb-3">
                                             {story.title}
                                         </h3>
-                                        <MediaOptions slug={story.slug} hasVideo={!!story.videoUrl && story.videoUrl.length > 5} variant="compact" />
+                                        <MediaOptions
+                                            slug={story.slug}
+                                            hasAudio={!!story.audioUrl && story.audioUrl.length > 5}
+                                            hasVideo={!!story.videoUrl && story.videoUrl.length > 5}
+                                            variant="compact"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -165,7 +170,12 @@ export function StoriesGrid({ category, categoryLabel }: StoriesGridProps) {
                                             `}>
                                                 {story.title}
                                             </h3>
-                                            <MediaOptions slug={story.slug} hasVideo={!!story.videoUrl && story.videoUrl.length > 5} variant="compact" />
+                                            <MediaOptions
+                                                slug={story.slug}
+                                                hasAudio={!!story.audioUrl && story.audioUrl.length > 5}
+                                                hasVideo={!!story.videoUrl && story.videoUrl.length > 5}
+                                                variant="compact"
+                                            />
                                         </div>
                                     </div>
                                 </div>

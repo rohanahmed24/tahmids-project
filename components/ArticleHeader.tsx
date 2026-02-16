@@ -17,6 +17,7 @@ interface ArticleHeaderProps {
     subtitle?: string;
     coverImage?: string;
     slug?: string;
+    audioUrl?: string | null;
     videoUrl?: string | null;
     locale?: Locale;
 }
@@ -30,6 +31,7 @@ export function ArticleHeader({
     category = "Design",
     coverImage,
     slug = "slow-interfaces",
+    audioUrl,
     videoUrl,
     locale = "en",
 }: ArticleHeaderProps) {
@@ -84,7 +86,12 @@ export function ArticleHeader({
                         </motion.h1>
 
                         {/* Media Options - Read, Listen, Watch */}
-                        <MediaOptions slug={slug} hasVideo={!!videoUrl && videoUrl.length > 5} variant="prominent" />
+                        <MediaOptions
+                            slug={slug}
+                            hasAudio={!!audioUrl && audioUrl.length > 5}
+                            hasVideo={!!videoUrl && videoUrl.length > 5}
+                            variant="prominent"
+                        />
                     </div>
                 </div>
 
@@ -190,7 +197,12 @@ export function ArticleHeader({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.7 }}
                         >
-                            <MediaOptions slug={slug} hasVideo={!!videoUrl && videoUrl.length > 5} variant="overlay" />
+                            <MediaOptions
+                                slug={slug}
+                                hasAudio={!!audioUrl && audioUrl.length > 5}
+                                hasVideo={!!videoUrl && videoUrl.length > 5}
+                                variant="overlay"
+                            />
                         </motion.div>
                     </div>
                 </div>

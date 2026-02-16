@@ -172,6 +172,9 @@ export function HeroSlider({ items }: HeroSliderProps) {
               <div className="mt-4 md:mt-0">
                 <MediaOptions
                   slug={currentTopic.slug}
+                  hasAudio={
+                    !!currentTopic.audioUrl && currentTopic.audioUrl.length > 5
+                  }
                   hasVideo={
                     !!currentTopic.videoUrl && currentTopic.videoUrl.length > 5
                   }
@@ -180,6 +183,9 @@ export function HeroSlider({ items }: HeroSliderProps) {
                 />
                 <MediaOptions
                   slug={currentTopic.slug}
+                  hasAudio={
+                    !!currentTopic.audioUrl && currentTopic.audioUrl.length > 5
+                  }
                   hasVideo={
                     !!currentTopic.videoUrl && currentTopic.videoUrl.length > 5
                   }
