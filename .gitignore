@@ -54,6 +54,5 @@ next-env.d.ts
 *.dump
 *.sql
 
-# DB backups
-*.dump
-*.sql
+# Keep Prisma migration SQL tracked
+!prisma/migrations/**/*.sql
