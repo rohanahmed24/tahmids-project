@@ -6,8 +6,7 @@ import { revalidatePath } from "next/cache";
 import { revalidateTag } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { verifyAdmin, getAdminSession } from "@/actions/admin-auth";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { uploadAsset } from "@/lib/upload-service";
 import {
     canonicalizeCategoryName,
     categoryToSlug,
@@ -17,15 +16,15 @@ import {
 async function handleFileUpload(file: File | null): Promise<string | undefined> {
     if (!file || file.size === 0) return undefined;
 
-    const bytes = await file.arrayBuffer();
-    const buffer = new Uint8Array(bytes);
-    const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
-    const uploadDir = path.join(process.cwd(), "public/imgs/uploads");
+    const uploaded = await uploadAsset({
+        file,
+        purpose: "article-cover",
+        allowedMimePrefixes: ["image/"],
+        maxSizeBytes: 10 * 1024 * 1024,
+        localPathPrefix: "/imgs/uploads",
+    });
 
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(uploadDir, filename), buffer);
-
-    return `/imgs/uploads/${filename}`;
+    return uploaded.url;
 }
 
 function generateSlug(title: string): string {
@@ -37,6 +36,25 @@ function generateSlug(title: string): string {
 
 function getTrimmedField(formData: FormData, key: string): string {
     return ((formData.get(key) as string) || "").trim();
+}
+
+function sanitizeOptionalUrl(value: FormDataEntryValue | null, allowRelative = false): string | undefined {
+    const input = typeof value === "string" ? value.trim() : "";
+    if (!input) return undefined;
+
+    if (allowRelative && /^\/(?!\/)/.test(input)) {
+        return input;
+    }
+
+    try {
+        const parsed = new URL(input);
+        if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+            throw new Error("Only http/https URLs are allowed.");
+        }
+        return parsed.toString();
+    } catch {
+        throw new Error("Invalid URL format provided.");
+    }
 }
 
 export async function createPost(formData: FormData) {
@@ -68,8 +86,8 @@ export async function createPost(formData: FormData) {
     const translatorNameBn = getTrimmedField(formData, "translatorNameBn") || undefined;
     const editorName = getTrimmedField(formData, "editorName") || undefined;
     const editorNameBn = getTrimmedField(formData, "editorNameBn") || undefined;
-    const videoUrl = (formData.get("videoUrl") as string) || undefined;
-    const audioUrl = (formData.get("audioUrl") as string) || undefined;
+    const videoUrl = sanitizeOptionalUrl(formData.get("videoUrl"));
+    const audioUrl = sanitizeOptionalUrl(formData.get("audioUrl"));
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = categoryToSlug(category) || undefined;
     const accent_color = (formData.get("accent_color") as string) || "#3B82F6";
@@ -90,7 +108,7 @@ export async function createPost(formData: FormData) {
 
     const coverImageFile = formData.get("coverImageFile") as File;
     const uploadedImagePath = await handleFileUpload(coverImageFile);
-    const coverImage = uploadedImagePath || (formData.get("coverImage") as string) || undefined;
+    const coverImage = uploadedImagePath || sanitizeOptionalUrl(formData.get("coverImage"), true);
 
     const date = new Date().toISOString();
 
@@ -207,8 +225,8 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     const subtitleBnInput = getTrimmedField(formData, "subtitleBn");
     const contentBnInput = getTrimmedField(formData, "contentBn");
     const categoryBnInput = getTrimmedField(formData, "categoryBn");
-    const videoUrl = (formData.get("videoUrl") as string) || undefined;
-    const audioUrl = (formData.get("audioUrl") as string) || undefined;
+    const videoUrl = sanitizeOptionalUrl(formData.get("videoUrl"));
+    const audioUrl = sanitizeOptionalUrl(formData.get("audioUrl"));
     const authorNameInput = getTrimmedField(formData, "authorName");
     const authorNameBnInput = getTrimmedField(formData, "authorNameBn");
     const translatorNameInput = getTrimmedField(formData, "translatorName");
@@ -271,7 +289,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
 
     const coverImageFile = formData.get("coverImageFile") as File;
     const uploadedImagePath = await handleFileUpload(coverImageFile);
-    let coverImage = (formData.get("coverImage") as string) || undefined;
+    let coverImage = sanitizeOptionalUrl(formData.get("coverImage"), true);
 
     if (uploadedImagePath) {
         coverImage = uploadedImagePath;

@@ -2,28 +2,34 @@ import type { NextConfig } from "next";
 
 type RemotePattern = NonNullable<NonNullable<NextConfig["images"]>["remotePatterns"]>[number];
 
-let uploadsPattern: RemotePattern | null = null;
-if (process.env.NEXT_PUBLIC_UPLOADS_BASE_URL) {
+function parseRemotePattern(url?: string): RemotePattern | null {
+  if (!url) return null;
+
   try {
-    const parsed = new URL(process.env.NEXT_PUBLIC_UPLOADS_BASE_URL);
+    const parsed = new URL(url);
     const protocol = parsed.protocol.replace(":", "");
     if (protocol === "http" || protocol === "https") {
-      uploadsPattern = {
+      return {
         protocol,
         hostname: parsed.hostname,
         ...(parsed.port ? { port: parsed.port } : {}),
       };
     }
   } catch {
-    uploadsPattern = null;
+    return null;
   }
+
+  return null;
 }
+
+const uploadsPattern = parseRemotePattern(process.env.NEXT_PUBLIC_UPLOADS_BASE_URL);
+const bunnyPattern = parseRemotePattern(process.env.BUNNY_CDN_BASE_URL);
 
 const nextConfig: NextConfig = {
   output: "standalone",
   experimental: {
     serverActions: {
-      bodySizeLimit: "10mb",
+      bodySizeLimit: "25mb",
     },
   },
   eslint: {
@@ -119,6 +125,7 @@ const nextConfig: NextConfig = {
         hostname: 'localhost',
       },
       ...(uploadsPattern ? [uploadsPattern] : []),
+      ...(bunnyPattern ? [bunnyPattern] : []),
     ],
   },
 };

@@ -1,9 +1,8 @@
 "use server";
 
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { verifyAdmin } from "@/actions/admin-auth";
 import { prisma } from "@/lib/db";
+import { uploadAsset } from "@/lib/upload-service";
 
 export async function uploadImage(formData: FormData) {
     const isAdmin = await verifyAdmin();
@@ -12,49 +11,36 @@ export async function uploadImage(formData: FormData) {
     }
 
     const file = formData.get("file") as File;
-    if (!file || file.size === 0) {
+    if (!(file instanceof File) || file.size === 0) {
         return { success: false, error: "No file provided" };
     }
 
-    // Validate file type
     if (!file.type.startsWith("image/") && !file.type.startsWith("audio/")) {
         return { success: false, error: "File must be an image or audio" };
     }
 
-    // Validate file size (max 20MB for audio support)
     if (file.size > 20 * 1024 * 1024) {
         return { success: false, error: "File size must be less than 20MB" };
     }
 
     try {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        // Generate unique filename
-        const timestamp = Date.now();
-        const originalName = file.name.replace(/[^a-zA-Z0-9.]/g, '');
-        const filename = `${timestamp}-${originalName}`;
-
-        // Ensure upload directory exists
-        const uploadDir = path.join(process.cwd(), "public/imgs/uploads");
-        await mkdir(uploadDir, { recursive: true });
-
-        // Write file
-        const filePath = path.join(uploadDir, filename);
-        await writeFile(filePath, buffer);
-
-        // Use API route for serving (works in standalone mode)
-        const apiPath = `/api/uploads/${filename}`;
+        const uploaded = await uploadAsset({
+            file,
+            purpose: file.type.startsWith("audio/") ? "article-audio" : "editor-image",
+            allowedMimePrefixes: ["image/", "audio/"],
+            maxSizeBytes: 20 * 1024 * 1024,
+            localPathPrefix: "/api/uploads",
+        });
 
         // Store in database
         try {
             await prisma.media.create({
                 data: {
-                    filename,
+                    filename: uploaded.filename,
                     originalName: file.name,
                     mimeType: file.type,
                     size: file.size,
-                    path: apiPath
+                    path: uploaded.url
                 }
             });
         } catch (dbError) {
@@ -64,12 +50,12 @@ export async function uploadImage(formData: FormData) {
 
         return {
             success: true,
-            url: apiPath,
-            filename
+            url: uploaded.url,
+            filename: uploaded.filename
         };
     } catch (error) {
         console.error("Upload failed:", error);
-        return { success: false, error: "Upload failed" };
+        return { success: false, error: error instanceof Error ? error.message : "Upload failed" };
     }
 }
 
