@@ -39,6 +39,7 @@ interface EditorProps {
         coverImage?: string;
         videoUrl?: string;
         audioUrl?: string;
+        audioUrlBn?: string;
         subtitle?: string;
         subtitleBn?: string;
         topic_slug?: string;
@@ -80,7 +81,9 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.coverImage || null);
     const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl || "");
+    const [audioUrlBn, setAudioUrlBn] = useState(initialData?.audioUrlBn || "");
     const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+    const [isUploadingAudioBn, setIsUploadingAudioBn] = useState(false);
     const [metaDescription, setMetaDescription] = useState(initialData?.metaDescription || "");
     const [metaDescriptionBn, setMetaDescriptionBn] = useState(initialData?.metaDescriptionBn || "");
     const [subtitleBn, setSubtitleBn] = useState(initialData?.subtitleBn || "");
@@ -94,6 +97,7 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const [readTime, setReadTime] = useState(0);
 
     const audioFileInputRef = useRef<HTMLInputElement>(null);
+    const audioFileBnInputRef = useRef<HTMLInputElement>(null);
 
     const categoryMap = useMemo(() => {
         const map = new Map<string, string>();
@@ -239,6 +243,8 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
         formData.set("categoryBn", categoryBn);
         formData.set("subtitleBn", subtitleBn);
         formData.set("metaDescriptionBn", metaDescriptionBn);
+        formData.set("audioUrl", audioUrl);
+        formData.set("audioUrlBn", audioUrlBn);
         // Ensure other states are set if not controlled inputs (they are mostly named inputs)
         handleSubmit(formData);
     };
@@ -704,9 +710,11 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-sm font-medium text-text-secondary">Audio File</label>
+                                <label className="text-sm font-medium text-text-secondary">Audio File (English)</label>
 
-                                {/* Hidden Audio File Input */}
+                                <input type="hidden" name="audioUrl" value={audioUrl} />
+
+                                {/* Hidden Audio File Input (English) */}
                                 <input
                                     type="file"
                                     ref={audioFileInputRef}
@@ -716,14 +724,14 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                         const file = e.target.files?.[0];
                                         if (!file) return;
                                         setIsUploadingAudio(true);
-                                        const id = toast.loading("Uploading audio...");
+                                        const id = toast.loading("Uploading English audio...");
                                         const formData = new FormData();
                                         formData.append("file", file);
                                         try {
                                             const result = await uploadImage(formData);
                                             if (result.success && result.url) {
                                                 setAudioUrl(result.url);
-                                                toast.success("Audio uploaded!", { id });
+                                                toast.success("English audio uploaded!", { id });
                                             } else {
                                                 toast.error(result.error || "Upload failed", { id });
                                             }
@@ -737,7 +745,6 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                     className="hidden"
                                 />
 
-                                {/* Audio Upload Button / Preview */}
                                 {audioUrl ? (
                                     <div className="space-y-2">
                                         <audio controls className="w-full" src={audioUrl}>
@@ -748,7 +755,7 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                             onClick={() => setAudioUrl("")}
                                             className="text-xs text-red-400 hover:text-red-300 transition-colors"
                                         >
-                                            Remove Audio
+                                            Remove English Audio
                                         </button>
                                     </div>
                                 ) : (
@@ -761,23 +768,75 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                         {isUploadingAudio ? (
                                             <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
                                         ) : (
-                                            <><Music className="w-4 h-4" /> Upload Audio File</>
+                                            <><Music className="w-4 h-4" /> Upload English Audio</>
                                         )}
                                     </button>
                                 )}
+                            </div>
 
-                                {/* Audio URL Fallback */}
-                                <div className="relative">
-                                    <Music className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
-                                    <input
-                                        type="text"
-                                        name="audioUrl"
-                                        value={audioUrl}
-                                        onChange={(e) => setAudioUrl(e.target.value)}
-                                        placeholder="Or paste audio URL"
-                                        className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-xs placeholder:text-text-muted focus:border-accent-main focus:outline-none text-text-primary"
-                                    />
-                                </div>
+                            <div className="space-y-3">
+                                <label className="text-sm font-medium text-text-secondary">Audio File (Bengali)</label>
+
+                                <input type="hidden" name="audioUrlBn" value={audioUrlBn} />
+
+                                {/* Hidden Audio File Input (Bengali) */}
+                                <input
+                                    type="file"
+                                    ref={audioFileBnInputRef}
+                                    id="audioFileUploadBn"
+                                    accept="audio/*"
+                                    onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (!file) return;
+                                        setIsUploadingAudioBn(true);
+                                        const id = toast.loading("Uploading Bengali audio...");
+                                        const formData = new FormData();
+                                        formData.append("file", file);
+                                        try {
+                                            const result = await uploadImage(formData);
+                                            if (result.success && result.url) {
+                                                setAudioUrlBn(result.url);
+                                                toast.success("Bengali audio uploaded!", { id });
+                                            } else {
+                                                toast.error(result.error || "Upload failed", { id });
+                                            }
+                                        } catch {
+                                            toast.error("Upload failed", { id });
+                                        } finally {
+                                            setIsUploadingAudioBn(false);
+                                            if (audioFileBnInputRef.current) audioFileBnInputRef.current.value = "";
+                                        }
+                                    }}
+                                    className="hidden"
+                                />
+
+                                {audioUrlBn ? (
+                                    <div className="space-y-2">
+                                        <audio controls className="w-full" src={audioUrlBn}>
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                        <button
+                                            type="button"
+                                            onClick={() => setAudioUrlBn("")}
+                                            className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                                        >
+                                            Remove Bengali Audio
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => audioFileBnInputRef.current?.click()}
+                                        disabled={isUploadingAudioBn}
+                                        className="w-full flex items-center justify-center gap-2 px-3 py-3 bg-bg-tertiary border border-dashed border-border-primary rounded-lg hover:border-accent-main/50 transition-colors text-text-secondary hover:text-text-primary disabled:opacity-50"
+                                    >
+                                        {isUploadingAudioBn ? (
+                                            <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</>
+                                        ) : (
+                                            <><Music className="w-4 h-4" /> Upload Bengali Audio</>
+                                        )}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </motion.div>

@@ -35,6 +35,7 @@ export type Post = {
     coverImage?: string | null;
     videoUrl?: string | null;
     audioUrl?: string | null;
+    audioUrlBn?: string | null;
     views: number;
     featured: boolean;
     published: boolean;
@@ -105,6 +106,33 @@ function normalizeImageUrl(url?: string | null): string | null | undefined {
         } catch {
             return null;
         }
+    }
+
+    return null;
+}
+
+function normalizeMediaUrl(url?: string | null): string | null | undefined {
+    if (!url) return url;
+    const trimmed = url.trim();
+    if (!trimmed || trimmed === "null" || trimmed === "undefined") return null;
+
+    if (trimmed.startsWith("/")) {
+        return trimmed;
+    }
+
+    try {
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            const parsed = new URL(trimmed);
+            return parsed.toString();
+        }
+
+        // Handle values saved without protocol (e.g. wisdomia-media.b-cdn.net/path/file.mp3)
+        if (/^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(trimmed)) {
+            const parsed = new URL(`https://${trimmed}`);
+            return parsed.toString();
+        }
+    } catch {
+        return null;
     }
 
     return null;
@@ -184,8 +212,9 @@ function mapPrismaPost(
         excerpt: localizedExcerpt,
         excerptBn: post.excerptBn,
         coverImage: normalizeImageUrl(post.coverImage),
-        videoUrl: post.videoUrl,
-        audioUrl: post.audioUrl,
+        videoUrl: normalizeMediaUrl(post.videoUrl),
+        audioUrl: normalizeMediaUrl(post.audioUrl),
+        audioUrlBn: normalizeMediaUrl(post.audioUrlBn),
         views: post.views || 0,
         featured: post.featured || false,
         published: post.published || false,

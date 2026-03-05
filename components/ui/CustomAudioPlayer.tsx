@@ -55,20 +55,53 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
 
   useEffect(() => {
     const audio = audioRef.current;
+    setIsPlaying(false);
+    setProgress(0);
+    setDuration(0);
+    setCurrentTime(0);
+    setPlaybackRate(1);
     if (!audio) return;
+
+    audio.pause();
+    audio.currentTime = 0;
+    audio.playbackRate = 1;
+    audio.load();
+  }, [src]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const readDuration = () => {
+      if (audio.duration > 0 && Number.isFinite(audio.duration)) {
+        return audio.duration;
+      }
+
+      if (audio.seekable.length > 0) {
+        const seekableEnd = audio.seekable.end(audio.seekable.length - 1);
+        if (seekableEnd > 0 && Number.isFinite(seekableEnd)) {
+          return seekableEnd;
+        }
+      }
+
+      return 0;
+    };
 
     const updateTime = () => {
       if (!isSeeking) {
         setCurrentTime(audio.currentTime);
-        if (audio.duration > 0) {
-          setProgress((audio.currentTime / audio.duration) * 100);
+        const nextDuration = readDuration();
+        if (nextDuration > 0) {
+          setDuration(nextDuration);
+          setProgress((audio.currentTime / nextDuration) * 100);
         }
       }
     };
 
     const updateDuration = () => {
-      if (audio.duration > 0 && Number.isFinite(audio.duration)) {
-        setDuration(audio.duration);
+      const nextDuration = readDuration();
+      if (nextDuration > 0) {
+        setDuration(nextDuration);
       }
     };
 
@@ -87,6 +120,9 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("loadedmetadata", updateDuration);
     audio.addEventListener("durationchange", updateDuration);
+    audio.addEventListener("loadeddata", updateDuration);
+    audio.addEventListener("canplay", updateDuration);
+    audio.addEventListener("canplaythrough", updateDuration);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
     audio.addEventListener("ended", onEnded);
@@ -96,12 +132,15 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
       audio.removeEventListener("timeupdate", updateTime);
       audio.removeEventListener("loadedmetadata", updateDuration);
       audio.removeEventListener("durationchange", updateDuration);
+      audio.removeEventListener("loadeddata", updateDuration);
+      audio.removeEventListener("canplay", updateDuration);
+      audio.removeEventListener("canplaythrough", updateDuration);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("ratechange", onRateChange);
     };
-  }, [isSeeking]);
+  }, [isSeeking, src]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -283,7 +322,7 @@ export function CustomAudioPlayer({ src, title }: CustomAudioPlayerProps) {
         </div>
 
         <div className="flex items-center justify-center gap-2 flex-wrap">
-          {[0.75, 1, 1.5, 2].map((rate) => (
+          {[0.75, 1, 1.25, 1.5, 2].map((rate) => (
             <button
               key={rate}
               type="button"

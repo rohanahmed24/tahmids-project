@@ -52,6 +52,7 @@ model Post {
   coverImage  String?
   videoUrl    String?
   audioUrl    String?  @map("audio_url")
+  audioUrlBn  String?  @map("audio_url_bn")
   views       Int?     @default(0)
   featured    Boolean? @default(false)
   topicSlug   String?  @map("topic_slug")

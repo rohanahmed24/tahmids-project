@@ -26,7 +26,8 @@ export default async function ArticlePage({
     notFound();
   }
 
-  const audioUrl = post.audioUrl?.trim() || "";
+  const audioUrl =
+    (locale === "bn" ? post.audioUrlBn : post.audioUrl)?.trim() || "";
   const videoUrl = post.videoUrl?.trim() || "";
   const hasAudio = Boolean(audioUrl);
   const hasVideo = Boolean(videoUrl);
