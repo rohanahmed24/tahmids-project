@@ -99,7 +99,7 @@ export default function Navbar() {
             className={`absolute left-1/2 -translate-x-1/2 ${textColorClass} text-center`}
           >
             <Link href="/" className="block">
-              <h1 className="font-serif leading-none transition-colors">
+              <h1 className="font-serif leading-none transition-colors cursor-pointer">
                 <span className="block text-[10px] md:text-xs font-medium tracking-widest uppercase opacity-60 mb-[-2px]">
                   The
                 </span>
