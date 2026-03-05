@@ -46,8 +46,14 @@ function sanitizeOptionalUrl(value: FormDataEntryValue | null, allowRelative = f
         return input;
     }
 
+    const withProtocol = /^[a-z][a-z0-9+.-]*:\/\//i.test(input)
+        ? input
+        : /^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(input)
+            ? `https://${input}`
+            : input;
+
     try {
-        const parsed = new URL(input);
+        const parsed = new URL(withProtocol);
         if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
             throw new Error("Only http/https URLs are allowed.");
         }
@@ -87,7 +93,8 @@ export async function createPost(formData: FormData) {
     const editorName = getTrimmedField(formData, "editorName") || undefined;
     const editorNameBn = getTrimmedField(formData, "editorNameBn") || undefined;
     const videoUrl = sanitizeOptionalUrl(formData.get("videoUrl"));
-    const audioUrl = sanitizeOptionalUrl(formData.get("audioUrl"));
+    const audioUrl = sanitizeOptionalUrl(formData.get("audioUrl"), true);
+    const audioUrlBn = sanitizeOptionalUrl(formData.get("audioUrlBn"), true);
     const subtitle = (formData.get("subtitle") as string) || undefined;
     const topic_slug = categoryToSlug(category) || undefined;
     const accent_color = (formData.get("accent_color") as string) || "#3B82F6";
@@ -142,6 +149,7 @@ export async function createPost(formData: FormData) {
                 coverImage,
                 videoUrl,
                 audioUrl,
+                audioUrlBn,
                 topicSlug: topic_slug,
                 accentColor: accent_color,
                 featured,
@@ -226,7 +234,8 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     const contentBnInput = getTrimmedField(formData, "contentBn");
     const categoryBnInput = getTrimmedField(formData, "categoryBn");
     const videoUrl = sanitizeOptionalUrl(formData.get("videoUrl"));
-    const audioUrl = sanitizeOptionalUrl(formData.get("audioUrl"));
+    const audioUrl = sanitizeOptionalUrl(formData.get("audioUrl"), true);
+    const audioUrlBn = sanitizeOptionalUrl(formData.get("audioUrlBn"), true);
     const authorNameInput = getTrimmedField(formData, "authorName");
     const authorNameBnInput = getTrimmedField(formData, "authorNameBn");
     const translatorNameInput = getTrimmedField(formData, "translatorName");
@@ -318,6 +327,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
                 coverImage,
                 videoUrl,
                 audioUrl,
+                audioUrlBn,
                 topicSlug: topic_slug,
                 accentColor: accent_color,
                 featured,
@@ -327,7 +337,20 @@ export async function updatePost(originalSlug: string, formData: FormData) {
                 backlinks: backlinks as Prisma.InputJsonValue
             }
         });
+    } catch (error) {
+        console.error("Failed to update post (database step):", error);
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === "P2025") {
+                throw new Error("Post not found.");
+            }
+            if (error.code === "P2002") {
+                throw new Error("Another post with this unique value already exists.");
+            }
+        }
+        throw new Error(error instanceof Error ? error.message : "Failed to update post");
+    }
 
+    try {
         revalidateTag('posts');
         revalidateTag('stats');
         revalidateTag('hot-topics');
@@ -346,8 +369,8 @@ export async function updatePost(originalSlug: string, formData: FormData) {
             revalidatePath(`/topics/${previousTopicSlug}`);
         }
     } catch (error) {
-        console.error("Failed to update post:", error);
-        throw new Error("Failed to update post");
+        // Do not block successful DB update due cache invalidation issues.
+        console.error("Post updated but revalidation failed:", error);
     }
 
     redirect("/admin/dashboard");
