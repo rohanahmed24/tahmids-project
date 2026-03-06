@@ -32,6 +32,7 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                 </div>
 
                 <Editor
+                    key={post.slug}
                     initialData={{
                         title: post.title,
                         titleBn: post.titleBn || undefined,

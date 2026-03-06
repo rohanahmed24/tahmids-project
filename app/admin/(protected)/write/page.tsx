@@ -38,7 +38,11 @@ export default async function WritePage() {
 
             {/* Editor */}
             <div className="bg-bg-secondary rounded-xl border border-border-primary overflow-hidden">
-                <Editor action={createPost} categoryOptions={categoryOptions} />
+                <Editor
+                    key="new-article-editor"
+                    action={createPost}
+                    categoryOptions={categoryOptions}
+                />
             </div>
         </div>
     );
