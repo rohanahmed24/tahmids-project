@@ -205,6 +205,7 @@ export function PostsTable({ posts }: PostsTableProps) {
                                     <div className="flex items-center gap-1">
                                         <Link
                                             href={`/admin/edit/${post.slug}`}
+                                            prefetch={false}
                                             className="p-2 text-text-secondary hover:text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-all"
                                             title="Edit"
                                         >
@@ -279,7 +280,11 @@ export function PostsTable({ posts }: PostsTableProps) {
                                 <span>{post.author}</span>
                             </div>
                             <div className="flex items-center gap-0.5">
-                                <Link href={`/admin/edit/${post.slug}`} className="p-1.5 text-text-secondary hover:text-accent-primary rounded-lg transition-colors">
+                                <Link
+                                    href={`/admin/edit/${post.slug}`}
+                                    prefetch={false}
+                                    className="p-1.5 text-text-secondary hover:text-accent-primary rounded-lg transition-colors"
+                                >
                                     <Edit className="w-4 h-4" />
                                 </Link>
                                 <button onClick={() => handleToggleStatus(post.slug, post.published || false)} className="p-1.5 text-text-secondary hover:text-blue-500 rounded-lg transition-colors">
@@ -362,6 +367,7 @@ export function PostsTable({ posts }: PostsTableProps) {
                                         <div className="flex items-center justify-around py-2 px-3 bg-bg-tertiary/30 border-t border-border-primary">
                                             <Link
                                                 href={`/admin/edit/${post.slug}`}
+                                                prefetch={false}
                                                 className="flex items-center gap-1.5 px-3 py-2 text-text-secondary hover:text-accent-primary text-xs font-medium rounded-lg hover:bg-bg-primary transition-colors"
                                             >
                                                 <Edit className="w-4 h-4" />
