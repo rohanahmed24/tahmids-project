@@ -8,6 +8,16 @@ interface ArticleVideoPlayerProps {
     title: string;
 }
 
+function getVideoMimeType(url: string): string | undefined {
+    const pathname = url.split("?")[0].toLowerCase();
+    if (pathname.endsWith(".webm")) return "video/webm";
+    if (pathname.endsWith(".ogv") || pathname.endsWith(".ogg")) return "video/ogg";
+    if (pathname.endsWith(".mov")) return "video/quicktime";
+    if (pathname.endsWith(".m3u8")) return "application/x-mpegURL";
+    if (pathname.endsWith(".mp4") || pathname.endsWith(".m4v")) return "video/mp4";
+    return undefined;
+}
+
 function getYouTubeEmbedUrl(url: string): string | null {
     if (!url) return null;
     
@@ -53,6 +63,7 @@ export function ArticleVideoPlayer({ videoUrl, title }: ArticleVideoPlayerProps)
         };
 
     const youtubeEmbedUrl = isYouTubeUrl(videoUrl) ? getYouTubeEmbedUrl(videoUrl) : null;
+    const videoMimeType = youtubeEmbedUrl ? undefined : getVideoMimeType(videoUrl);
     
     return (
         <div className="w-full rounded-xl overflow-hidden bg-bg-secondary border border-border-subtle shadow-lg">
@@ -69,11 +80,11 @@ export function ArticleVideoPlayer({ videoUrl, title }: ArticleVideoPlayerProps)
                 ) : (
                     <video
                         controls
-                        className="w-full h-full object-cover"
-                        poster=""
+                        playsInline
+                        className="h-full w-full bg-black object-cover"
                         preload="metadata"
                     >
-                        <source src={videoUrl} type="video/mp4" />
+                        <source src={videoUrl} type={videoMimeType} />
                         {copy.unsupported}
                     </video>
                 )}

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield, LogOut, X, LucideIcon, ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export interface NavItem {
     id: string;
@@ -203,6 +204,10 @@ function SidebarContent({ navItems, handleLogout, siteName, onClose, isMobile }:
 
             {/* Footer */}
             <div className={`${isMobile ? 'p-3 pb-safe-bottom' : 'p-4'} border-t border-border-primary bg-bg-tertiary/30`}>
+                <div className="mb-3 px-1">
+                    <ThemeToggle className="w-full justify-center" />
+                </div>
+
                 <motion.button
                     whileTap={{ scale: 0.98 }}
                     onClick={handleLogout}
@@ -226,4 +231,3 @@ function SidebarContent({ navItems, handleLogout, siteName, onClose, isMobile }:
         </div>
     );
 }
-

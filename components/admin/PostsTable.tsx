@@ -67,10 +67,19 @@ export function PostsTable({ posts }: PostsTableProps) {
                         <button
                             key={option.value}
                             onClick={() => setFilter(option.value as typeof filter)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all border
                                 ${filter === option.value
-                                    ? "bg-accent-primary text-white shadow-sm"
-                                    : "bg-bg-secondary text-text-secondary hover:bg-bg-tertiary border border-border-primary"}`}
+                                    ? "shadow-sm"
+                                    : "bg-bg-secondary hover:bg-bg-tertiary border-border-primary"}`}
+                            style={filter === option.value
+                                ? {
+                                    backgroundColor: "var(--accent-main)",
+                                    borderColor: "var(--accent-main)",
+                                    color: "var(--text-inverse)",
+                                }
+                                : {
+                                    color: "var(--text-secondary)",
+                                }}
                         >
                             <Filter className="w-3 h-3" />
                             {option.label}
@@ -102,9 +111,13 @@ export function PostsTable({ posts }: PostsTableProps) {
 
                     <Link
                         href="/admin/write"
-                        className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-accent-primary text-white
-                            rounded-lg hover:bg-accent-primary/90 transition-all text-xs sm:text-sm font-medium
+                        className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2
+                            rounded-lg transition-all text-xs sm:text-sm font-medium
                             shadow-sm hover:shadow-md active:scale-95"
+                        style={{
+                            backgroundColor: "var(--accent-main)",
+                            color: "var(--text-inverse)",
+                        }}
                     >
                         <span className="hidden sm:inline">New Article</span>
                         <span className="sm:hidden">New</span>
@@ -420,8 +433,13 @@ export function PostsTable({ posts }: PostsTableProps) {
                     </p>
                     <Link
                         href="/admin/write"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent-primary text-white rounded-xl
-                            hover:bg-accent-primary/90 transition-all shadow-lg shadow-accent-primary/25 font-medium"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
+                            transition-all shadow-lg font-medium"
+                        style={{
+                            backgroundColor: "var(--accent-main)",
+                            color: "var(--text-inverse)",
+                            boxShadow: "0 10px 24px color-mix(in srgb, var(--accent-main) 24%, transparent)",
+                        }}
                     >
                         Create New Article
                     </Link>

@@ -15,20 +15,26 @@ export async function uploadImage(formData: FormData) {
         return { success: false, error: "No file provided" };
     }
 
-    if (!file.type.startsWith("image/") && !file.type.startsWith("audio/")) {
-        return { success: false, error: "File must be an image or audio" };
+    if (!file.type.startsWith("image/") && !file.type.startsWith("audio/") && !file.type.startsWith("video/")) {
+        return { success: false, error: "File must be an image, audio, or video" };
     }
 
-    if (file.size > 20 * 1024 * 1024) {
-        return { success: false, error: "File size must be less than 20MB" };
+    const isVideo = file.type.startsWith("video/");
+    const maxSizeBytes = isVideo ? 250 * 1024 * 1024 : 20 * 1024 * 1024;
+
+    if (file.size > maxSizeBytes) {
+        return {
+            success: false,
+            error: isVideo ? "Video size must be less than 250MB" : "File size must be less than 20MB"
+        };
     }
 
     try {
         const uploaded = await uploadAsset({
             file,
-            purpose: file.type.startsWith("audio/") ? "article-audio" : "editor-image",
-            allowedMimePrefixes: ["image/", "audio/"],
-            maxSizeBytes: 20 * 1024 * 1024,
+            purpose: isVideo ? "article-video" : file.type.startsWith("audio/") ? "article-audio" : "editor-image",
+            allowedMimePrefixes: ["image/", "audio/", "video/"],
+            maxSizeBytes,
             localPathPrefix: "/api/uploads",
         });
 

@@ -3,8 +3,14 @@
 import * as React from "react"
 import { useTheme } from "next-themes"
 import { Sun, Moon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+    className?: string
+    showLabel?: boolean
+}
+
+export function ThemeToggle({ className, showLabel = true }: ThemeToggleProps) {
     const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = React.useState(false)
 
@@ -15,28 +21,34 @@ export function ThemeToggle() {
     if (!mounted) {
         // Render a placeholder with the same dimensions to prevent layout shift
         return (
-            <div className="w-5 h-5 opacity-0" />
+            <div className={cn(showLabel ? "h-10 w-20" : "h-10 w-10 shrink-0", "opacity-0", className)} />
         )
     }
 
+    const isDark = theme === "dark"
+
     return (
         <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="flex items-center gap-2 hover:opacity-60 transition-opacity"
+            type="button"
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            className={cn(
+                "inline-flex items-center justify-center gap-2 rounded-full border border-border-primary bg-bg-secondary/80 text-text-primary transition-colors hover:bg-bg-tertiary",
+                showLabel ? "px-3 py-2 text-xs font-bold uppercase tracking-wider" : "!h-10 !w-10 !p-0 shrink-0",
+                className,
+            )}
             aria-label="Toggle theme"
         >
-            {theme === "dark" ? (
+            {isDark ? (
                 <>
                     <Sun className="w-4 h-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Light</span>
+                    {showLabel && <span>Light</span>}
                 </>
             ) : (
                 <>
                     <Moon className="w-4 h-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Dark</span>
+                    {showLabel && <span>Dark</span>}
                 </>
             )}
         </button>
     )
 }
-

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 import { getPostBySlug, getRelatedPosts } from "@/lib/posts";
 import { ArticleHeader } from "@/components/ArticleHeader";
 import { ArticleContent } from "@/components/ArticleContent";
@@ -6,6 +7,7 @@ import { ArticleSidebar } from "@/components/ArticleSidebar";
 import { BacklinksSection } from "@/components/BacklinksSection";
 import { ArticleAudioPlayer } from "@/components/ArticleAudioPlayer";
 import { ArticleVideoPlayer } from "@/components/ArticleVideoPlayer";
+import { ArticleNewsletterSignup } from "@/components/ArticleNewsletterSignup";
 import { getCurrentLocale } from "@/lib/locale";
 import { Assets } from "@/lib/assets";
 
@@ -18,8 +20,14 @@ export default async function ArticlePage({
   params,
   searchParams,
 }: ArticlePageProps) {
-  const locale = await getCurrentLocale();
-  const [{ slug }, { mode }] = await Promise.all([params, searchParams]);
+  const [locale, session, resolvedParams, resolvedSearchParams] = await Promise.all([
+    getCurrentLocale(),
+    auth(),
+    params,
+    searchParams,
+  ]);
+  const { slug } = resolvedParams;
+  const { mode } = resolvedSearchParams;
   const post = await getPostBySlug(slug, locale);
 
   if (!post) {
@@ -28,12 +36,16 @@ export default async function ArticlePage({
 
   const audioUrl =
     (locale === "bn" ? post.audioUrlBn : post.audioUrl)?.trim() || "";
-  const videoUrl = post.videoUrl?.trim() || "";
+  const publicVideoUrl = post.videoUrl?.trim() || "";
+  const memberVideoUrl = post.memberVideoUrl?.trim() || "";
+  const videoUrl =
+    session?.user && memberVideoUrl ? memberVideoUrl : publicVideoUrl;
   const hasAudio = Boolean(audioUrl);
   const hasVideo = Boolean(videoUrl);
   const activeMode = mode === "watch" || mode === "listen" ? mode : "read";
   const shouldShowVideo = activeMode === "watch" && hasVideo;
   const shouldShowAudio = hasAudio && (activeMode !== "watch" || !hasVideo);
+  const shouldShowNewsletterSignup = !session?.user;
 
   const relatedPosts = await getRelatedPosts(
     post.categoryEn,
@@ -76,6 +88,10 @@ export default async function ArticlePage({
               </div>
             )}
 
+            {shouldShowNewsletterSignup && (
+              <ArticleNewsletterSignup locale={locale} variant="inline" />
+            )}
+
             <ArticleContent>
               {post.content && (
                 <div
@@ -88,6 +104,10 @@ export default async function ArticlePage({
             {/* Backlinks Section */}
             {post.backlinks && post.backlinks.length > 0 && (
               <BacklinksSection backlinks={post.backlinks} />
+            )}
+
+            {shouldShowNewsletterSignup && (
+              <ArticleNewsletterSignup locale={locale} variant="footer" />
             )}
           </div>
 

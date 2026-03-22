@@ -43,6 +43,7 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                         contentBn: post.contentBn || undefined,
                         coverImage: post.coverImage || undefined,
                         videoUrl: post.videoUrl || undefined,
+                        memberVideoUrl: post.memberVideoUrl || undefined,
                         audioUrl: post.audioUrl || undefined,
                         audioUrlBn: post.audioUrlBn || undefined,
                         subtitle: post.subtitle || undefined,

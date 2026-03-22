@@ -1,6 +1,6 @@
 "use client";
 
-import { TrendingUp, TrendingDown, Users, FileText, Eye, Clock } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, FileText, Eye, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface StatsCardsProps {
@@ -12,7 +12,8 @@ interface StatsCardsProps {
         totalViews: number;
         monthlyGrowth: number;
         engagementRate: number;
-        avgReadTime: string;
+        newsletterAudience: number;
+        newsletterSubscribers: number;
     };
 }
 
@@ -46,11 +47,11 @@ export function StatsCards({ stats }: StatsCardsProps) {
             gradient: "from-purple-500/20 via-purple-400/10 to-transparent"
         },
         {
-            title: "Avg. Read Time",
-            value: stats.avgReadTime,
-            change: "Based on word count",
+            title: "Newsletter Reach",
+            value: stats.newsletterAudience.toLocaleString(),
+            change: `${stats.newsletterSubscribers} direct signups`,
             trend: "neutral",
-            icon: Clock,
+            icon: Mail,
             color: "orange",
             gradient: "from-orange-500/20 via-orange-400/10 to-transparent"
         }

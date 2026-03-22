@@ -34,6 +34,7 @@ export type Post = {
     excerptBn?: string | null;
     coverImage?: string | null;
     videoUrl?: string | null;
+    memberVideoUrl?: string | null;
     audioUrl?: string | null;
     audioUrlBn?: string | null;
     views: number;
@@ -213,6 +214,7 @@ function mapPrismaPost(
         excerptBn: post.excerptBn,
         coverImage: normalizeImageUrl(post.coverImage),
         videoUrl: normalizeMediaUrl(post.videoUrl),
+        memberVideoUrl: normalizeMediaUrl(post.memberVideoUrl),
         audioUrl: normalizeMediaUrl(post.audioUrl),
         audioUrlBn: normalizeMediaUrl(post.audioUrlBn),
         views: post.views || 0,

@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 
-type UploadPurpose = "article-cover" | "article-audio" | "editor-image" | "media-library";
+type UploadPurpose = "article-cover" | "article-audio" | "article-video" | "editor-image" | "media-library";
 type LocalPathPrefix = "/api/uploads" | "/imgs/uploads";
 
 interface UploadAssetOptions {
@@ -42,11 +42,16 @@ const MIME_EXTENSION_MAP: Record<string, string> = {
     "audio/ogg": ".ogg",
     "audio/mp4": ".m4a",
     "audio/x-m4a": ".m4a",
+    "video/mp4": ".mp4",
+    "video/webm": ".webm",
+    "video/ogg": ".ogv",
+    "video/quicktime": ".mov",
 };
 
 const PURPOSE_PATH: Record<UploadPurpose, string> = {
     "article-cover": "articles/covers",
     "article-audio": "articles/audio",
+    "article-video": "articles/video",
     "editor-image": "articles/content",
     "media-library": "media/library",
 };

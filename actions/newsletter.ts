@@ -1,8 +1,23 @@
 "use server";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import {
+    getNewsletterSubscriberCount,
+    getNewsletterSubscribers,
+    normalizeNewsletterEmail,
+    syncLegacyNewsletterSubscribers,
+} from "@/lib/newsletter";
 
-export async function subscribeToNewsletter(email: string) {
+interface SubscribeToNewsletterOptions {
+    source?: string;
+    locale?: string;
+}
+
+export async function subscribeToNewsletter(
+    email: string,
+    options: SubscribeToNewsletterOptions = {},
+) {
     if (!email || !email.trim()) {
         return { success: false, error: "Email is required" };
     }
@@ -12,36 +27,37 @@ export async function subscribeToNewsletter(email: string) {
         return { success: false, error: "Please enter a valid email address" };
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = normalizeNewsletterEmail(email);
 
     try {
-        // Use Settings model to store subscribers (as JSON list)
-        const subscribersData = await prisma.setting.findUnique({
-            where: { keyName: "newsletter_subscribers" }
+        await syncLegacyNewsletterSubscribers();
+
+        const existingSubscriber = await prisma.newsletterSubscriber.findUnique({
+            where: { email: normalizedEmail },
         });
 
-        let subscribers: string[] = [];
-        if (subscribersData?.value) {
-            try {
-                subscribers = JSON.parse(subscribersData.value);
-            } catch {
-                subscribers = [];
-            }
-        }
-
-        // Check if already subscribed
-        if (subscribers.includes(normalizedEmail)) {
+        if (existingSubscriber) {
             return { success: false, error: "This email is already subscribed" };
         }
 
-        // Add new subscriber
-        subscribers.push(normalizedEmail);
+        const session = await auth();
+        const source = options.source?.trim().slice(0, 80) || "site";
+        const locale = options.locale?.trim().slice(0, 10) || null;
 
-        await prisma.setting.upsert({
-            where: { keyName: "newsletter_subscribers" },
-            update: { value: JSON.stringify(subscribers) },
-            create: { keyName: "newsletter_subscribers", value: JSON.stringify(subscribers) }
+        await prisma.newsletterSubscriber.create({
+            data: {
+                email: normalizedEmail,
+                source,
+                locale,
+            },
         });
+
+        if (session?.user?.email && normalizeNewsletterEmail(session.user.email) === normalizedEmail) {
+            return {
+                success: true,
+                message: "You are subscribed. We will use your account email for future newsletters.",
+            };
+        }
 
         return { success: true, message: "Successfully subscribed to the newsletter!" };
     } catch (error) {
@@ -52,14 +68,7 @@ export async function subscribeToNewsletter(email: string) {
 
 export async function getSubscriberCount() {
     try {
-        const subscribersData = await prisma.setting.findUnique({
-            where: { keyName: "newsletter_subscribers" }
-        });
-
-        if (!subscribersData?.value) return 0;
-        
-        const subscribers = JSON.parse(subscribersData.value);
-        return Array.isArray(subscribers) ? subscribers.length : 0;
+        return await getNewsletterSubscriberCount();
     } catch (error) {
         console.error("Error getting subscriber count:", error);
         return 0;
@@ -68,19 +77,14 @@ export async function getSubscriberCount() {
 
 export async function getAllSubscribers() {
     try {
-        const subscribersData = await prisma.setting.findUnique({
-            where: { keyName: "newsletter_subscribers" }
-        });
+        const subscribers = await getNewsletterSubscribers();
 
-        if (!subscribersData?.value) return [];
-        
-        const emails = JSON.parse(subscribersData.value);
-        if (!Array.isArray(emails)) return [];
-
-        return emails.map((email: string, index: number) => ({
-            id: index + 1,
-            email,
-            subscribedAt: new Date().toISOString()
+        return subscribers.map((subscriber) => ({
+            id: subscriber.id,
+            email: subscriber.email,
+            source: subscriber.source,
+            locale: subscriber.locale,
+            subscribedAt: subscriber.createdAt,
         }));
     } catch (error) {
         console.error("Error fetching subscribers:", error);

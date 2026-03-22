@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { AdminSidebar, NavItem } from "@/app/admin/components/AdminSidebar";
-import { LayoutDashboard, PenTool, Image, Users, BarChart3, Settings, Upload, Menu, Bell, Search, Globe, FolderTree } from "lucide-react";
+import { LayoutDashboard, PenTool, Image, Users, BarChart3, Settings, Upload, Menu, Bell, Search, Globe, FolderTree, Mail } from "lucide-react";
 import { logoutAdmin } from "@/actions/admin-auth";
 import { motion, AnimatePresence } from "framer-motion";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const NAV_ITEMS: NavItem[] = [
     { id: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "/admin/write", label: "Write", icon: PenTool },
     { id: "/admin/media", label: "Media", icon: Image },
+    { id: "/admin/newsletter", label: "Newsletter", icon: Mail },
     { id: "/admin/users", label: "Users", icon: Users },
     { id: "/admin/analytics", label: "Analytics", icon: BarChart3 },
     { id: "/admin/seo", label: "SEO", icon: Globe },
@@ -97,6 +99,7 @@ export default function AdminProtectedLayout({
 
                         {/* Right: Quick Actions */}
                         <div className="flex items-center gap-1 sm:gap-2">
+                            <ThemeToggle showLabel={false} className="!h-10 !w-10 !p-0 shrink-0" />
                             <motion.button
                                 whileTap={{ scale: 0.9 }}
                                 className="p-2 text-text-secondary hover:text-text-primary rounded-xl
