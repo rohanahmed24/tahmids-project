@@ -18,16 +18,20 @@ export async function subscribeToNewsletter(
     email: string,
     options: SubscribeToNewsletterOptions = {},
 ) {
-    if (!email || !email.trim()) {
+    const session = await auth();
+    const fallbackEmail = session?.user?.email?.trim() || "";
+    const inputEmail = email?.trim() || fallbackEmail;
+
+    if (!inputEmail) {
         return { success: false, error: "Email is required" };
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
+    if (!emailRegex.test(inputEmail)) {
         return { success: false, error: "Please enter a valid email address" };
     }
 
-    const normalizedEmail = normalizeNewsletterEmail(email);
+    const normalizedEmail = normalizeNewsletterEmail(inputEmail);
 
     try {
         await syncLegacyNewsletterSubscribers();
@@ -40,7 +44,6 @@ export async function subscribeToNewsletter(
             return { success: false, error: "This email is already subscribed" };
         }
 
-        const session = await auth();
         const source = options.source?.trim().slice(0, 80) || "site";
         const locale = options.locale?.trim().slice(0, 10) || null;
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, CheckCircle2, Loader2, Mail } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, Loader2, Mail, Sparkles } from "lucide-react";
 import { subscribeToNewsletter } from "@/actions/newsletter";
 
 interface ArticleNewsletterSignupProps {
@@ -11,9 +12,10 @@ interface ArticleNewsletterSignupProps {
 
 const copyByLocale = {
     bn: {
-        inlineBadge: "সাবস্ক্রাইব",
-        inlineTitle: "এই ধরনের আরও লেখা পেতে ইমেইল দিন",
-        inlineBody: "নতুন লেখা, কিউরেটেড আপডেট ও বিশেষ নিউজলেটার সরাসরি আপনার ইনবক্সে পাঠানো হবে।",
+        inlineBadge: "সদস্য সুবিধা",
+        inlineTitle: "সাইন ইন করে আনলক করুন বিজ্ঞাপনমুক্ত ভিডিও",
+        inlineBody: "সাইন ইন করলে পাবেন ad-free ভিডিও, দ্রুত এক্সেস, এবং আরও অনেক এক্সক্লুসিভ অফার।",
+        inlineCta: "সাইন ইন করুন",
         footerBadge: "নিউজলেটার",
         footerTitle: "লেখাটি ভালো লেগেছে? নিউজলেটারে যোগ দিন",
         footerBody: "পড়ার শেষে এখান থেকেই যুক্ত হোন। ভবিষ্যতের গুরুত্বপূর্ণ লেখা ও আপডেট ইমেইলে পেয়ে যাবেন।",
@@ -24,9 +26,10 @@ const copyByLocale = {
         error: "সাবস্ক্রাইব করা যায়নি। আবার চেষ্টা করুন।",
     },
     en: {
-        inlineBadge: "Subscribe",
-        inlineTitle: "Get future articles in your inbox",
-        inlineBody: "Share your email to receive new stories, curated updates, and newsletter drops from the editorial team.",
+        inlineBadge: "Member Benefits",
+        inlineTitle: "Sign in to unlock ad-free videos",
+        inlineBody: "Sign in to get ad-free video access, faster reading flow, and exciting member-only offers.",
+        inlineCta: "Sign In",
         footerBadge: "Newsletter",
         footerTitle: "Enjoyed the article? Join the newsletter",
         footerBody: "Subscribe here at the end and we will send the next thoughtful read straight to your inbox.",
@@ -108,6 +111,45 @@ export function ArticleNewsletterSignup({
             setIsSubmitting(false);
         }
     };
+
+    if (isInline) {
+        return (
+            <section className="overflow-hidden rounded-[28px] border border-[#c8a26c]/40 bg-[linear-gradient(145deg,rgba(29,20,12,0.96),rgba(12,12,12,0.98))] text-white shadow-[0_18px_50px_rgba(0,0,0,0.24)]">
+                <div className="relative px-5 py-6 sm:px-7 sm:py-8 lg:px-10 lg:py-10">
+                    <div className="pointer-events-none absolute -right-16 -top-12 h-44 w-44 rounded-full bg-amber-300/20 blur-3xl" />
+                    <div className="pointer-events-none absolute -left-12 -bottom-12 h-40 w-40 rounded-full bg-purple-500/20 blur-3xl" />
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 via-amber-200 to-purple-400" />
+
+                    <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="max-w-2xl space-y-3">
+                            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/85">
+                                <Sparkles className="h-3.5 w-3.5" />
+                                <span>{copy.inlineBadge}</span>
+                            </div>
+                            <div className="space-y-2">
+                                <h2 className="font-serif text-2xl font-semibold leading-tight sm:text-3xl text-white">
+                                    {copy.inlineTitle}
+                                </h2>
+                                <p className="max-w-xl text-sm leading-6 sm:text-base text-white/80">
+                                    {copy.inlineBody}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="w-full max-w-xs shrink-0">
+                            <Link
+                                href="/signin"
+                                className="inline-flex w-full min-h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-300 to-amber-200 px-5 py-3 text-sm font-semibold text-[#1f140a] transition hover:brightness-105"
+                            >
+                                <span>{copy.inlineCta}</span>
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section

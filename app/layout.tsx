@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { SessionSync } from "@/components/SessionSync";
 import { getGoogleVerificationTag } from "@/actions/seo";
 import { getCurrentLocale } from "@/lib/locale";
+import NextTopLoader from "nextjs-toploader";
 
 export async function generateMetadata(): Promise<Metadata> {
   const googleVerificationTag = await getGoogleVerificationTag();
@@ -95,6 +96,14 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
+              <NextTopLoader
+                color="#a855f7"
+                height={3}
+                crawl={true}
+                showSpinner={false}
+                speed={220}
+                easing="ease"
+              />
               <SessionSync />
               {children}
               <Toaster richColors position="top-center" />

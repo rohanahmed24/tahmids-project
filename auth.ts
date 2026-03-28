@@ -2,20 +2,19 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google"
-import GitHub from "next-auth/providers/github"
 import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
+
+const googleClientId = process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID;
+const googleClientSecret =
+    process.env.GOOGLE_CLIENT_SECRET || process.env.AUTH_GOOGLE_SECRET;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     basePath: "/api/auth",
     providers: [
         Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        }),
-        GitHub({
-            clientId: process.env.GITHUB_ID,
-            clientSecret: process.env.GITHUB_SECRET,
+            clientId: googleClientId,
+            clientSecret: googleClientSecret,
         }),
         Credentials({
             name: "Credentials",
@@ -62,64 +61,60 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ],
     callbacks: {
         async signIn({ user, account }) {
-            if (account?.provider === 'google' || account?.provider === 'github') {
+            if (account?.provider === 'google') {
                 if (!user.email) return false;
+                const normalizedEmail = user.email.toLowerCase().trim();
 
                 try {
-                    // Check if user exists
-                    let dbUser = await prisma.user.findUnique({
-                        where: { email: user.email }
+                    const dbUser = await prisma.user.upsert({
+                        where: { email: normalizedEmail },
+                        create: {
+                            name: user.name || 'User',
+                            email: normalizedEmail,
+                            role: 'user',
+                            image: user.image || null
+                        },
+                        update: {
+                            name: user.name || undefined,
+                            image: user.image || undefined,
+                        },
                     });
 
-                    if (!dbUser) {
-                        // Create new user for OAuth
-                        dbUser = await prisma.user.create({
-                            data: {
-                                name: user.name || 'User',
-                                email: user.email,
-                                role: 'user',
-                                image: user.image || null
-                            }
-                        });
-
-                        user.id = dbUser.id.toString();
-
-                        // Create account record
-                        await prisma.account.create({
-                            data: {
-                                userId: dbUser.id,
-                                type: account.type,
+                    await prisma.account.upsert({
+                        where: {
+                            provider_providerAccountId: {
                                 provider: account.provider,
                                 providerAccountId: account.providerAccountId,
-                                accessToken: account.access_token || null,
-                                tokenType: account.token_type || null
-                            }
-                        });
-                    } else {
-                        user.id = dbUser.id.toString();
+                            },
+                        },
+                        create: {
+                            userId: dbUser.id,
+                            type: account.type,
+                            provider: account.provider,
+                            providerAccountId: account.providerAccountId,
+                            accessToken: account.access_token || null,
+                            tokenType: account.token_type || null,
+                            scope: account.scope || null,
+                            idToken: account.id_token || null,
+                            expiresAt: account.expires_at || null,
+                            refreshToken: account.refresh_token || null,
+                        },
+                        update: {
+                            userId: dbUser.id,
+                            accessToken: account.access_token || null,
+                            tokenType: account.token_type || null,
+                            scope: account.scope || null,
+                            idToken: account.id_token || null,
+                            expiresAt: account.expires_at || null,
+                            refreshToken: account.refresh_token || null,
+                        },
+                    });
 
-                        // Update existing account or create if not exists
-                        // Note: provider + providerAccountId should be unique, but here we check by user_id + provider
-                        const existingAccount = await prisma.account.findFirst({
-                            where: {
-                                userId: dbUser.id,
-                                provider: account.provider
-                            }
-                        });
-
-                        if (!existingAccount) {
-                            await prisma.account.create({
-                                data: {
-                                    userId: dbUser.id,
-                                    type: account.type,
-                                    provider: account.provider,
-                                    providerAccountId: account.providerAccountId,
-                                    accessToken: account.access_token || null,
-                                    tokenType: account.token_type || null
-                                }
-                            });
-                        }
-                    }
+                    user.id = dbUser.id.toString();
+                    user.email = dbUser.email;
+                    user.name = dbUser.name;
+                    user.image = dbUser.image;
+                    (user as { role?: string }).role = dbUser.role;
                 } catch (error) {
                     console.error("SignIn callback error:", error);
                     return false;
@@ -129,16 +124,34 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         },
         async jwt({ token, user }) {
             if (user) {
+                const userRole =
+                    typeof (user as { role?: unknown }).role === "string"
+                        ? (user as { role: string }).role
+                        : undefined;
                 token.id = user.id;
-                token.role = (user as any).role;
+                token.role = userRole;
+                token.email = user.email ?? token.email;
                 token.picture = user.image;
+            }
+            if (!token.role && token.email) {
+                const dbUser = await prisma.user.findUnique({
+                    where: { email: token.email.toLowerCase() },
+                    select: { id: true, role: true, image: true },
+                });
+                if (dbUser) {
+                    token.id = String(dbUser.id);
+                    token.role = dbUser.role;
+                    token.picture = dbUser.image ?? token.picture;
+                }
             }
             return token;
         },
         async session({ session, token }) {
             if (session.user) {
                 session.user.id = token.id as string;
-                (session.user as any).role = token.role;
+                session.user.role =
+                    typeof token.role === "string" ? token.role : undefined;
+                session.user.email = typeof token.email === "string" ? token.email : session.user.email;
                 session.user.image = token.picture;
             }
             return session;

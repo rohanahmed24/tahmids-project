@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useTransition } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
     Image as ImageIcon,
     Link as LinkIcon,
@@ -38,7 +39,9 @@ interface EditorProps {
         contentBn?: string;
         coverImage?: string;
         videoUrl?: string;
+        videoUrlBn?: string;
         memberVideoUrl?: string;
+        memberVideoUrlBn?: string;
         audioUrl?: string;
         audioUrlBn?: string;
         subtitle?: string;
@@ -73,6 +76,7 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const [category, setCategory] = useState(initialData?.category || categoryOptions[0] || "");
     const [categoryBn, setCategoryBn] = useState(initialData?.categoryBn || "");
     const [published, setPublished] = useState(initialData?.published ?? true);
+    const [, startPublishToggleTransition] = useTransition();
     const [authorName, setAuthorName] = useState(initialData?.authorName || "");
     const [authorNameBn, setAuthorNameBn] = useState(initialData?.authorNameBn || "");
     const [translatorName, setTranslatorName] = useState(initialData?.translatorName || "");
@@ -82,10 +86,11 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.coverImage || null);
     const [videoUrl, setVideoUrl] = useState(initialData?.videoUrl || "");
+    const [videoUrlBn, setVideoUrlBn] = useState(initialData?.videoUrlBn || "");
     const [memberVideoUrl, setMemberVideoUrl] = useState(initialData?.memberVideoUrl || "");
+    const [memberVideoUrlBn, setMemberVideoUrlBn] = useState(initialData?.memberVideoUrlBn || "");
     const [audioUrl, setAudioUrl] = useState(initialData?.audioUrl || "");
     const [audioUrlBn, setAudioUrlBn] = useState(initialData?.audioUrlBn || "");
-    const [isUploadingMemberVideo, setIsUploadingMemberVideo] = useState(false);
     const [isUploadingAudio, setIsUploadingAudio] = useState(false);
     const [isUploadingAudioBn, setIsUploadingAudioBn] = useState(false);
     const [metaDescription, setMetaDescription] = useState(initialData?.metaDescription || "");
@@ -102,7 +107,6 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
 
     const audioFileInputRef = useRef<HTMLInputElement>(null);
     const audioFileBnInputRef = useRef<HTMLInputElement>(null);
-    const memberVideoFileInputRef = useRef<HTMLInputElement>(null);
 
     const categoryMap = useMemo(() => {
         const map = new Map<string, string>();
@@ -249,11 +253,13 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
         formData.set("subtitleBn", subtitleBn);
         formData.set("metaDescriptionBn", metaDescriptionBn);
         formData.set("videoUrl", videoUrl);
+        formData.set("videoUrlBn", videoUrlBn);
         formData.set("memberVideoUrl", memberVideoUrl);
+        formData.set("memberVideoUrlBn", memberVideoUrlBn);
         formData.set("audioUrl", audioUrl);
         formData.set("audioUrlBn", audioUrlBn);
         // Ensure other states are set if not controlled inputs (they are mostly named inputs)
-        handleSubmit(formData);
+        await handleSubmit(formData);
     };
 
     return (
@@ -263,10 +269,10 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center justify-between gap-3 sm:justify-start sm:gap-4">
                     {!isFocusMode && (
-                        <a href="/admin/dashboard" className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors">
+                        <Link href="/admin/dashboard" className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors">
                             <ArrowLeft className="w-4 h-4" />
                             Back
-                        </a>
+                        </Link>
                     )}
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                         {isAutoSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Clock className="w-3 h-3" />}
@@ -305,15 +311,17 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                     <div className="flex flex-1 min-w-0 bg-bg-card rounded-lg p-1 border border-border-primary sm:flex-none">
                         <button
                             type="button"
-                            onClick={() => setPublished(false)}
-                            className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${!published ? "bg-yellow-500/20 text-yellow-400" : "text-text-secondary hover:text-text-primary"}`}
+                            onClick={() => startPublishToggleTransition(() => setPublished(false))}
+                            disabled={isSubmitting}
+                            className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all touch-manipulation active:scale-[0.98] disabled:opacity-50 ${!published ? "bg-yellow-500/20 text-yellow-400" : "text-text-secondary hover:text-text-primary"}`}
                         >
                             Draft
                         </button>
                         <button
                             type="button"
-                            onClick={() => setPublished(true)}
-                            className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${published ? "bg-green-500/20 text-green-400" : "text-text-secondary hover:text-text-primary"}`}
+                            onClick={() => startPublishToggleTransition(() => setPublished(true))}
+                            disabled={isSubmitting}
+                            className={`flex-1 px-3 py-1.5 rounded-md text-sm font-medium transition-all touch-manipulation active:scale-[0.98] disabled:opacity-50 ${published ? "bg-green-500/20 text-green-400" : "text-text-secondary hover:text-text-primary"}`}
                         >
                             Publish
                         </button>
@@ -322,7 +330,7 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-500 to-purple-600 px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto sm:px-6"
+                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-500 to-purple-600 px-4 py-2 text-sm font-bold text-white transition-all touch-manipulation active:scale-[0.99] hover:opacity-90 disabled:opacity-50 sm:w-auto sm:px-6"
                     >
                         {isSubmitting ? "Saving..." : <><Save className="w-4 h-4" /> {published ? "Publish" : "Save Draft"}</>}
                     </button>
@@ -717,86 +725,55 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                         className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-xs placeholder:text-text-muted focus:border-accent-main focus:outline-none text-text-primary"
                                     />
                                 </div>
-                                <p className="text-[10px] text-text-muted">Guests will see this video. Signed-in readers can get the uploaded Bunny video below.</p>
+                                <p className="text-[10px] text-text-muted">Guests will see this video. Signed-in readers can get the Bunny/direct link below.</p>
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-sm font-medium text-text-secondary">Member Video Upload</label>
-                                <input type="hidden" name="memberVideoUrl" value={memberVideoUrl} />
-                                <input
-                                    type="file"
-                                    ref={memberVideoFileInputRef}
-                                    accept="video/mp4,video/webm,video/ogg,video/quicktime"
-                                    onChange={async (e) => {
-                                        const file = e.target.files?.[0];
-                                        if (!file) return;
-                                        setIsUploadingMemberVideo(true);
-                                        const id = toast.loading("Uploading member video...");
-                                        const formData = new FormData();
-                                        formData.append("file", file);
-                                        try {
-                                            const result = await uploadImage(formData);
-                                            if (result.success && result.url) {
-                                                setMemberVideoUrl(result.url);
-                                                toast.success("Member video uploaded!", { id });
-                                            } else {
-                                                toast.error(result.error || "Upload failed", { id });
-                                            }
-                                        } catch {
-                                            toast.error("Upload failed", { id });
-                                        } finally {
-                                            setIsUploadingMemberVideo(false);
-                                            if (memberVideoFileInputRef.current) memberVideoFileInputRef.current.value = "";
-                                        }
-                                    }}
-                                    className="hidden"
-                                />
+                                <label className="text-sm font-medium text-text-secondary">Public Video Link (Bangla)</label>
+                                <div className="relative">
+                                    <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                                    <input
+                                        type="text"
+                                        name="videoUrlBn"
+                                        value={videoUrlBn}
+                                        onChange={(e) => setVideoUrlBn(e.target.value)}
+                                        placeholder="বাংলা YouTube URL (optional)"
+                                        className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-xs placeholder:text-text-muted focus:border-accent-main focus:outline-none text-text-primary"
+                                    />
+                                </div>
+                                <p className="text-[10px] text-text-muted">Bangla locale will prefer this link and fall back to the English video if empty.</p>
+                            </div>
 
-                                {memberVideoUrl ? (
-                                    <div className="space-y-3 rounded-xl border border-border-primary bg-bg-tertiary/60 p-3">
-                                        <video
-                                            controls
-                                            playsInline
-                                            preload="metadata"
-                                            className="aspect-video w-full rounded-lg bg-black"
-                                            src={memberVideoUrl}
-                                        >
-                                            Your browser does not support the video tag.
-                                        </video>
-                                        <div className="flex flex-wrap items-center gap-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => memberVideoFileInputRef.current?.click()}
-                                                className="inline-flex items-center gap-2 rounded-lg border border-border-primary px-3 py-2 text-xs font-medium text-text-primary transition-colors hover:bg-bg-primary"
-                                            >
-                                                <UploadCloud className="h-4 w-4" />
-                                                Replace Video
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setMemberVideoUrl("")}
-                                                className="text-xs text-red-400 transition-colors hover:text-red-300"
-                                            >
-                                                Remove Member Video
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => memberVideoFileInputRef.current?.click()}
-                                        disabled={isUploadingMemberVideo}
-                                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border-primary bg-bg-tertiary/50 px-4 py-6 text-sm text-text-secondary transition-colors hover:border-accent-main/50 hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                        {isUploadingMemberVideo ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <UploadCloud className="h-4 w-4" />
-                                        )}
-                                        {isUploadingMemberVideo ? "Uploading..." : "Upload Bunny video for signed-in readers"}
-                                    </button>
-                                )}
-                                <p className="text-[10px] text-text-muted">Recommended: MP4 or WebM. Uploaded videos use the same Bunny storage setup as your other media.</p>
+                            <div className="space-y-3">
+                                <label className="text-sm font-medium text-text-secondary">Member Video Link (Bunny/Direct)</label>
+                                <div className="relative">
+                                    <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                                    <input
+                                        type="text"
+                                        name="memberVideoUrl"
+                                        value={memberVideoUrl}
+                                        onChange={(e) => setMemberVideoUrl(e.target.value)}
+                                        placeholder="Bunny or direct video URL for signed-in readers (optional)"
+                                        className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-xs placeholder:text-text-muted focus:border-accent-main focus:outline-none text-text-primary"
+                                    />
+                                </div>
+                                <p className="text-[10px] text-text-muted">Paste the URL directly. No upload is required.</p>
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-sm font-medium text-text-secondary">Member Video Link (Bangla)</label>
+                                <div className="relative">
+                                    <Video className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                                    <input
+                                        type="text"
+                                        name="memberVideoUrlBn"
+                                        value={memberVideoUrlBn}
+                                        onChange={(e) => setMemberVideoUrlBn(e.target.value)}
+                                        placeholder="বাংলা Bunny/direct video URL (optional)"
+                                        className="w-full pl-9 pr-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg text-xs placeholder:text-text-muted focus:border-accent-main focus:outline-none text-text-primary"
+                                    />
+                                </div>
+                                <p className="text-[10px] text-text-muted">Bangla locale will use this first, then fall back to English member video.</p>
                             </div>
 
                             <div className="space-y-3">

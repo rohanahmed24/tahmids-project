@@ -51,7 +51,9 @@ model Post {
   contentBn   String?  @map("content_bn")
   coverImage  String?
   videoUrl    String?
+  videoUrlBn  String?  @map("video_url_bn")
   memberVideoUrl String? @map("member_video_url")
+  memberVideoUrlBn String? @map("member_video_url_bn")
   audioUrl    String?  @map("audio_url")
   audioUrlBn  String?  @map("audio_url_bn")
   views       Int?     @default(0)

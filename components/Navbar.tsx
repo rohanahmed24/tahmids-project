@@ -18,6 +18,7 @@ export default function Navbar() {
   const { locale } = useLocale();
   const user = session?.user;
   const isLoading = status === "loading";
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,6 +50,8 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
     await signOut({ callbackUrl: "/" });
   };
 
@@ -112,9 +115,31 @@ export default function Navbar() {
 
           {/* Right: Language Toggle Only */}
           <div
-            className={`flex items-center justify-end flex-1 ${textColorClass}`}
+            className={`flex items-center justify-end flex-1 gap-2 ${textColorClass}`}
           >
             <LanguageToggle />
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin opacity-60" />
+            ) : user ? (
+              <button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-bg-tertiary disabled:opacity-50"
+                aria-label="Log out"
+                title="Log out"
+              >
+                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                <span className="hidden md:inline">Logout</span>
+              </button>
+            ) : (
+              <Link
+                href="/signin"
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-bg-tertiary"
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden md:inline">{t(locale, "signIn")}</span>
+              </Link>
+            )}
           </div>
         </div>
       </motion.nav>

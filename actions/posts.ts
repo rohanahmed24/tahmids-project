@@ -93,7 +93,9 @@ export async function createPost(formData: FormData) {
     const editorName = getTrimmedField(formData, "editorName") || undefined;
     const editorNameBn = getTrimmedField(formData, "editorNameBn") || undefined;
     const videoUrl = sanitizeOptionalUrl(formData.get("videoUrl"));
+    const videoUrlBn = sanitizeOptionalUrl(formData.get("videoUrlBn"));
     const memberVideoUrl = sanitizeOptionalUrl(formData.get("memberVideoUrl"), true);
+    const memberVideoUrlBn = sanitizeOptionalUrl(formData.get("memberVideoUrlBn"), true);
     const audioUrl = sanitizeOptionalUrl(formData.get("audioUrl"), true);
     const audioUrlBn = sanitizeOptionalUrl(formData.get("audioUrlBn"), true);
     const subtitle = (formData.get("subtitle") as string) || undefined;
@@ -149,7 +151,9 @@ export async function createPost(formData: FormData) {
                 excerptBn,
                 coverImage,
                 videoUrl,
+                videoUrlBn,
                 memberVideoUrl,
+                memberVideoUrlBn,
                 audioUrl,
                 audioUrlBn,
                 topicSlug: topic_slug,
@@ -159,7 +163,7 @@ export async function createPost(formData: FormData) {
                 metaDescription,
                 metaDescriptionBn,
                 backlinks: backlinks as Prisma.InputJsonValue
-            }
+            } as Prisma.PostUncheckedCreateInput
         });
     } catch (error) {
         console.error("Failed to create post:", error);
@@ -236,7 +240,9 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     const contentBnInput = getTrimmedField(formData, "contentBn");
     const categoryBnInput = getTrimmedField(formData, "categoryBn");
     const videoUrl = sanitizeOptionalUrl(formData.get("videoUrl"));
+    const videoUrlBn = sanitizeOptionalUrl(formData.get("videoUrlBn"));
     const memberVideoUrl = sanitizeOptionalUrl(formData.get("memberVideoUrl"), true);
+    const memberVideoUrlBn = sanitizeOptionalUrl(formData.get("memberVideoUrlBn"), true);
     const audioUrl = sanitizeOptionalUrl(formData.get("audioUrl"), true);
     const audioUrlBn = sanitizeOptionalUrl(formData.get("audioUrlBn"), true);
     const authorNameInput = getTrimmedField(formData, "authorName");
@@ -329,7 +335,9 @@ export async function updatePost(originalSlug: string, formData: FormData) {
                 excerptBn,
                 coverImage,
                 videoUrl,
+                videoUrlBn,
                 memberVideoUrl,
+                memberVideoUrlBn,
                 audioUrl,
                 audioUrlBn,
                 topicSlug: topic_slug,
@@ -339,7 +347,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
                 metaDescription,
                 metaDescriptionBn,
                 backlinks: backlinks as Prisma.InputJsonValue
-            }
+            } as Prisma.PostUncheckedUpdateInput
         });
     } catch (error) {
         console.error("Failed to update post (database step):", error);

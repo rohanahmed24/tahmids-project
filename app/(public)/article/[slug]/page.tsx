@@ -36,8 +36,14 @@ export default async function ArticlePage({
 
   const audioUrl =
     (locale === "bn" ? post.audioUrlBn : post.audioUrl)?.trim() || "";
-  const publicVideoUrl = post.videoUrl?.trim() || "";
-  const memberVideoUrl = post.memberVideoUrl?.trim() || "";
+  const publicVideoUrl =
+    (locale === "bn" ? post.videoUrlBn : post.videoUrl)?.trim() ||
+    post.videoUrl?.trim() ||
+    "";
+  const memberVideoUrl =
+    (locale === "bn" ? post.memberVideoUrlBn : post.memberVideoUrl)?.trim() ||
+    post.memberVideoUrl?.trim() ||
+    "";
   const videoUrl =
     session?.user && memberVideoUrl ? memberVideoUrl : publicVideoUrl;
   const hasAudio = Boolean(audioUrl);

@@ -34,7 +34,9 @@ export type Post = {
     excerptBn?: string | null;
     coverImage?: string | null;
     videoUrl?: string | null;
+    videoUrlBn?: string | null;
     memberVideoUrl?: string | null;
+    memberVideoUrlBn?: string | null;
     audioUrl?: string | null;
     audioUrlBn?: string | null;
     views: number;
@@ -144,6 +146,10 @@ function mapPrismaPost(
     post: PrismaPost & { author?: { image: string | null } | null },
     locale: Locale = "en"
 ): Post {
+    const postWithLocalizedMedia = post as PrismaPost & {
+        videoUrlBn?: string | null;
+        memberVideoUrlBn?: string | null;
+    };
     // Properly handle backlinks JSON field - handle both array and string formats
     let backlinks: string[] | null = null;
     if (post.backlinks !== null && post.backlinks !== undefined) {
@@ -189,6 +195,17 @@ function mapPrismaPost(
             ? (post.metaDescriptionBn || post.metaDescription)
             : post.metaDescription;
 
+    const normalizedVideoUrl = normalizeMediaUrl(post.videoUrl);
+    const normalizedVideoUrlBn = normalizeMediaUrl(postWithLocalizedMedia.videoUrlBn);
+    const normalizedMemberVideoUrl = normalizeMediaUrl(post.memberVideoUrl);
+    const normalizedMemberVideoUrlBn = normalizeMediaUrl(postWithLocalizedMedia.memberVideoUrlBn);
+    const localizedVideoUrl =
+        locale === "bn" ? (normalizedVideoUrlBn || normalizedVideoUrl) : normalizedVideoUrl;
+    const localizedMemberVideoUrl =
+        locale === "bn"
+            ? (normalizedMemberVideoUrlBn || normalizedMemberVideoUrl)
+            : normalizedMemberVideoUrl;
+
     return {
         id: post.id,
         slug: post.slug,
@@ -213,8 +230,10 @@ function mapPrismaPost(
         excerpt: localizedExcerpt,
         excerptBn: post.excerptBn,
         coverImage: normalizeImageUrl(post.coverImage),
-        videoUrl: normalizeMediaUrl(post.videoUrl),
-        memberVideoUrl: normalizeMediaUrl(post.memberVideoUrl),
+        videoUrl: localizedVideoUrl,
+        videoUrlBn: normalizedVideoUrlBn,
+        memberVideoUrl: localizedMemberVideoUrl,
+        memberVideoUrlBn: normalizedMemberVideoUrlBn,
         audioUrl: normalizeMediaUrl(post.audioUrl),
         audioUrlBn: normalizeMediaUrl(post.audioUrlBn),
         views: post.views || 0,
