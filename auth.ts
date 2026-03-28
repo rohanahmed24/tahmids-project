@@ -110,6 +110,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         },
                     });
 
+                    await prisma.newsletterSubscriber.upsert({
+                        where: { email: normalizedEmail },
+                        create: {
+                            email: normalizedEmail,
+                            source: "google-oauth",
+                            locale: null,
+                        },
+                        update: {},
+                    });
+
                     user.id = dbUser.id.toString();
                     user.email = dbUser.email;
                     user.name = dbUser.name;
