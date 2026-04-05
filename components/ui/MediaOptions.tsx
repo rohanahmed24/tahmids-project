@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { BookOpen, Headphones, Play } from "lucide-react";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { getArticlePath } from "@/lib/article-path";
 
 interface MediaOptionsProps {
   slug: string;
@@ -57,7 +58,7 @@ export function MediaOptions({
       id: "read",
       label: labels.read,
       icon: BookOpen,
-      href: `/article/${slug}`,
+      href: getArticlePath(slug, locale),
       targetId: "article-content",
     },
     ...(hasAudio
@@ -66,7 +67,7 @@ export function MediaOptions({
             id: "listen",
             label: labels.listen,
             icon: Headphones,
-            href: `/article/${slug}?mode=listen`,
+            href: getArticlePath(slug, locale, "listen"),
             targetId: "article-media",
           },
         ]
@@ -77,7 +78,7 @@ export function MediaOptions({
             id: "watch",
             label: labels.watch,
             icon: Play,
-            href: `/article/${slug}?mode=watch`,
+            href: getArticlePath(slug, locale, "watch"),
             targetId: "article-media",
           },
         ]

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { Post } from "@/lib/posts";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { getArticlePath } from "@/lib/article-path";
 
 interface ArticleCardProps {
     article: Post;
@@ -20,7 +21,7 @@ export function ArticleCard({ article, width }: ArticleCardProps) {
 
     return (
         <div
-            onClick={() => router.push(`/article/${article.slug}`)}
+            onClick={() => router.push(getArticlePath(article.slug, locale))}
             className="group flex flex-col gap-5 cursor-pointer text-text-primary flex-shrink-0"
             style={style}
         >

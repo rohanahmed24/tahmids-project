@@ -71,13 +71,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ];
 
-    // Dynamic article pages
-    const articlePages = posts.map((post) => ({
-        url: `${baseUrl}/article/${post.slug}`,
-        lastModified: new Date(post.updated_at || post.created_at),
-        changeFrequency: "weekly" as const,
-        priority: 0.9,
-    }));
+    // Dynamic article pages (localized URLs for SEO)
+    const articlePages = posts.flatMap((post) => {
+        const lastModified = new Date(post.updated_at || post.created_at);
+        return [
+            {
+                url: `${baseUrl}/en/article/${post.slug}`,
+                lastModified,
+                changeFrequency: "weekly" as const,
+                priority: 0.9,
+            },
+            {
+                url: `${baseUrl}/bn/article/${post.slug}`,
+                lastModified,
+                changeFrequency: "weekly" as const,
+                priority: 0.9,
+            },
+        ];
+    });
 
     return [...staticPages, ...articlePages];
 }

@@ -151,10 +151,10 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/signin"
-                className="inline-flex h-8 items-center gap-2 rounded-full border border-accent/40 bg-accent px-6 text-sm font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-accent/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
+                className="inline-flex h-8 items-center gap-2 rounded-full border border-accent/40 bg-accent px-6 text-[12px] font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-accent/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
               >
                 <User className="w-4 h-4" />
-                <span className="hidden md:inline text-sm">
+                <span className="hidden md:inline text-[12px]">
                   {t(locale, "signIn")}
                 </span>
               </Link>
@@ -215,7 +215,7 @@ export default function Navbar() {
                     <Link
                       href="/signin"
                       onClick={() => setIsMenuOpen(false)}
-                      className="inline-flex h-11 items-center gap-2 rounded-full border border-accent/40 bg-accent px-4 text-sm font-bold uppercase tracking-widest text-white shadow-sm transition-all hover:bg-accent/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
+                      className="inline-flex h-11 items-center gap-2 rounded-full border border-accent/40 bg-accent px-4 text-[12px] font-bold uppercase tracking-widest text-white shadow-sm transition-all hover:bg-accent/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
                     >
                       <User className="w-5 h-5" />
                       {t(locale, "signIn")}

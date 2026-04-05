@@ -7,6 +7,7 @@ import { Assets } from "@/lib/assets";
 import { getPublicCategorySummaries } from "@/lib/posts";
 import { getCurrentLocale } from "@/lib/locale";
 import { t } from "@/lib/translations";
+import { getArticlePath } from "@/lib/article-path";
 
 export default async function TopicsPage() {
     const locale = await getCurrentLocale();
@@ -61,7 +62,7 @@ export default async function TopicsPage() {
                             <p className="text-lg text-text-secondary max-w-md">
                                 {featured.body}
                             </p>
-                            <Link href="/article/ai-ethics" className="inline-block px-8 py-4 bg-text-primary text-bg-primary font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity">
+                            <Link href={getArticlePath("ai-ethics", locale)} className="inline-block px-8 py-4 bg-text-primary text-bg-primary font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity">
                                 {t(locale, "startReading")}
                             </Link>
                         </div>

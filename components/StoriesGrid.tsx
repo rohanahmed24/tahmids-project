@@ -11,6 +11,7 @@ import type { Post } from "@/lib/posts";
 import { Assets } from "@/lib/assets";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { t } from "@/lib/translations";
+import { getArticlePath } from "@/lib/article-path";
 
 interface StoriesGridProps {
     category?: string; // Optional filtering
@@ -86,7 +87,7 @@ export function StoriesGrid({ category, categoryLabel }: StoriesGridProps) {
                         {stories.map((story) => (
                             <div
                                 key={story.id}
-                                onClick={() => router.push(`/article/${story.slug}`)}
+                                onClick={() => router.push(getArticlePath(story.slug, locale))}
                                 className="h-[380px] relative group overflow-hidden rounded-2xl bg-bg-card cursor-pointer w-full"
                             >
                                 <Image
@@ -144,7 +145,7 @@ export function StoriesGrid({ category, categoryLabel }: StoriesGridProps) {
                                 `}
                             >
                                 <div
-                                    onClick={() => router.push(`/article/${story.slug}`)}
+                                    onClick={() => router.push(getArticlePath(story.slug, locale))}
                                     className="block w-full h-full cursor-pointer"
                                 >
                                     <Image

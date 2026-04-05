@@ -7,6 +7,7 @@ import { MobileSlider } from "@/components/ui/MobileSlider";
 import { HorizontalSlider } from "@/components/HorizontalSlider";
 import { Post } from "@/lib/posts";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { getArticlePath } from "@/lib/article-path";
 
 interface ArticleGridProps {
     articles: Post[];
@@ -61,7 +62,7 @@ export function ArticleGrid({ articles = [] }: ArticleGridProps) {
                         {articles.map((article) => (
                             <div
                                 key={article.slug}
-                                onClick={() => router.push(`/article/${article.slug}`)}
+                                onClick={() => router.push(getArticlePath(article.slug, locale))}
                                 className="group flex flex-col bg-bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                             >
                                 <div className="relative w-full aspect-[16/9] overflow-hidden">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Loader2, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, Loader2, Mail } from "lucide-react";
 import { subscribeToNewsletter } from "@/actions/newsletter";
 
 interface ArticleNewsletterSignupProps {
@@ -12,10 +12,12 @@ interface ArticleNewsletterSignupProps {
 
 const copyByLocale = {
     bn: {
-        inlineBadge: "সদস্য সুবিধা",
-        inlineTitle: "সাইন ইন করে আনলক করুন বিজ্ঞাপনমুক্ত ভিডিও",
-        inlineBody: "সাইন ইন করলে পাবেন ad-free ভিডিও, দ্রুত এক্সেস, এবং আরও অনেক এক্সক্লুসিভ অফার।",
-        inlineCta: "সাইন ইন করুন",
+        inlineBadge: "প্রিমিয়াম অ্যাক্সেস",
+        inlineTitle: "SIGN UP করে নিন ad-free premium experience!",
+        inlineBody: "100% FREE",
+        inlineSecondary: "NO SPAM",
+        inlineTertiary: "১টি Newsletter প্রতি সপ্তাহে",
+        inlineCta: "Sign Up",
         footerBadge: "নিউজলেটার",
         footerTitle: "লেখাটি ভালো লেগেছে? নিউজলেটারে যোগ দিন",
         footerBody: "পড়ার শেষে এখান থেকেই যুক্ত হোন। ভবিষ্যতের গুরুত্বপূর্ণ লেখা ও আপডেট ইমেইলে পেয়ে যাবেন।",
@@ -26,16 +28,18 @@ const copyByLocale = {
         error: "সাবস্ক্রাইব করা যায়নি। আবার চেষ্টা করুন।",
     },
     en: {
-        inlineBadge: "Member Benefits",
-        inlineTitle: "Sign in to unlock ad-free videos",
-        inlineBody: "Sign in to get ad-free video access, faster reading flow, and exciting member-only offers.",
-        inlineCta: "Sign In",
+        inlineBadge: "Premium Access",
+        inlineTitle: "SIGN UP for ad-free premium experience!",
+        inlineBody: "100% FREE",
+        inlineSecondary: "NO SPAM",
+        inlineTertiary: "1 Newsletter each week",
+        inlineCta: "Sign Up",
         footerBadge: "Newsletter",
-        footerTitle: "Enjoyed the article? Join the newsletter",
-        footerBody: "Subscribe here at the end and we will send the next thoughtful read straight to your inbox.",
+        footerTitle: "Enjoying?",
+        footerBody: "Sign up for newsletter to stay connected.",
         placeholder: "Enter your email",
         submit: "Subscribe",
-        finePrint: "No spam. Unsubscribe whenever you want.",
+        finePrint: "1 mail each week. No spam. Unsubscribe anytime.",
         success: "You are on the list. Watch your inbox for future updates.",
         error: "Subscription failed. Please try again.",
     },
@@ -120,25 +124,33 @@ export function ArticleNewsletterSignup({
                     <div className="pointer-events-none absolute -left-12 -bottom-12 h-40 w-40 rounded-full bg-purple-500/20 blur-3xl" />
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 via-amber-200 to-purple-400" />
 
-                    <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="max-w-2xl space-y-3">
-                            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/85">
-                                <Sparkles className="h-3.5 w-3.5" />
+                    <div className="relative flex flex-col items-center text-center gap-6">
+                        <div className="max-w-3xl space-y-4">
+                            <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-white/85">
                                 <span>{copy.inlineBadge}</span>
                             </div>
-                            <div className="space-y-2">
-                                <h2 className="font-serif text-2xl font-semibold leading-tight sm:text-3xl text-white">
-                                    {copy.inlineTitle}
-                                </h2>
-                                <p className="max-w-xl text-sm leading-6 sm:text-base text-white/80">
+
+                            <h2 className="font-serif text-2xl font-semibold leading-tight sm:text-3xl text-white">
+                                {copy.inlineTitle}
+                            </h2>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto">
+                                <p className="rounded-xl border border-amber-300/40 bg-amber-300/10 px-4 py-2 text-sm sm:text-base font-bold tracking-wide text-amber-200 dark:text-white uppercase">
                                     {copy.inlineBody}
                                 </p>
+                                <p className="rounded-xl border border-amber-300/40 bg-amber-300/10 px-4 py-2 text-sm sm:text-base font-bold tracking-wide text-amber-200 dark:text-white uppercase">
+                                    {copy.inlineSecondary}
+                                </p>
                             </div>
+
+                            <p className="text-base sm:text-lg text-white/90 font-medium">
+                                {copy.inlineTertiary}
+                            </p>
                         </div>
 
                         <div className="w-full max-w-xs shrink-0">
                             <Link
-                                href="/signin"
+                                href="/register"
                                 className="inline-flex w-full min-h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-300 to-amber-200 px-5 py-3 text-sm font-semibold text-[#1f140a] transition hover:brightness-105"
                             >
                                 <span>{copy.inlineCta}</span>

@@ -181,7 +181,11 @@ export class PostService {
             };
 
             // Remove undefined keys
-            Object.keys(dataToUpdate).forEach(key => (dataToUpdate as any)[key] === undefined && delete (dataToUpdate as any)[key]);
+            for (const [key, value] of Object.entries(dataToUpdate)) {
+                if (value === undefined) {
+                    delete dataToUpdate[key as keyof typeof dataToUpdate];
+                }
+            }
 
             await prisma.post.update({
                 where: { slug: originalSlug },
@@ -206,6 +210,8 @@ export class PostService {
 
         if (slug) {
             revalidatePath(`/article/${slug}`);
+            revalidatePath(`/en/article/${slug}`);
+            revalidatePath(`/bn/article/${slug}`);
             revalidatePath(`/admin/edit/${slug}`);
         }
     }

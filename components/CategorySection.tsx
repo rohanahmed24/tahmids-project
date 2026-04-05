@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { Post } from "@/lib/posts";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { getArticlePath } from "@/lib/article-path";
 
 interface CategorySectionProps {
     title: string;
@@ -101,7 +102,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                             {safeArticles.map((item) => (
                                 <Link
                                     key={item.slug}
-                                    href={`/article/${item.slug}`}
+                                    href={getArticlePath(item.slug, locale)}
                                     className="flex-shrink-0"
                                     style={{ width: cardWidth }}
                                 >
@@ -159,7 +160,7 @@ export function CategorySection({ title, slug, articles = [] }: CategorySectionP
                             transition={{ duration: 0.6 }}
                             className="group cursor-pointer"
                         >
-                            <Link href={`/article/${item.slug}`}>
+                            <Link href={getArticlePath(item.slug, locale)}>
                                 <div className="relative aspect-[16/9] overflow-hidden mb-4 transition-all duration-700">
                                     <Image
                                         src={item.coverImage || '/placeholder.jpg'}

@@ -1,14 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { t } from "@/lib/translations";
 
 export function LanguageToggle() {
     const { locale, setLocale } = useLocale();
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [isUpdating, setIsUpdating] = useState(false);
+
+    const getLocalizedPath = (nextLocale: "en" | "bn") => {
+        const currentPath = pathname || "/";
+        const queryString = searchParams.toString();
+        let nextPath = currentPath;
+
+        if (/^\/(en|bn)(\/|$)/.test(currentPath)) {
+            nextPath = currentPath.replace(/^\/(en|bn)(?=\/|$)/, `/${nextLocale}`);
+        } else if (currentPath.startsWith("/article/")) {
+            nextPath = `/${nextLocale}${currentPath}`;
+        }
+
+        return queryString ? `${nextPath}?${queryString}` : nextPath;
+    };
 
     const toggleLanguage = async () => {
         const nextLocale = locale === "en" ? "bn" : "en";
@@ -25,7 +41,7 @@ export function LanguageToggle() {
                 throw new Error("Failed to update locale");
             }
             setLocale(nextLocale);
-            router.refresh();
+            router.push(getLocalizedPath(nextLocale));
         } catch (error) {
             console.error("Failed to update language:", error);
         } finally {

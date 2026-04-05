@@ -9,9 +9,10 @@ import { MediaOptions } from "@/components/ui/MediaOptions";
 import { Post } from "@/lib/posts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { getArticlePath } from "@/lib/article-path";
 
 // Desktop Horizontal Slider Component using Embla
-function FeaturedHorizontalSlider({ items, previousLabel, nextLabel }: { items: Post[]; previousLabel: string; nextLabel: string }) {
+function FeaturedHorizontalSlider({ items, previousLabel, nextLabel, locale }: { items: Post[]; previousLabel: string; nextLabel: string; locale: "en" | "bn" }) {
     const [emblaRef, emblaApi] = useEmblaCarousel({
         loop: true,
         align: "start",
@@ -30,7 +31,7 @@ function FeaturedHorizontalSlider({ items, previousLabel, nextLabel }: { items: 
                     {items.map((item, index) => (
                         <Link
                             key={item.slug}
-                            href={`/article/${item.slug}`}
+                            href={getArticlePath(item.slug, locale)}
                             className="flex-shrink-0 group relative w-[350px]"
                         >
                             <div className="relative aspect-[16/9] overflow-hidden mb-4 rounded-lg">
@@ -150,7 +151,7 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
                             {articles.map((item, index) => (
                                 <Link
                                     key={item.slug}
-                                    href={`/article/${item.slug}`}
+                                    href={getArticlePath(item.slug, locale)}
                                     className="flex-shrink-0 w-[85vw] sm:w-[50vw] relative"
                                 >
                                     <div className="relative aspect-[16/9] overflow-hidden rounded-lg mb-2">
@@ -203,8 +204,8 @@ export function FeaturedTales({ articles = [] }: FeaturedTalesProps) {
 
                 {/* Desktop: 2 Horizontal Sliders */}
                 <div className="hidden md:block space-y-12">
-                    <FeaturedHorizontalSlider items={topRowItems} previousLabel={copy.previous} nextLabel={copy.next} />
-                    <FeaturedHorizontalSlider items={bottomRowItems} previousLabel={copy.previous} nextLabel={copy.next} />
+                    <FeaturedHorizontalSlider items={topRowItems} previousLabel={copy.previous} nextLabel={copy.next} locale={locale} />
+                    <FeaturedHorizontalSlider items={bottomRowItems} previousLabel={copy.previous} nextLabel={copy.next} locale={locale} />
                 </div>
             </div>
         </section>

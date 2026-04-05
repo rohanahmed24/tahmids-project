@@ -8,6 +8,7 @@ import { Post } from "@/lib/posts";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MediaOptions } from "@/components/ui/MediaOptions";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { getArticlePath } from "@/lib/article-path";
 
 interface HorizontalSliderProps {
     articles: Post[];
@@ -41,7 +42,7 @@ export function HorizontalSlider({ articles }: HorizontalSliderProps) {
                         <Link
                             // Use index in key because we might have duplicates now
                             key={`${item.slug}-${index}`}
-                            href={`/article/${item.slug}`}
+                            href={getArticlePath(item.slug, locale)}
                             className="flex-shrink-0 group relative w-[350px]"
                         >
                             <div className="relative aspect-[16/9] overflow-hidden mb-4 rounded-lg">

@@ -4,6 +4,7 @@ import type { Post } from "@/lib/posts";
 import type { Locale } from "@/lib/locale";
 import { t } from "@/lib/translations";
 import { FallbackImage } from "@/components/ui/FallbackImage";
+import { getArticlePath } from "@/lib/article-path";
 
 interface ArticleSidebarProps {
     post: Post;
@@ -57,7 +58,7 @@ export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: Arti
                 <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
                     {relatedPosts.length > 0 ? (
                         relatedPosts.map((post) => (
-                            <Link href={`/article/${post.slug}`} key={post.slug} className="group block space-y-3" data-testid={`link-related-post-${post.slug}`}>
+                            <Link href={getArticlePath(post.slug, locale)} key={post.slug} className="group block space-y-3" data-testid={`link-related-post-${post.slug}`}>
                                 {/* Mobile: square aspect, PC: 3:2 aspect for larger display */}
                                 <div className="relative w-full aspect-square md:aspect-[3/2] overflow-hidden rounded-sm bg-bg-secondary">
                                     <FallbackImage
