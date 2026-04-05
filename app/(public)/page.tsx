@@ -9,7 +9,6 @@ import { getCurrentLocale } from "@/lib/locale";
 const Subscription = dynamic(() => import("@/components/Subscription").then(mod => mod.Subscription));
 const ArticleGrid = dynamic(() => import("@/components/ArticleGrid").then(mod => mod.ArticleGrid));
 const Testimonials = dynamic(() => import("@/components/Testimonials").then(mod => mod.Testimonials));
-const FAQ = dynamic(() => import("@/components/FAQ").then(mod => mod.FAQ));
 const CTABanner = dynamic(() => import("@/components/CTABanner").then(mod => mod.CTABanner));
 const TopicExplore = dynamic(() => import("@/components/TopicExplore").then(mod => mod.TopicExplore));
 const AuthorsGrid = dynamic(() => import("@/components/AuthorsGrid").then(mod => mod.AuthorsGrid));
@@ -79,7 +78,6 @@ export default async function Home() {
       <TopicExplore categories={categories} locale={locale} />
       <AuthorsGrid />
       <Testimonials />
-      <FAQ />
       <CTABanner />
     </main>
   );

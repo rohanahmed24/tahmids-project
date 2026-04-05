@@ -1,8 +1,6 @@
 "use client";
 
-import { FAQ } from "@/components/FAQ";
 import { MotionWrapper } from "@/components/ui/MotionWrapper";
-import { Mail, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import { Assets } from "@/lib/assets";
 import { useLocale } from "@/components/providers/LocaleProvider";
@@ -11,113 +9,90 @@ export default function ContactPage() {
     const { locale } = useLocale();
     const copy = locale === "bn"
         ? {
-            support: "সহায়তা",
-            getIn: "যোগাযোগে",
-            touch: "আসুন",
+            badge: "যোগাযোগ",
+            title: "যোগাযোগ করুন",
             imageAlt: "চিঠিপত্রের শিল্প",
-            sendMessage: "আমাদের বার্তা পাঠান",
-            name: "নাম",
-            email: "ইমেইল",
-            message: "বার্তা",
-            send: "বার্তা পাঠান",
-            namePlaceholder: "জন ডো",
-            emailPlaceholder: "john@example.com",
-            messagePlaceholder: "কীভাবে সাহায্য করতে পারি?",
-            editorialInquiries: "সম্পাদকীয় জিজ্ঞাসা",
-            editorialBody: "প্রেস, লাইসেন্সিং এবং পার্টনারশিপ সংক্রান্ত বিষয়ে।",
-            editorialLink: "সম্পাদকীয় বিভাগে যোগাযোগ →",
+            line1: "কোনো লেখা পাঠাতে চান, কিংবা অন্য কোনো প্রশ্ন আছে?",
+            line2: "নির্দ্বিধায় আমাদের সাথে যোগাযোগ করতে পারেন।",
+            writerLabel: "লেখকদের জন্য:",
+            writerBody:
+                "আমরা কেবল তথ্যবহুল লেখার বদলে বলার মতো গল্প চাই। আপনি লেখা পাঠাতে চাইলে চেষ্টা করবেন যেন আপনার লেখা প্রথম থেকে শেষ পর্যন্ত পাঠকদের ধরে রাখতে পারে। সকল তথ্যের জন্য ফুটনোট ব্যবহার করুন, যেন আমারা সহজেই নির্ভুলতা যাচাই করতে পারি।",
+            emailLabel: "যে কোনো প্রশ্ন কিংবা লেখা পাঠাতে আমাদের ইমেইল করুন:",
+            email: "contact@thewisdomia.com",
         }
         : {
-            support: "Support",
-            getIn: "Get in",
-            touch: "Touch",
+            badge: "Contact",
+            title: "Get in Touch",
             imageAlt: "The Art of Correspondence",
-            sendMessage: "Send us a message",
-            name: "Name",
-            email: "Email",
-            message: "Message",
-            send: "Send Message",
-            namePlaceholder: "John Doe",
-            emailPlaceholder: "john@example.com",
-            messagePlaceholder: "How can we help?",
-            editorialInquiries: "Editorial Inquiries",
-            editorialBody: "For press, licensing, and partnership opportunities.",
-            editorialLink: "Contact Editorial →",
+            line1: "Have a question or a story worth sharing? We would love to hear from you.",
+            writerLabel: "For Contributors:",
+            writerBody:
+                "We look for narratives, not just articles. If you are submitting your work, ensure your piece is crafted to keep readers hooked from the first word to the end. Please include footnotes for all factual claims so that we can verify the information.",
+            emailLabel: "For all queries and submissions, send us an email:",
+            email: "contact@thewisdomia.com",
         };
 
     return (
         <main className="min-h-screen bg-bg-primary transition-colors duration-300">
-            {/* 1. Header Section */}
-            <section className="pt-28 pb-20 px-6 text-center">
+            <section className="pt-28 pb-12 px-6 text-center">
                 <MotionWrapper type="slide-up">
-                    <span className="text-xs font-bold tracking-[0.3em] uppercase opacity-40 text-text-primary mb-6 block">{copy.support}</span>
-                    <h1 className="text-6xl md:text-8xl font-serif font-medium text-text-primary tracking-tighter leading-[0.9]">
-                        {copy.getIn} <br />
-                        <span className="italic font-light opacity-60">{copy.touch}</span>
+                    <span className="text-xs font-bold tracking-[0.32em] uppercase opacity-40 text-text-primary mb-5 block">
+                        {copy.badge}
+                    </span>
+                    <h1 className="text-5xl md:text-7xl font-serif font-semibold text-text-primary tracking-tight leading-[0.95]">
+                        {copy.title}
                     </h1>
                 </MotionWrapper>
             </section>
 
-            {/* 1.5 Conceptual Image */}
-            <section className="w-full h-[400px] relative">
-                <Image src={Assets.imgContactStationery} alt={copy.imageAlt} fill sizes="100vw" className="object-cover" />
-                <div className="absolute inset-0 bg-black/20" />
+            <section className="relative w-full h-[360px] md:h-[440px] overflow-hidden">
+                <Image
+                    src={Assets.imgContactStationery}
+                    alt={copy.imageAlt}
+                    fill
+                    sizes="100vw"
+                    className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-bg-primary" />
             </section>
 
-            {/* 2. Contact Form & Info Grid */}
-            <section className="py-20 px-6 md:px-12 bg-bg-secondary border-y border-border-subtle">
-                <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
-                    {/* Contact Form */}
-                    <div className="space-y-8">
-                        <h3 className="text-2xl font-serif font-bold text-text-primary">{copy.sendMessage}</h3>
-                        <form className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-text-muted">{copy.name}</label>
-                                    <input type="text" className="w-full bg-bg-primary border border-border-subtle p-4 text-text-primary focus:outline-none focus:border-accent transition-colors" placeholder={copy.namePlaceholder} />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-text-muted">{copy.email}</label>
-                                    <input type="email" className="w-full bg-bg-primary border border-border-subtle p-4 text-text-primary focus:outline-none focus:border-accent transition-colors" placeholder={copy.emailPlaceholder} />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-widest text-text-muted">{copy.message}</label>
-                                <textarea rows={6} className="w-full bg-bg-primary border border-border-subtle p-4 text-text-primary focus:outline-none focus:border-accent transition-colors" placeholder={copy.messagePlaceholder}></textarea>
-                            </div>
-                            <button className="px-8 py-4 bg-text-primary text-bg-primary font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity w-full md:w-auto">
-                                {copy.send}
-                            </button>
-                        </form>
-                    </div>
+            <section className="relative -mt-20 md:-mt-24 pb-24 px-6 md:px-12">
+                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <article className="lg:col-span-2 rounded-3xl border border-border-subtle bg-bg-secondary/95 backdrop-blur-sm p-6 md:p-10 shadow-[0_24px_80px_rgba(0,0,0,0.14)]">
+                        <p className="text-lg md:text-2xl text-text-primary leading-relaxed">
+                            {copy.line1}
+                        </p>
+                        {locale === "bn" && (
+                            <p className="mt-4 text-lg md:text-xl text-text-primary leading-relaxed">
+                                {copy.line2}
+                            </p>
+                        )}
 
-                    {/* Info Grid */}
-                    <div className="space-y-12 lg:pl-12 lg:border-l border-border-subtle">
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4 text-text-primary">
-                                <Mail className="w-6 h-6 text-accent" />
-                                <span className="text-lg font-sans">hello@wisdomia.com</span>
-                            </div>
-                            <div className="flex items-center gap-4 text-text-primary">
-                                <Phone className="w-6 h-6 text-accent" />
-                                <span className="text-lg font-sans">+1 (555) 000-0000</span>
-                            </div>
-                            <div className="flex items-center gap-4 text-text-primary">
-                                <MapPin className="w-6 h-6 text-accent" />
-                                <span className="text-lg font-sans">123 Wisdom Ave, New York, NY</span>
-                            </div>
+                        <div className="mt-8 rounded-2xl border border-accent/30 bg-accent/5 p-5 md:p-6">
+                            <p className="text-base md:text-lg text-text-secondary leading-relaxed">
+                                <span className="font-semibold text-text-primary">{copy.writerLabel} </span>
+                                {copy.writerBody}
+                            </p>
                         </div>
-                        <div className="p-8 bg-bg-card rounded-xl border border-border-subtle">
-                            <h4 className="text-xl font-serif font-bold text-text-primary mb-2">{copy.editorialInquiries}</h4>
-                            <p className="text-text-secondary text-sm mb-4">{copy.editorialBody}</p>
-                            <a href="#" className="text-accent font-bold text-sm tracking-widest uppercase hover:underline">{copy.editorialLink}</a>
-                        </div>
-                    </div>
+                    </article>
+
+                    <aside className="rounded-3xl border border-border-subtle bg-bg-secondary p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.12)] flex flex-col justify-center">
+                        <p className="text-sm uppercase tracking-[0.2em] text-text-muted mb-4">
+                            {copy.badge}
+                        </p>
+                        <p className="text-base md:text-lg text-text-secondary leading-relaxed">
+                            {copy.emailLabel}
+                        </p>
+                        <a
+                            href={`mailto:${copy.email}`}
+                            className="mt-5 inline-flex items-center justify-center rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-lg md:text-xl font-semibold text-accent hover:bg-accent/15 transition-colors"
+                        >
+                            {copy.email}
+                        </a>
+                    </aside>
                 </div>
+                <div className="max-w-6xl mx-auto mt-6 h-px bg-gradient-to-r from-transparent via-border-subtle to-transparent" />
             </section>
-
-            {/* 3. FAQ Section */}
-            <FAQ />
         </main>
     );
 }

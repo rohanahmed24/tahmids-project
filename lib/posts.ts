@@ -628,6 +628,82 @@ export async function getFeaturedPosts(limit: number = 3, locale: Locale = "en")
     )();
 }
 
+export async function getPopularPosts(limit: number = 12, locale: Locale = "en"): Promise<Post[]> {
+    return unstable_cache(
+        async (): Promise<Post[]> => {
+            try {
+                const posts = await prisma.post.findMany({
+                    where: { published: true },
+                    include: { author: { select: { image: true } } },
+                    orderBy: [{ views: "desc" }, { createdAt: "desc" }],
+                    take: limit,
+                });
+                return posts.map((post) => mapPrismaPost(post, locale));
+            } catch (error) {
+                console.error("Failed to fetch popular posts:", error);
+                return [];
+            }
+        },
+        ["popular-posts", locale, String(limit)],
+        { revalidate: 120, tags: ["posts", "popular"] }
+    )();
+}
+
+export async function getStoriesFeed(
+    options: {
+        category?: string;
+        limit?: number;
+        offset?: number;
+        locale?: Locale;
+    } = {}
+): Promise<{ stories: Post[]; hasMore: boolean }> {
+    const {
+        category,
+        limit = 8,
+        offset = 0,
+        locale = "en",
+    } = options;
+
+    const safeLimit = Math.max(1, limit);
+    const safeOffset = Math.max(0, offset);
+
+    try {
+        const normalizedCategory = category?.trim();
+        const where = normalizedCategory
+            ? {
+                category: {
+                    equals: normalizedCategory,
+                    mode: "insensitive" as const,
+                },
+                published: true,
+            }
+            : { featured: true, published: true };
+
+        const orderBy = normalizedCategory
+            ? [{ date: "desc" as const }, { id: "desc" as const }]
+            : [{ views: "desc" as const }, { id: "desc" as const }];
+
+        const rows = await prisma.post.findMany({
+            where,
+            include: { author: { select: { image: true } } },
+            orderBy,
+            skip: safeOffset,
+            take: safeLimit + 1,
+        });
+
+        const hasMore = rows.length > safeLimit;
+        const sliced = hasMore ? rows.slice(0, safeLimit) : rows;
+
+        return {
+            stories: sliced.map((post) => mapPrismaPost(post, locale)),
+            hasMore,
+        };
+    } catch (error) {
+        console.error("Failed to fetch stories feed:", error);
+        return { stories: [], hasMore: false };
+    }
+}
+
 export async function getAllPosts(locale: Locale = "en"): Promise<Post[]> {
     return unstable_cache(
         async (): Promise<Post[]> => {

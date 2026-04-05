@@ -104,7 +104,7 @@ export function Footer() {
                 {/* CTA */}
                 <div className="col-span-2 md:col-span-4 flex flex-col items-center md:items-start justify-start pt-4 md:pt-0">
                     <Link
-                        href="/pricing"
+                        href="/signin"
                         className="text-xs font-bold uppercase tracking-widest border border-border-subtle px-6 py-4 rounded-full hover:bg-black hover:text-white hover:border-black active:scale-95 transition-all w-full md:w-auto text-center"
                     >
                         {copy.member}
