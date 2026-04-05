@@ -32,7 +32,7 @@ export function ThemeToggle({ className, showLabel = true }: ThemeToggleProps) {
             type="button"
             onClick={() => setTheme(isDark ? "light" : "dark")}
             className={cn(
-                "inline-flex items-center justify-center gap-2 rounded-full border border-border-primary bg-bg-secondary/80 text-text-primary transition-colors hover:bg-bg-tertiary",
+                "inline-flex items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent text-white shadow-sm transition-all hover:bg-accent/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary",
                 showLabel ? "px-3 py-2 text-xs font-bold uppercase tracking-wider" : "!h-10 !w-10 !p-0 shrink-0",
                 className,
             )}

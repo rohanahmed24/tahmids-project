@@ -103,12 +103,25 @@ export default function Navbar() {
           >
             <Link href="/" className="block">
               <h1 className="font-serif leading-none transition-colors cursor-pointer">
-                <span className="block text-[10px] md:text-xs font-medium tracking-widest uppercase opacity-60 mb-[-2px]">
-                  The
-                </span>
-                <span className="block text-2xl md:text-3xl font-black tracking-tighter">
-                  WISDOMIA
-                </span>
+                {locale === "bn" ? (
+                  <>
+                    <span className="block text-[10px] md:text-xs font-medium tracking-widest opacity-60 mb-[-2px]">
+                      দ্যা
+                    </span>
+                    <span className="block text-xl sm:text-2xl md:text-3xl font-black tracking-tight">
+                      উইজডোমিয়া
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="block text-[10px] md:text-xs font-medium tracking-widest uppercase opacity-60 mb-[-2px]">
+                      The
+                    </span>
+                    <span className="block text-xl sm:text-2xl md:text-3xl font-black tracking-tighter">
+                      WISDOMIA
+                    </span>
+                  </>
+                )}
               </h1>
             </Link>
           </div>
@@ -128,16 +141,22 @@ export default function Navbar() {
                 aria-label="Log out"
                 title="Log out"
               >
-                {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                {isLoggingOut ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <LogOut className="w-4 h-4" />
+                )}
                 <span className="hidden md:inline">Logout</span>
               </button>
             ) : (
               <Link
                 href="/signin"
-                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-bg-tertiary"
+                className="inline-flex h-8 items-center gap-2 rounded-full border border-accent/40 bg-accent px-6 text-sm font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-accent/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
               >
                 <User className="w-4 h-4" />
-                <span className="hidden md:inline">{t(locale, "signIn")}</span>
+                <span className="hidden md:inline text-sm">
+                  {t(locale, "signIn")}
+                </span>
               </Link>
             )}
           </div>
@@ -177,7 +196,7 @@ export default function Navbar() {
                 </button>
 
                 <div className="flex items-center gap-4">
-                  <ThemeToggle />
+                  <ThemeToggle className="h-11 px-4 text-sm tracking-widest" />
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin opacity-50" />
                   ) : user ? (
@@ -196,9 +215,9 @@ export default function Navbar() {
                     <Link
                       href="/signin"
                       onClick={() => setIsMenuOpen(false)}
-                      className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest  text-black dark:text-white px-4 py-2   "
+                      className="inline-flex h-11 items-center gap-2 rounded-full border border-accent/40 bg-accent px-4 text-sm font-bold uppercase tracking-widest text-white shadow-sm transition-all hover:bg-accent/90 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
                     >
-                      <User className="w-4 h-4" />
+                      <User className="w-5 h-5" />
                       {t(locale, "signIn")}
                     </Link>
                   )}
@@ -233,25 +252,25 @@ export default function Navbar() {
                   </button>
                 </form>
 
-                <div className="flex items-center gap-4 text-sm font-sans text-text-secondary">
+                <div className="flex items-center gap-4 text-base md:text-lg font-semibold font-sans text-text-secondary">
                   <Link
                     href="/popular"
                     onClick={() => setIsMenuOpen(false)}
-                    className="hover:text-text-primary"
+                    className="hover:text-text-primary transition-colors"
                   >
                     {t(locale, "popular")}
                   </Link>
                   <Link
                     href="/latest"
                     onClick={() => setIsMenuOpen(false)}
-                    className="hover:text-text-primary"
+                    className="hover:text-text-primary transition-colors"
                   >
                     {t(locale, "latest")}
                   </Link>
                   <Link
                     href="/newsletters"
                     onClick={() => setIsMenuOpen(false)}
-                    className="hover:text-text-primary"
+                    className="hover:text-text-primary transition-colors"
                   >
                     {t(locale, "newsletters")}
                   </Link>

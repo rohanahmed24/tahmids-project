@@ -99,20 +99,20 @@ export function ArticleHeader({
                 <div className="bg-bg-primary px-4 py-3">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span
-                            className="font-medium text-text-primary text-[clamp(0.75rem,2.5vw,0.875rem)]"
+                            className="font-medium text-text-primary text-[clamp(0.875rem,2.8vw,1rem)]"
                         >
                             by {author}
                         </span>
                         {creditItems.map((item) => (
                             <span
                                 key={item}
-                                className="text-text-muted text-[clamp(0.625rem,2vw,0.75rem)]"
+                                className="text-text-muted text-[clamp(0.75rem,2.2vw,0.875rem)]"
                             >
                                 • {item}
                             </span>
                         ))}
                         <span
-                            className="text-text-muted text-[clamp(0.625rem,2vw,0.75rem)]"
+                            className="text-text-muted text-[clamp(0.75rem,2.2vw,0.875rem)]"
                         >
                             • {date}
                         </span>
@@ -176,10 +176,10 @@ export function ArticleHeader({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.5 }}
-                            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[clamp(0.75rem,1vw,0.875rem)]"
+                            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[clamp(0.875rem,1.1vw,1rem)]"
                         >
                             <span
-                                className="font-medium text-white text-[clamp(0.875rem,1.2vw,1rem)]"
+                                className="font-medium text-white text-[clamp(1rem,1.3vw,1.125rem)]"
                             >
                                 by {author}
                             </span>

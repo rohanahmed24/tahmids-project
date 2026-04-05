@@ -169,6 +169,30 @@ async function uploadToBunny(config: BunnyConfig, key: string, file: File): Prom
     }
 }
 
+async function isPublicUrlReachable(url: string): Promise<boolean> {
+    try {
+        const response = await fetch(url, {
+            method: "HEAD",
+            cache: "no-store",
+            signal: AbortSignal.timeout(4000),
+        });
+
+        if (response.ok) return true;
+        if (response.status === 405) {
+            const getResponse = await fetch(url, {
+                method: "GET",
+                cache: "no-store",
+                signal: AbortSignal.timeout(4000),
+            });
+            return getResponse.ok;
+        }
+
+        return false;
+    } catch {
+        return false;
+    }
+}
+
 async function uploadLocally(filename: string, file: File, localPathPrefix: LocalPathPrefix): Promise<string> {
     const uploadDir = path.join(process.cwd(), "public/imgs/uploads");
     await mkdir(uploadDir, { recursive: true });
@@ -200,11 +224,29 @@ export async function uploadAsset(options: UploadAssetOptions): Promise<UploadAs
     if (bunnyConfig) {
         const key = buildObjectKey(purpose, filename, bunnyConfig.basePath);
         await uploadToBunny(bunnyConfig, key, file);
+        const bunnyUrl = `${bunnyConfig.cdnBaseUrl}/${encodeObjectKey(key)}`;
+        const reachable = await isPublicUrlReachable(bunnyUrl);
+
+        if (reachable) {
+            return {
+                filename,
+                key,
+                url: bunnyUrl,
+                storage: "bunny",
+            };
+        }
+
+        console.warn("Bunny upload succeeded but CDN URL is not reachable yet. Falling back to local storage.", {
+            key,
+            url: bunnyUrl,
+        });
+
+        const localUrl = await uploadLocally(filename, file, localPathPrefix);
         return {
             filename,
-            key,
-            url: `${bunnyConfig.cdnBaseUrl}/${encodeObjectKey(key)}`,
-            storage: "bunny",
+            key: filename,
+            url: localUrl,
+            storage: "local",
         };
     }
 

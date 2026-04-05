@@ -38,7 +38,7 @@ export async function ArticleSidebar({ post, relatedPosts, locale = "en" }: Arti
                 {roleCredits.length > 0 && (
                     <div className="space-y-1 border-y border-black/10 dark:border-white/10 py-3">
                         {roleCredits.map((credit) => (
-                            <p key={credit.key} className="text-xs leading-relaxed">
+                            <p key={credit.key} className="text-sm leading-relaxed">
                                 <span className="uppercase tracking-widest opacity-60 mr-2">{t(locale, credit.key)}</span>
                                 <span className="font-medium">{credit.value}</span>
                             </p>
