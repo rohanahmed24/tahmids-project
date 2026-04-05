@@ -12,13 +12,13 @@ export function BacklinksSection({ backlinks }: BacklinksSectionProps) {
   const copy = locale === "bn"
     ? {
       title: "উৎসসূত্র",
-      subtitle: "এই লেখায় নিচের বাহ্যিক সূত্রগুলো উল্লেখ করা হয়েছে:",
-      footer: "বাহ্যিক লিংক নতুন উইন্ডোতে খুলবে। বাহ্যিক সাইটের কনটেন্টের জন্য Wisdomia দায়ী নয়।",
+      subtitle: "লেখাটিতে নিচের সূত্রগুলো ব্যবহৃত হয়েছে:",
+      footer: "বাহ্যিক লিংকসমূহ নতুন ট্যাবে খুলবে। বাহিরের অন্য ওয়েবসাইটের কনটেন্টের জন্য উইজডোমিয়া দায়ী নয়।",
     }
     : {
       title: "Cited Sources",
       subtitle: "This article references the following external sources:",
-      footer: "External links open in new window. Wisdomia is not responsible for content on external sites.",
+      footer: "External links open in new windows. Wisdomia is not responsible for content on external sites.",
     };
 
   if (!backlinks || backlinks.length === 0) {

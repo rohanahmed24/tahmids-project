@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Post } from "@/lib/posts";
 import { Edit, Trash2, Eye, EyeOff, Calendar, User, FileText, Filter, ArrowUpDown, MoreVertical, ExternalLink } from "lucide-react";
 import { deletePost, togglePostStatus } from "@/actions/posts";
@@ -16,6 +16,8 @@ export function PostsTable({ posts }: PostsTableProps) {
     const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
     const [sortBy, setSortBy] = useState<"date" | "views" | "title">("date");
     const [expandedCard, setExpandedCard] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const POSTS_PER_PAGE = 12;
 
     const filteredPosts = posts.filter(post => {
         if (filter === "published") return post.published;
@@ -34,6 +36,21 @@ export function PostsTable({ posts }: PostsTableProps) {
                 return new Date(b.date).getTime() - new Date(a.date).getTime();
         }
     });
+
+    const totalPages = Math.max(1, Math.ceil(sortedPosts.length / POSTS_PER_PAGE));
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+    const paginatedPosts = sortedPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
+
+    useEffect(() => {
+        setCurrentPage(1);
+        setExpandedCard(null);
+    }, [filter, sortBy, posts.length]);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     const handleDelete = async (slug: string) => {
         if (confirm("Are you sure you want to delete this post?")) {
@@ -140,7 +157,7 @@ export function PostsTable({ posts }: PostsTableProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {sortedPosts.map((post, index) => (
+                        {paginatedPosts.map((post, index) => (
                             <motion.tr
                                 key={post.slug}
                                 initial={{ opacity: 0, y: 10 }}
@@ -248,7 +265,7 @@ export function PostsTable({ posts }: PostsTableProps) {
 
             {/* Tablet Card Grid View */}
             <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3 p-3">
-                {sortedPosts.map((post, index) => (
+                {paginatedPosts.map((post, index) => (
                     <motion.div
                         key={post.slug}
                         initial={{ opacity: 0, y: 10 }}
@@ -315,7 +332,7 @@ export function PostsTable({ posts }: PostsTableProps) {
             {/* Mobile Card View - Enhanced */}
             <div className="sm:hidden divide-y divide-border-primary">
                 <AnimatePresence>
-                    {sortedPosts.map((post, index) => (
+                    {paginatedPosts.map((post, index) => (
                         <motion.div
                             key={post.slug}
                             initial={{ opacity: 0 }}
@@ -444,6 +461,51 @@ export function PostsTable({ posts }: PostsTableProps) {
                         Create New Article
                     </Link>
                 </motion.div>
+            )}
+
+            {/* Pagination */}
+            {sortedPosts.length > 0 && totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t border-border-primary bg-bg-tertiary/20">
+                    <p className="text-xs sm:text-sm text-text-secondary">
+                        Showing {startIndex + 1}-{Math.min(startIndex + POSTS_PER_PAGE, sortedPosts.length)} of {sortedPosts.length} articles
+                    </p>
+
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1.5 rounded-lg text-xs sm:text-sm border border-border-primary text-text-primary hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            Previous
+                        </button>
+
+                        {Array.from({ length: totalPages }).map((_, idx) => {
+                            const page = idx + 1;
+                            const isActive = page === currentPage;
+                            return (
+                                <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`w-8 h-8 rounded-lg text-xs sm:text-sm font-medium border transition-colors ${
+                                        isActive
+                                            ? "bg-accent text-white border-accent"
+                                            : "border-border-primary text-text-primary hover:bg-bg-secondary"
+                                    }`}
+                                >
+                                    {page}
+                                </button>
+                            );
+                        })}
+
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-1.5 rounded-lg text-xs sm:text-sm border border-border-primary text-text-primary hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
