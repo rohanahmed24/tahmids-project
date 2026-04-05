@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { SEOAnalyzer } from "@/components/admin/SEOAnalyzer";
 import {
     canonicalizeCategoryName,
     categoryToSlug,
@@ -60,16 +61,22 @@ interface EditorProps {
         metaDescriptionBn?: string;
         titleBn?: string;
         backlinks?: string[];
+        primaryKeyword?: string;
+        primaryKeywordBn?: string;
+        keywords?: string[];
+        keywordsBn?: string[];
     };
     action: (formData: FormData) => Promise<void>;
     categoryOptions?: string[];
+    flashMessage?: string;
 }
 
-export default function Editor({ initialData, action, categoryOptions = [] }: EditorProps) {
+export default function Editor({ initialData, action, categoryOptions = [], flashMessage }: EditorProps) {
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const [title, setTitle] = useState(initialData?.title || "");
     const [titleBn, setTitleBn] = useState(initialData?.titleBn || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
+    const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
     const [content, setContent] = useState(initialData?.content || "");
     const [contentBn, setContentBn] = useState(initialData?.contentBn || "");
     const [coverImage, setCoverImage] = useState(initialData?.coverImage || "");
@@ -97,6 +104,10 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const [metaDescriptionBn, setMetaDescriptionBn] = useState(initialData?.metaDescriptionBn || "");
     const [subtitleBn, setSubtitleBn] = useState(initialData?.subtitleBn || "");
     const [backlinks, setBacklinks] = useState(initialData?.backlinks ? initialData.backlinks.join('\n') : "");
+    const [primaryKeyword, setPrimaryKeyword] = useState(initialData?.primaryKeyword || "");
+    const [primaryKeywordBn, setPrimaryKeywordBn] = useState(initialData?.primaryKeywordBn || "");
+    const [keywords, setKeywords] = useState(initialData?.keywords ? initialData.keywords.join(", ") : "");
+    const [keywordsBn, setKeywordsBn] = useState(initialData?.keywordsBn ? initialData.keywordsBn.join(", ") : "");
 
     // Premium Features State
     const [isFocusMode, setIsFocusMode] = useState(false);
@@ -104,6 +115,7 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
     const [wordCount, setWordCount] = useState(0);
     const [readTime, setReadTime] = useState(0);
+    const shownFlashMessageRef = useRef<string | null>(null);
 
     const audioFileInputRef = useRef<HTMLInputElement>(null);
     const audioFileBnInputRef = useRef<HTMLInputElement>(null);
@@ -140,6 +152,16 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
         return "__custom__";
     }, [category, knownCategories, categoryMap]);
     const computedTopicSlug = useMemo(() => categoryToSlug(category), [category]);
+    const liveEnglishUrl = `/en/article/${slug || "your-slug"}`;
+    const liveBanglaUrl = `/bn/article/${slug || "your-slug"}`;
+
+    // Initial Auto-save Recovery
+    useEffect(() => {
+        if (flashMessage && shownFlashMessageRef.current !== flashMessage) {
+            shownFlashMessageRef.current = flashMessage;
+            toast.success(flashMessage);
+        }
+    }, [flashMessage]);
 
     // Initial Auto-save Recovery
     useEffect(() => {
@@ -185,16 +207,16 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
         return () => clearTimeout(timeoutId);
     }, [content, title, initialData]);
 
-    // Auto-generate slug
+    // Auto-generate slug only for brand-new posts.
     useEffect(() => {
-        if (!initialData && title) {
+        if (!initialData && !isSlugManuallyEdited && title) {
             const generatedSlug = title
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, "-")
                 .replace(/(^-|-$)+/g, "");
             setSlug(generatedSlug);
         }
-    }, [title, initialData]);
+    }, [title, isSlugManuallyEdited, initialData]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -221,12 +243,11 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
         } catch (error: unknown) {
             // Check if this is a Next.js redirect (which throws NEXT_REDIRECT)
             if (isRedirectError(error)) {
-                // This is a redirect, not an error - clear the toast
                 toast.dismiss(id);
                 if (!initialData) {
                     localStorage.removeItem("draft_new_post");
                 }
-                return;
+                throw error;
             }
             console.error("Submission failed", error);
             toast.error("Failed to save article", { id });
@@ -252,6 +273,10 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
         formData.set("categoryBn", categoryBn);
         formData.set("subtitleBn", subtitleBn);
         formData.set("metaDescriptionBn", metaDescriptionBn);
+        formData.set("keywords", keywords);
+        formData.set("keywordsBn", keywordsBn);
+        formData.set("primaryKeyword", primaryKeyword);
+        formData.set("primaryKeywordBn", primaryKeywordBn);
         formData.set("videoUrl", videoUrl);
         formData.set("videoUrlBn", videoUrlBn);
         formData.set("memberVideoUrl", memberVideoUrl);
@@ -364,16 +389,30 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                 className="w-full bg-transparent text-2xl font-serif font-semibold placeholder:text-text-muted focus:outline-none text-text-primary"
                             />
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <span className="font-mono text-purple-500">/article/</span>
-                            <div className="relative flex-1">
-                                <input
-                                    type="text"
-                                    name="slug"
-                                    value={slug}
-                                    onChange={(e) => setSlug(e.target.value)}
-                                    className="w-full bg-transparent border-none p-0 focus:ring-0 text-text-secondary font-mono text-sm"
-                                />
+                        <div className="space-y-3 text-sm text-gray-500">
+                            <div className="flex items-center gap-2">
+                                <span className="font-mono text-purple-500 shrink-0">/en/article/</span>
+                                <div className="relative flex-1">
+                                    <input
+                                        type="text"
+                                        name="slug"
+                                        value={slug}
+                                        onChange={(e) => {
+                                            setIsSlugManuallyEdited(true);
+                                            setSlug(e.target.value);
+                                        }}
+                                        className="w-full bg-transparent border-none p-0 focus:ring-0 text-text-secondary font-mono text-sm"
+                                    />
+                                </div>
+                            </div>
+                            <div className="rounded-xl border border-border-primary bg-bg-tertiary/40 px-3 py-2">
+                                <p className="text-[11px] uppercase tracking-[0.2em] text-text-muted mb-1">Live URL Preview</p>
+                                <p className="font-mono text-xs sm:text-sm text-text-primary break-all">
+                                    {liveEnglishUrl}
+                                </p>
+                                <p className="mt-1 text-[11px] font-mono text-text-muted break-all">
+                                    Bangla: {liveBanglaUrl}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -646,6 +685,58 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                             </div>
 
                             <div className="space-y-2 pt-4 border-t border-gray-800">
+                                <label className="text-sm font-medium text-text-secondary">Primary Keyword (English)</label>
+                                <input
+                                    type="text"
+                                    name="primaryKeyword"
+                                    value={primaryKeyword}
+                                    onChange={(e) => setPrimaryKeyword(e.target.value)}
+                                    placeholder="example: seo content writing"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                                <p className="text-[10px] text-text-muted">Main keyword for this article. SEO analyzer will score against this.</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">Primary Keyword (Bengali)</label>
+                                <input
+                                    type="text"
+                                    name="primaryKeywordBn"
+                                    value={primaryKeywordBn}
+                                    onChange={(e) => setPrimaryKeywordBn(e.target.value)}
+                                    placeholder="উদাহরণ: এসইও কনটেন্ট লেখা"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                                <p className="text-[10px] text-text-muted">Optional primary keyword for Bangla SERP targeting.</p>
+                            </div>
+
+                            <div className="space-y-2 pt-4 border-t border-gray-800">
+                                <label className="text-sm font-medium text-text-secondary">SEO Keywords (English)</label>
+                                <input
+                                    type="text"
+                                    name="keywords"
+                                    value={keywords}
+                                    onChange={(e) => setKeywords(e.target.value)}
+                                    placeholder="seo, keyword research, content strategy"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                                <p className="text-[10px] text-text-muted">Comma-separated keywords. Keep them specific and relevant to the article intent.</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-text-secondary">SEO Keywords (Bengali)</label>
+                                <input
+                                    type="text"
+                                    name="keywordsBn"
+                                    value={keywordsBn}
+                                    onChange={(e) => setKeywordsBn(e.target.value)}
+                                    placeholder="এসইও, কিওয়ার্ড গবেষণা, কনটেন্ট স্ট্র্যাটেজি"
+                                    className="w-full px-3 py-2 bg-bg-tertiary border border-border-primary rounded-lg focus:border-accent-main focus:outline-none transition-colors text-text-primary text-sm"
+                                />
+                                <p className="text-[10px] text-text-muted">Optional localized keyword list for Bangla SERP relevance.</p>
+                            </div>
+
+                            <div className="space-y-2 pt-4 border-t border-gray-800">
                                 <label className="text-sm font-medium text-text-secondary">Backlinks (one per line)</label>
                                 <textarea
                                     name="backlinks"
@@ -658,6 +749,16 @@ export default function Editor({ initialData, action, categoryOptions = [] }: Ed
                                 <p className="text-[10px] text-text-muted">External links to reference. Each URL on a new line.</p>
                             </div>
                         </div>
+
+                        <SEOAnalyzer
+                            title={title}
+                            slug={slug}
+                            content={content}
+                            metaDescription={metaDescription}
+                            backlinks={backlinks}
+                            primaryKeyword={primaryKeyword}
+                            coverImage={coverImage || previewImage || undefined}
+                        />
 
                         {/* Media Card */}
                         <div className="bg-bg-card border border-border-primary rounded-2xl p-6 space-y-6">

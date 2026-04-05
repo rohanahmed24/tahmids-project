@@ -38,6 +38,23 @@ function getTrimmedField(formData: FormData, key: string): string {
     return ((formData.get(key) as string) || "").trim();
 }
 
+function parseKeywordList(value: string | undefined): string[] {
+    if (!value?.trim()) return [];
+    return value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+        .map((item) => item.toLowerCase());
+}
+
+function parsePrimaryKeyword(value: string | undefined): string | undefined {
+    if (!value?.trim()) return undefined;
+    return value
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+}
+
 function sanitizeOptionalUrl(value: FormDataEntryValue | null, allowRelative = false): string | undefined {
     const input = typeof value === "string" ? value.trim() : "";
     if (!input) return undefined;
@@ -107,6 +124,23 @@ export async function createPost(formData: FormData) {
     const metaDescriptionBn = getTrimmedField(formData, "metaDescriptionBn") || undefined;
     const backlinksRaw = formData.get("backlinks") as string;
     const backlinks = backlinksRaw?.trim() ? backlinksRaw.split('\n').filter(url => url.trim()).map(url => url.trim()) : undefined;
+    const keywordsRaw = getTrimmedField(formData, "keywords");
+    const keywordsBnRaw = getTrimmedField(formData, "keywordsBn");
+    const primaryKeywordRaw = getTrimmedField(formData, "primaryKeyword");
+    const primaryKeywordBnRaw = getTrimmedField(formData, "primaryKeywordBn");
+    const keywords = parseKeywordList(keywordsRaw);
+    const keywordsBn = parseKeywordList(keywordsBnRaw);
+    const primaryKeyword = parsePrimaryKeyword(primaryKeywordRaw);
+    const primaryKeywordBn = parsePrimaryKeyword(primaryKeywordBnRaw);
+    const seoPayload = (backlinks && backlinks.length) || keywords.length || keywordsBn.length || primaryKeyword || primaryKeywordBn
+        ? {
+            links: backlinks || [],
+            keywords,
+            keywordsBn,
+            primaryKeyword,
+            primaryKeywordBn,
+        }
+        : undefined;
 
     const excerpt = content ? content.substring(0, 200) + "..." : "";
     const excerptBn = contentBn ? contentBn.substring(0, 200) + "..." : undefined;
@@ -162,7 +196,7 @@ export async function createPost(formData: FormData) {
                 published,
                 metaDescription,
                 metaDescriptionBn,
-                backlinks: backlinks as Prisma.InputJsonValue
+                backlinks: seoPayload as Prisma.InputJsonValue
             } as Prisma.PostUncheckedCreateInput
         });
     } catch (error) {
@@ -185,7 +219,8 @@ export async function createPost(formData: FormData) {
     if (topic_slug) {
         revalidatePath(`/topics/${topic_slug}`);
     }
-    redirect("/admin/dashboard");
+    const saveState = published ? "published" : "saved";
+    redirect(`/admin/edit/${slug}?status=${saveState}`);
 }
 
 export async function deletePost(slug: string) {
@@ -230,6 +265,8 @@ export async function updatePost(originalSlug: string, formData: FormData) {
 
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
+    const slugInput = getTrimmedField(formData, "slug");
+    const slug = slugInput ? generateSlug(slugInput) : generateSlug(title);
     const rawCategory = (formData.get("category") as string) || "";
     const category = canonicalizeCategoryName(rawCategory);
     if (!category) {
@@ -264,6 +301,23 @@ export async function updatePost(originalSlug: string, formData: FormData) {
     const metaDescriptionBnInput = getTrimmedField(formData, "metaDescriptionBn");
     const backlinksRaw = formData.get("backlinks") as string;
     const backlinks = backlinksRaw?.trim() ? backlinksRaw.split('\n').filter(url => url.trim()).map(url => url.trim()) : undefined;
+    const keywordsRaw = getTrimmedField(formData, "keywords");
+    const keywordsBnRaw = getTrimmedField(formData, "keywordsBn");
+    const primaryKeywordRaw = getTrimmedField(formData, "primaryKeyword");
+    const primaryKeywordBnRaw = getTrimmedField(formData, "primaryKeywordBn");
+    const keywords = parseKeywordList(keywordsRaw);
+    const keywordsBn = parseKeywordList(keywordsBnRaw);
+    const primaryKeyword = parsePrimaryKeyword(primaryKeywordRaw);
+    const primaryKeywordBn = parsePrimaryKeyword(primaryKeywordBnRaw);
+    const seoPayload = (backlinks && backlinks.length) || keywords.length || keywordsBn.length || primaryKeyword || primaryKeywordBn
+        ? {
+            links: backlinks || [],
+            keywords,
+            keywordsBn,
+            primaryKeyword,
+            primaryKeywordBn,
+        }
+        : undefined;
 
     const excerpt = content ? content.substring(0, 200) + "..." : "";
     const excerptBn = contentBnInput ? contentBnInput.substring(0, 200) + "..." : null;
@@ -317,6 +371,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
         await prisma.post.update({
             where: { slug: originalSlug },
             data: {
+                slug,
                 title,
                 titleBn,
                 subtitle,
@@ -346,7 +401,7 @@ export async function updatePost(originalSlug: string, formData: FormData) {
                 published,
                 metaDescription,
                 metaDescriptionBn,
-                backlinks: backlinks as Prisma.InputJsonValue
+                backlinks: seoPayload as Prisma.InputJsonValue
             } as Prisma.PostUncheckedUpdateInput
         });
     } catch (error) {
@@ -370,7 +425,13 @@ export async function updatePost(originalSlug: string, formData: FormData) {
         revalidateTag('featured');
         revalidateTag('categories');
         revalidatePath(`/article/${originalSlug}`);
+        revalidatePath(`/article/${slug}`);
+        revalidatePath(`/en/article/${originalSlug}`);
+        revalidatePath(`/en/article/${slug}`);
+        revalidatePath(`/bn/article/${originalSlug}`);
+        revalidatePath(`/bn/article/${slug}`);
         revalidatePath(`/admin/edit/${originalSlug}`);
+        revalidatePath(`/admin/edit/${slug}`);
         revalidatePath("/admin/dashboard");
         revalidatePath("/");
         revalidatePath("/topics");
@@ -385,7 +446,8 @@ export async function updatePost(originalSlug: string, formData: FormData) {
         console.error("Post updated but revalidation failed:", error);
     }
 
-    redirect("/admin/dashboard");
+    const saveState = published ? "updated_published" : "updated_saved";
+    redirect(`/admin/edit/${slug}?status=${saveState}`);
 }
 
 export async function togglePostStatus(slug: string, published: boolean) {

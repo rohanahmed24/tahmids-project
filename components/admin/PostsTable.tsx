@@ -7,6 +7,7 @@ import { deletePost, togglePostStatus } from "@/actions/posts";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { getArticlePath } from "@/lib/article-path";
 
 interface PostsTableProps {
     posts: Post[];
@@ -69,6 +70,8 @@ export function PostsTable({ posts }: PostsTableProps) {
             alert("Failed to update post status");
         }
     };
+
+    const getArticleHref = (slug: string) => getArticlePath(slug, "en");
 
     return (
         <div className="space-y-0">
@@ -181,9 +184,21 @@ export function PostsTable({ posts }: PostsTableProps) {
                                             </div>
                                         )}
                                         <div className="min-w-0">
-                                            <h3 className="font-medium text-text-primary line-clamp-1 group-hover:text-accent-primary transition-colors">
-                                                {post.title}
-                                            </h3>
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <h3 className="font-medium text-text-primary line-clamp-1 group-hover:text-accent-primary transition-colors min-w-0">
+                                                    {post.title}
+                                                </h3>
+                                                <Link
+                                                    href={getArticleHref(post.slug)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    prefetch={false}
+                                                    className="shrink-0 p-1.5 text-text-secondary hover:text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-all"
+                                                    title="Open article"
+                                                >
+                                                    <ExternalLink className="w-4 h-4" />
+                                                </Link>
+                                            </div>
                                             {post.subtitle && (
                                                 <p className="text-sm text-text-secondary line-clamp-1 mt-0.5">
                                                     {post.subtitle}
@@ -233,6 +248,16 @@ export function PostsTable({ posts }: PostsTableProps) {
                                 </td>
                                 <td className="p-4">
                                     <div className="flex items-center gap-1">
+                                        <Link
+                                            href={getArticleHref(post.slug)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            prefetch={false}
+                                            className="p-2 text-text-secondary hover:text-green-500 hover:bg-green-500/10 rounded-lg transition-all"
+                                            title="Open article"
+                                        >
+                                            <ExternalLink className="w-4 h-4" />
+                                        </Link>
                                         <Link
                                             href={`/admin/edit/${post.slug}`}
                                             prefetch={false}
@@ -289,9 +314,22 @@ export function PostsTable({ posts }: PostsTableProps) {
                             )}
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
-                                    <h3 className="font-medium text-text-primary line-clamp-2 text-sm group-hover:text-accent-primary transition-colors">
-                                        {post.title}
-                                    </h3>
+                                    <div className="flex items-start gap-2 min-w-0">
+                                        <h3 className="font-medium text-text-primary line-clamp-2 text-sm group-hover:text-accent-primary transition-colors min-w-0">
+                                            {post.title}
+                                        </h3>
+                                        <Link
+                                            href={getArticleHref(post.slug)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            prefetch={false}
+                                            className="shrink-0 p-1 text-text-secondary hover:text-accent-primary hover:bg-accent-primary/10 rounded-lg transition-all"
+                                            title="Open article"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <ExternalLink className="w-4 h-4" />
+                                        </Link>
+                                    </div>
                                     <div className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${post.published ? "bg-green-500" : "bg-yellow-500"}`} />
                                 </div>
                                 <div className="flex items-center gap-2 mt-2 text-xs text-text-secondary">
@@ -311,16 +349,28 @@ export function PostsTable({ posts }: PostsTableProps) {
                             </div>
                             <div className="flex items-center gap-0.5">
                                 <Link
+                                    href={getArticleHref(post.slug)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    prefetch={false}
+                                    className="p-1.5 text-text-secondary hover:text-green-500 rounded-lg transition-colors"
+                                    title="Open article"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <ExternalLink className="w-4 h-4" />
+                                </Link>
+                                <Link
                                     href={`/admin/edit/${post.slug}`}
                                     prefetch={false}
                                     className="p-1.5 text-text-secondary hover:text-accent-primary rounded-lg transition-colors"
+                                    onClick={(e) => e.stopPropagation()}
                                 >
                                     <Edit className="w-4 h-4" />
                                 </Link>
-                                <button onClick={() => handleToggleStatus(post.slug, post.published || false)} className="p-1.5 text-text-secondary hover:text-blue-500 rounded-lg transition-colors">
+                                <button onClick={(e) => { e.stopPropagation(); handleToggleStatus(post.slug, post.published || false); }} className="p-1.5 text-text-secondary hover:text-blue-500 rounded-lg transition-colors">
                                     {post.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
-                                <button onClick={() => handleDelete(post.slug)} className="p-1.5 text-text-secondary hover:text-red-500 rounded-lg transition-colors">
+                                <button onClick={(e) => { e.stopPropagation(); handleDelete(post.slug); }} className="p-1.5 text-text-secondary hover:text-red-500 rounded-lg transition-colors">
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             </div>
@@ -396,9 +446,21 @@ export function PostsTable({ posts }: PostsTableProps) {
                                     >
                                         <div className="flex items-center justify-around py-2 px-3 bg-bg-tertiary/30 border-t border-border-primary">
                                             <Link
+                                                href={getArticleHref(post.slug)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                prefetch={false}
+                                                className="flex items-center gap-1.5 px-3 py-2 text-text-secondary hover:text-green-500 text-xs font-medium rounded-lg hover:bg-bg-primary transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <ExternalLink className="w-4 h-4" />
+                                                Open
+                                            </Link>
+                                            <Link
                                                 href={`/admin/edit/${post.slug}`}
                                                 prefetch={false}
                                                 className="flex items-center gap-1.5 px-3 py-2 text-text-secondary hover:text-accent-primary text-xs font-medium rounded-lg hover:bg-bg-primary transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
                                             >
                                                 <Edit className="w-4 h-4" />
                                                 Edit
@@ -411,9 +473,12 @@ export function PostsTable({ posts }: PostsTableProps) {
                                                 {post.published ? "Unpublish" : "Publish"}
                                             </button>
                                             <Link
-                                                href={`/${post.slug}`}
+                                                href={getArticleHref(post.slug)}
                                                 target="_blank"
+                                                rel="noopener noreferrer"
+                                                prefetch={false}
                                                 className="flex items-center gap-1.5 px-3 py-2 text-text-secondary hover:text-green-500 text-xs font-medium rounded-lg hover:bg-bg-primary transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
                                             >
                                                 <ExternalLink className="w-4 h-4" />
                                                 View
@@ -474,7 +539,7 @@ export function PostsTable({ posts }: PostsTableProps) {
                         <button
                             onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                             disabled={currentPage === 1}
-                            className="px-3 py-1.5 rounded-lg text-xs sm:text-sm border border-border-primary text-text-primary hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="h-10 px-4 rounded-xl text-sm font-semibold border border-border-primary text-text-primary bg-bg-primary hover:bg-bg-secondary disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
                         >
                             Previous
                         </button>
@@ -486,10 +551,10 @@ export function PostsTable({ posts }: PostsTableProps) {
                                 <button
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`w-8 h-8 rounded-lg text-xs sm:text-sm font-medium border transition-colors ${
+                                    className={`w-10 h-10 rounded-xl text-sm font-semibold border transition-colors ${
                                         isActive
-                                            ? "bg-accent text-white border-accent"
-                                            : "border-border-primary text-text-primary hover:bg-bg-secondary"
+                                            ? "bg-accent text-white border-accent shadow-sm"
+                                            : "bg-bg-primary border-border-primary text-text-primary hover:bg-bg-secondary"
                                     }`}
                                 >
                                     {page}
@@ -500,7 +565,7 @@ export function PostsTable({ posts }: PostsTableProps) {
                         <button
                             onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                             disabled={currentPage === totalPages}
-                            className="px-3 py-1.5 rounded-lg text-xs sm:text-sm border border-border-primary text-text-primary hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="h-10 px-4 rounded-xl text-sm font-semibold border border-border-primary text-text-primary bg-bg-primary hover:bg-bg-secondary disabled:opacity-45 disabled:cursor-not-allowed transition-colors"
                         >
                             Next
                         </button>

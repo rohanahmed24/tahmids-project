@@ -5,13 +5,27 @@ import { redirect, notFound } from "next/navigation";
 import Editor from "@/app/admin/components/Editor";
 import { getCategoryOptions } from "@/lib/posts";
 
-export default async function EditPage({ params }: { params: Promise<{ slug: string }> }) {
+type EditPageProps = {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ status?: string }>;
+};
+
+function resolveFlashMessage(status?: string): string | undefined {
+    if (!status) return undefined;
+    if (status === "published") return "Article published successfully.";
+    if (status === "saved") return "Draft saved successfully.";
+    if (status === "updated_published") return "Article updated and published successfully.";
+    if (status === "updated_saved") return "Article updated successfully.";
+    return undefined;
+}
+
+export default async function EditPage({ params, searchParams }: EditPageProps) {
     const isAdmin = await verifyAdmin();
     if (!isAdmin) {
         redirect("/signin");
     }
 
-    const { slug } = await params;
+    const [{ slug }, resolvedSearchParams] = await Promise.all([params, searchParams]);
     const post = await getPostBySlug(slug, "en", true);
 
     if (!post) {
@@ -62,10 +76,15 @@ export default async function EditPage({ params }: { params: Promise<{ slug: str
                         editorNameBn: post.editorNameBn || undefined,
                         metaDescription: post.metaDescription || undefined,
                         metaDescriptionBn: post.metaDescriptionBn || undefined,
-                        backlinks: post.backlinks || []
+                        backlinks: post.backlinks || [],
+                        primaryKeyword: post.primaryKeyword || undefined,
+                        primaryKeywordBn: post.primaryKeywordBn || undefined,
+                        keywords: post.keywords || [],
+                        keywordsBn: post.keywordsBn || [],
                     }}
                     action={updateAction}
                     categoryOptions={categoryOptions}
+                    flashMessage={resolveFlashMessage(resolvedSearchParams.status)}
                 />
             </div>
         </main>

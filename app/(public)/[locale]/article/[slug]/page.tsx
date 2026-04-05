@@ -169,6 +169,12 @@ export async function generateMetadata({ params }: LocalizedArticlePageProps) {
     title: post.title,
     description:
       post.metaDescription || post.excerpt || "Read this article on Wisdomia",
+    keywords:
+      (locale === "bn" ? post.keywordsBn : post.keywords) ||
+      post.keywords ||
+      (locale === "bn" ? post.primaryKeywordBn : post.primaryKeyword) ||
+      post.primaryKeyword ||
+      undefined,
     alternates: {
       canonical: canonicalPath,
       languages: {

@@ -9,6 +9,7 @@ interface SEOAnalyzerProps {
   content: string;
   metaDescription: string;
   backlinks: string;
+  primaryKeyword?: string;
   coverImage?: string;
 }
 
@@ -69,6 +70,7 @@ export function SEOAnalyzer({
   content,
   metaDescription,
   backlinks,
+  primaryKeyword,
   coverImage,
 }: SEOAnalyzerProps) {
   const analysis = useMemo(() => {
@@ -85,18 +87,19 @@ export function SEOAnalyzer({
       link.startsWith("/") || link.includes("thewisdomia.com")
     );
     const backlinkList = normalizeBacklinks(backlinks);
-    const primaryKeyword = extractPrimaryKeyword(title);
+    const effectivePrimaryKeyword =
+      primaryKeyword?.trim().toLowerCase() || extractPrimaryKeyword(title);
     const normalizedSlug = slug.toLowerCase();
     const normalizedText = plainText.toLowerCase();
     const normalizedMeta = metaDescription.toLowerCase();
     const keywordInTitle =
-      primaryKeyword && title.toLowerCase().includes(primaryKeyword);
+      effectivePrimaryKeyword && title.toLowerCase().includes(effectivePrimaryKeyword);
     const keywordInSlug =
-      primaryKeyword && normalizedSlug.includes(primaryKeyword);
+      effectivePrimaryKeyword && normalizedSlug.includes(effectivePrimaryKeyword);
     const keywordInMeta =
-      primaryKeyword && normalizedMeta.includes(primaryKeyword);
+      effectivePrimaryKeyword && normalizedMeta.includes(effectivePrimaryKeyword);
     const keywordInContent =
-      primaryKeyword && normalizedText.includes(primaryKeyword);
+      effectivePrimaryKeyword && normalizedText.includes(effectivePrimaryKeyword);
 
     const checks: SEOCheck[] = [
       {
@@ -141,7 +144,9 @@ export function SEOAnalyzer({
           (keywordInContent ? 4 : 0),
         maxScore: 16,
         ok: Boolean(keywordInTitle && keywordInSlug && keywordInMeta && keywordInContent),
-        hint: primaryKeyword ? `Keyword: "${primaryKeyword}"` : "Add a descriptive title",
+        hint: effectivePrimaryKeyword
+          ? `Keyword: "${effectivePrimaryKeyword}"`
+          : "Set a primary keyword",
       },
       {
         id: "internal-links",
@@ -183,9 +188,9 @@ export function SEOAnalyzer({
       score,
       checks,
       wordCount,
-      primaryKeyword,
+      primaryKeyword: effectivePrimaryKeyword,
     };
-  }, [title, slug, content, metaDescription, backlinks, coverImage]);
+  }, [title, slug, content, metaDescription, backlinks, primaryKeyword, coverImage]);
 
   const scoreTone =
     analysis.score >= 85
@@ -264,4 +269,3 @@ export function SEOAnalyzer({
     </div>
   );
 }
-

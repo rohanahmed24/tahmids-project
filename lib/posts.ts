@@ -50,6 +50,10 @@ export type Post = {
     metaDescription?: string | null;
     metaDescriptionBn?: string | null;
     backlinks?: string[] | null;
+    primaryKeyword?: string | null;
+    primaryKeywordBn?: string | null;
+    keywords?: string[] | null;
+    keywordsBn?: string[] | null;
 };
 
 export type CategorySummary = {
@@ -150,18 +154,72 @@ function mapPrismaPost(
         videoUrlBn?: string | null;
         memberVideoUrlBn?: string | null;
     };
-    // Properly handle backlinks JSON field - handle both array and string formats
+    // Properly handle backlinks JSON field - supports:
+    // 1) legacy array format: ["https://..."]
+    // 2) legacy stringified array format
+    // 3) structured object format:
+    // { links: string[], primaryKeyword?: string, primaryKeywordBn?: string, keywords: string[], keywordsBn: string[] }
     let backlinks: string[] | null = null;
+    let primaryKeyword: string | null = null;
+    let primaryKeywordBn: string | null = null;
+    let keywords: string[] | null = null;
+    let keywordsBn: string[] | null = null;
     if (post.backlinks !== null && post.backlinks !== undefined) {
         if (Array.isArray(post.backlinks)) {
             // Already an array - ensure all elements are strings
             backlinks = post.backlinks.map(item => String(item));
+        } else if (typeof post.backlinks === "object" && post.backlinks) {
+            const structured = post.backlinks as {
+                links?: unknown;
+                primaryKeyword?: unknown;
+                primaryKeywordBn?: unknown;
+                keywords?: unknown;
+                keywordsBn?: unknown;
+            };
+            if (Array.isArray(structured.links)) {
+                backlinks = structured.links.map(item => String(item));
+            }
+            if (typeof structured.primaryKeyword === "string") {
+                primaryKeyword = structured.primaryKeyword.trim() || null;
+            }
+            if (typeof structured.primaryKeywordBn === "string") {
+                primaryKeywordBn = structured.primaryKeywordBn.trim() || null;
+            }
+            if (Array.isArray(structured.keywords)) {
+                keywords = structured.keywords.map(item => String(item));
+            }
+            if (Array.isArray(structured.keywordsBn)) {
+                keywordsBn = structured.keywordsBn.map(item => String(item));
+            }
         } else if (typeof post.backlinks === 'string') {
             // String containing JSON - parse it
             try {
                 const parsed = JSON.parse(post.backlinks);
                 if (Array.isArray(parsed)) {
                     backlinks = parsed.map(item => String(item));
+                } else if (parsed && typeof parsed === "object") {
+                    const structured = parsed as {
+                        links?: unknown;
+                        primaryKeyword?: unknown;
+                        primaryKeywordBn?: unknown;
+                        keywords?: unknown;
+                        keywordsBn?: unknown;
+                    };
+                    if (Array.isArray(structured.links)) {
+                        backlinks = structured.links.map(item => String(item));
+                    }
+                    if (typeof structured.primaryKeyword === "string") {
+                        primaryKeyword = structured.primaryKeyword.trim() || null;
+                    }
+                    if (typeof structured.primaryKeywordBn === "string") {
+                        primaryKeywordBn = structured.primaryKeywordBn.trim() || null;
+                    }
+                    if (Array.isArray(structured.keywords)) {
+                        keywords = structured.keywords.map(item => String(item));
+                    }
+                    if (Array.isArray(structured.keywordsBn)) {
+                        keywordsBn = structured.keywordsBn.map(item => String(item));
+                    }
                 }
             } catch (e) {
                 console.error('Failed to parse backlinks JSON:', post.backlinks, e);
@@ -194,6 +252,8 @@ function mapPrismaPost(
         locale === "bn"
             ? (post.metaDescriptionBn || post.metaDescription)
             : post.metaDescription;
+    const localizedPrimaryKeyword =
+        locale === "bn" ? (primaryKeywordBn || primaryKeyword) : primaryKeyword;
 
     const normalizedVideoUrl = normalizeMediaUrl(post.videoUrl);
     const normalizedVideoUrlBn = normalizeMediaUrl(postWithLocalizedMedia.videoUrlBn);
@@ -245,6 +305,10 @@ function mapPrismaPost(
         updated_at: post.updatedAt.toISOString(),
         authorImage: normalizeImageUrl(post.author?.image || undefined),
         backlinks: backlinks,
+        primaryKeyword: localizedPrimaryKeyword,
+        primaryKeywordBn: primaryKeywordBn,
+        keywords: keywords,
+        keywordsBn: keywordsBn,
         metaDescription: localizedMetaDescription,
         metaDescriptionBn: post.metaDescriptionBn
     };
